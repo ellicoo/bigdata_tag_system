@@ -1,0 +1,136 @@
+import json
+import logging
+from typing import List, Dict, Any
+from pyspark.sql import SparkSession, DataFrame
+from ..config.base_config import MySQLConfig
+
+logger = logging.getLogger(__name__)
+
+
+class TagRuleReader:
+    """标签规则读取器 - 从MySQL读取标签规则配置"""
+    
+    def __init__(self, spark: SparkSession, mysql_config: MySQLConfig):
+        self.spark = spark
+        self.mysql_config = mysql_config
+    
+    def read_active_rules(self) -> List[Dict[str, Any]]:
+        """读取所有启用的标签规则"""
+        try:
+            # 联表查询获取完整的标签规则信息
+            query = """
+            (SELECT 
+                tr.id as rule_id,
+                tr.tag_id,
+                tr.rule_name,
+                tr.rule_description,
+                tr.condition_logic,
+                tr.rule_conditions,
+                tr.target_table,
+                tr.target_fields,
+                td.tag_name,
+                td.tag_code,
+                td.tag_type,
+                tc.category_name
+             FROM tag_rules tr 
+             JOIN tag_definition td ON tr.tag_id = td.id 
+             JOIN tag_category tc ON td.category_id = tc.id
+             WHERE tr.status = 1 AND td.status = 1) as active_rules
+            """
+            
+            rules_df = self.spark.read.jdbc(
+                url=self.mysql_config.jdbc_url,
+                table=query,
+                properties=self.mysql_config.connection_properties
+            )
+            
+            rules_list = rules_df.collect()
+            logger.info(f"成功读取 {len(rules_list)} 条活跃标签规则")
+            
+            # 转换为字典列表
+            result = []
+            for row in rules_list:
+                rule_dict = row.asDict()
+                # 解析JSON规则条件
+                try:
+                    rule_dict['rule_conditions'] = json.loads(rule_dict['rule_conditions'])
+                except (json.JSONDecodeError, TypeError):
+                    logger.warning(f"规则 {rule_dict['rule_id']} 的条件格式错误，跳过")
+                    continue
+                result.append(rule_dict)
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"读取标签规则失败: {str(e)}")
+            raise
+    
+    def read_rules_by_category(self, category_name: str) -> List[Dict[str, Any]]:
+        """按分类读取标签规则"""
+        all_rules = self.read_active_rules()
+        return [rule for rule in all_rules if rule['category_name'] == category_name]
+    
+    def read_rules_by_table(self, target_table: str) -> List[Dict[str, Any]]:
+        """按目标表读取标签规则"""
+        all_rules = self.read_active_rules()
+        return [rule for rule in all_rules if rule['target_table'] == target_table]
+    
+    def group_rules_by_table(self, rules: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
+        """将规则按目标表分组，用于批量读取数据"""
+        table_groups = {}
+        for rule in rules:
+            table_name = rule['target_table']
+            if table_name not in table_groups:
+                table_groups[table_name] = []
+            table_groups[table_name].append(rule)
+        
+        logger.info(f"规则按表分组结果: {[(table, len(rules)) for table, rules in table_groups.items()]}")
+        return table_groups
+    
+    def get_all_required_fields(self, rules: List[Dict[str, Any]]) -> str:
+        """获取规则需要的所有字段，用于数据裁剪"""
+        fields_set = set(['user_id'])  # user_id是必需字段
+        
+        for rule in rules:
+            if rule['target_fields']:
+                fields = [f.strip() for f in rule['target_fields'].split(',')]
+                fields_set.update(fields)
+            
+            # 从规则条件中提取字段
+            try:
+                conditions = rule['rule_conditions']['conditions']
+                for condition in conditions:
+                    if 'field' in condition:
+                        fields_set.add(condition['field'])
+            except (KeyError, TypeError):
+                continue
+        
+        return ','.join(sorted(fields_set))
+    
+    def validate_rule_format(self, rule: Dict[str, Any]) -> bool:
+        """验证规则格式是否正确"""
+        required_fields = ['rule_id', 'tag_id', 'rule_conditions', 'target_table']
+        
+        for field in required_fields:
+            if field not in rule:
+                logger.warning(f"规则缺少必要字段: {field}")
+                return False
+        
+        # 验证规则条件格式
+        try:
+            conditions = rule['rule_conditions']
+            if not isinstance(conditions, dict):
+                return False
+            
+            if 'conditions' not in conditions:
+                return False
+            
+            for condition in conditions['conditions']:
+                if not all(key in condition for key in ['field', 'operator', 'value']):
+                    return False
+            
+            return True
+            
+        except Exception as e:
+            logger.warning(f"规则格式验证失败: {str(e)}")
+            return False

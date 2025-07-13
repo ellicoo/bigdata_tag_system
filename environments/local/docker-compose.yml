@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  # MinIO (S3模拟)
+  minio:
+    image: minio/minio:latest
+    container_name: tag_system_minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - tag_system_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # MySQL数据库
+  mysql:
+    image: mysql:8.0
+    container_name: tag_system_mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: tag_system
+      MYSQL_USER: tag_user
+      MYSQL_PASSWORD: tag_pass
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./test_env/sql:/docker-entrypoint-initdb.d
+    networks:
+      - tag_system_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Spark Master
+  spark-master:
+    image: bitnami/spark:3.4
+    container_name: tag_system_spark_master
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    networks:
+      - tag_system_net
+    volumes:
+      - ./test_env/spark_apps:/opt/spark_apps
+      - ./test_env/jars:/opt/spark/jars/extra
+
+  # Spark Worker
+  spark-worker:
+    image: bitnami/spark:3.4
+    container_name: tag_system_spark_worker
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=2G
+      - SPARK_WORKER_CORES=2
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    networks:
+      - tag_system_net
+    volumes:
+      - ./test_env/spark_apps:/opt/spark_apps
+      - ./test_env/jars:/opt/spark/jars/extra
+
+  # Jupyter Notebook (用于测试和开发)
+  jupyter:
+    image: jupyter/pyspark-notebook:latest
+    container_name: tag_system_jupyter
+    ports:
+      - "8888:8888"
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=tag_system_2024
+    volumes:
+      - ./test_env/notebooks:/home/jovyan/work
+      - ./:/home/jovyan/work/tag_system
+    networks:
+      - tag_system_net
+    depends_on:
+      - spark-master
+      - mysql
+      - minio
+
+volumes:
+  minio_data:
+  mysql_data:
+
+networks:
+  tag_system_net:
+    driver: bridge
