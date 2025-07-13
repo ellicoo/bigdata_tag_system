@@ -64,6 +64,24 @@ def parse_arguments():
         help='指定标签ID列表，逗号分隔 (例如: 1,2,3)'
     )
     
+    # 并行控制参数
+    parser.add_argument(
+        '--parallel',
+        action='store_true',
+        help='强制启用并行计算模式'
+    )
+    parser.add_argument(
+        '--atomic',
+        action='store_true', 
+        help='强制启用原子写入模式'
+    )
+    parser.add_argument(
+        '--max-workers',
+        type=int,
+        default=4,
+        help='最大并行工作线程数 (默认: 4)'
+    )
+    
     # 日志级别
     parser.add_argument(
         '--log-level',
@@ -114,7 +132,12 @@ def main():
     
     # 创建调度器
     try:
-        scheduler = TagComputeScheduler(config)
+        scheduler = TagComputeScheduler(
+            config, 
+            parallel_mode=args.parallel,
+            atomic_mode=args.atomic,
+            max_workers=args.max_workers
+        )
         
         # 初始化系统
         logger.info("📋 初始化标签计算系统...")

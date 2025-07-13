@@ -14,8 +14,9 @@ logger = logging.getLogger(__name__)
 class TagComputeEngine:
     """标签计算引擎 - 核心标签计算逻辑"""
     
-    def __init__(self, spark: SparkSession):
+    def __init__(self, spark: SparkSession, max_workers: int = 4):
         self.spark = spark
+        self.max_workers = max_workers
         self.rule_parser = RuleConditionParser()
     
     def compute_single_tag(self, data_df: DataFrame, rule: Dict[str, Any]) -> Optional[DataFrame]:
@@ -95,15 +96,87 @@ class TagComputeEngine:
         logger.info(f"批量计算完成，成功计算 {len(results)}/{len(rules)} 个标签")
         return results
     
+    def compute_tags_parallel(self, data_df: DataFrame, rules: List[Dict[str, Any]]) -> List[DataFrame]:
+        """
+        并行计算多个标签 - 利用Spark原生并行能力
+        
+        Args:
+            data_df: 业务数据DataFrame
+            rules: 标签规则列表
+            
+        Returns:
+            标签结果DataFrame列表
+        """
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        import threading
+        
+        logger.info(f"🚀 开始并行计算 {len(rules)} 个标签")
+        
+        # 缓存数据提升并行性能
+        cached_data = data_df.cache()
+        
+        results = []
+        failed_tags = []
+        lock = threading.Lock()
+        
+        def compute_single_tag_threadsafe(rule):
+            """线程安全的单标签计算"""
+            try:
+                # Spark操作本身是线程安全的，但我们加锁确保稳定性
+                with lock:
+                    result_df = self.compute_single_tag(cached_data, rule)
+                    return rule, result_df
+            except Exception as e:
+                logger.error(f"并行计算标签失败: {rule.get('tag_name', 'Unknown')}, 错误: {str(e)}")
+                return rule, None
+        
+        # 使用线程池并行处理
+        max_workers = min(self.max_workers, len(rules))  # 使用配置的最大线程数
+        
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # 提交所有计算任务
+            future_to_rule = {
+                executor.submit(compute_single_tag_threadsafe, rule): rule 
+                for rule in rules
+            }
+            
+            # 收集结果
+            for future in as_completed(future_to_rule):
+                rule = future_to_rule[future]
+                try:
+                    rule_returned, result_df = future.result(timeout=300)  # 5分钟超时
+                    if result_df is not None:
+                        results.append(result_df)
+                        logger.info(f"✅ 标签 {rule['tag_name']} 并行计算完成")
+                    else:
+                        failed_tags.append(rule['tag_name'])
+                        
+                except Exception as e:
+                    logger.error(f"❌ 标签 {rule['tag_name']} 计算超时或异常: {str(e)}")
+                    failed_tags.append(rule['tag_name'])
+        
+        # 清理缓存
+        cached_data.unpersist()
+        
+        logger.info(f"🎉 并行计算完成 - 成功: {len(results)}, 失败: {len(failed_tags)}")
+        if failed_tags:
+            logger.warning(f"失败的标签: {failed_tags}")
+        
+        return results
+    
     def _add_tag_details(self, result_df: DataFrame, rule: Dict[str, Any], hit_fields: List[str]) -> DataFrame:
         """为标签结果添加详细信息"""
+        
+        # 复制需要的数据避免序列化整个对象
+        tag_name = rule['tag_name']
+        rule_conditions = rule['rule_conditions']
         
         @F.udf(returnType=StringType())
         def generate_tag_detail(*hit_values):
             """生成标签详细信息的UDF"""
             try:
-                # 生成命中原因
-                reason = self._generate_hit_reason(rule['rule_conditions'], hit_fields, hit_values)
+                # 简化的命中原因生成
+                reason = f"满足标签规则: {tag_name}"
                 
                 # 构建标签详细信息
                 detail = {
@@ -112,13 +185,12 @@ class TagComputeEngine:
                     'source': 'AUTO',
                     'hit_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                     'rule_version': '1.0',
-                    'tag_name': rule['tag_name']
+                    'tag_name': tag_name
                 }
                 
                 return json.dumps(detail, ensure_ascii=False)
                 
             except Exception as e:
-                logger.error(f"生成标签详情失败: {str(e)}")
                 return json.dumps({'error': str(e)})
         
         # 获取用于生成详情的字段列

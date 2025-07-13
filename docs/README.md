@@ -10,6 +10,7 @@
 ### 开发文档  
 - **[MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)** - 系统迁移指南
 - **[RESTRUCTURE_PLAN.md](./RESTRUCTURE_PLAN.md)** - 架构重构计划
+- **[本地测试指南.md](./本地测试指南.md)** - 本地环境测试操作指南
 
 ## 🏗️ 项目架构
 
@@ -26,6 +27,13 @@
 ├── docs/                  # 项目文档 (当前目录)
 └── main.py               # 统一入口
 ```
+
+### 🔄 数据模型（重构后）
+系统采用**一个用户一条记录**的优化设计：
+- `user_tags.tag_ids`: JSON数组存储用户的所有标签ID `[1,2,3,5]`
+- **标签合并**: 新计算标签 + 已有标签 → 数组合并去重
+- **查询友好**: 支持 `JSON_CONTAINS(tag_ids, '1')` 高效查询
+- **业务契合**: 符合"用户拥有多个标签"的真实业务模型
 
 ## 🚀 快速开始
 
@@ -55,7 +63,8 @@ cd environments/glue-dev && python deploy.py
 
 ### 运维开发
 1. 查看 [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) 了解部署和迁移步骤
-2. 参考根目录 [README.md](../README.md) 了解日常操作命令
+2. 参考 [本地测试指南.md](./本地测试指南.md) 进行本地环境测试
+3. 参考根目录 [README.md](../README.md) 了解日常操作命令
 
 ---
 

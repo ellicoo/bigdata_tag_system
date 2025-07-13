@@ -42,22 +42,19 @@ CREATE TABLE IF NOT EXISTS tag_rules (
     INDEX idx_active (is_active)
 ) COMMENT '标签规则表';
 
--- 4. 用户标签结果表
+-- 4. 用户标签结果表（修正版：一个用户一条记录，包含所有标签ID数组）
 CREATE TABLE IF NOT EXISTS user_tags (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id VARCHAR(100) NOT NULL COMMENT '用户ID',
-    tag_id INT NOT NULL COMMENT '标签ID',
-    tag_name VARCHAR(200) NOT NULL COMMENT '标签名称',
-    tag_category VARCHAR(100) NOT NULL COMMENT '标签分类',
-    tag_detail JSON COMMENT '标签详细信息',
+    tag_ids JSON NOT NULL COMMENT '用户的所有标签ID数组',
+    tag_details JSON COMMENT '标签详细信息（key-value形式）',
     computed_date DATE NOT NULL COMMENT '计算日期',
     created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_user_id (user_id),
-    INDEX idx_tag_id (tag_id),
     INDEX idx_computed_date (computed_date),
-    INDEX idx_user_tag (user_id, tag_id),
-    UNIQUE KEY uk_user_tag_date (user_id, tag_id, computed_date)
-) COMMENT '用户标签结果表';
+    UNIQUE KEY uk_user_date (user_id, computed_date)
+) COMMENT '用户标签结果表（一个用户一条记录，包含标签ID数组）';
 
 -- 插入初始测试数据
 -- 标签分类

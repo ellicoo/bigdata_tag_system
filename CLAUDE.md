@@ -111,6 +111,12 @@ python -m pytest tests/test_basic.py -v
 
 # 测试覆盖率
 python -m pytest tests/ --cov=src --cov-report=html
+
+# 运行特定测试用例
+python -m pytest tests/integration/test_end_to_end.py::TestEndToEndIntegration::test_full_tag_compute_workflow -v     # 全量标签测试
+python -m pytest tests/integration/test_end_to_end.py::TestEndToEndIntegration::test_specific_tags_workflow -v      # 特定标签测试
+python -m pytest tests/integration/test_end_to_end.py::TestEndToEndIntegration::test_incremental_compute_workflow -v # 增量计算测试
+python -m pytest tests/integration/test_end_to_end.py::TestEndToEndIntegration::test_health_check_workflow -v       # 健康检查测试
 ```
 
 ## 配置管理
@@ -166,8 +172,25 @@ PROD_GLUE_ROLE_ARN=arn:aws:iam::xxx:role/GlueServiceRole-prod
 - **S3 Hive表**: 来自数据湖的用户数据（user_basic_info, user_asset_summary, user_activity_summary）
 - **MySQL规则表**: 以JSON格式存储的标签定义和规则条件
 
-### 输出结果
-- **MySQL user_tags表**: 计算后的标签结果，包含user_id和标签元数据
+### 输出结果（重构后的数据模型）
+- **MySQL user_tags表**: 采用**一个用户一条记录**的设计
+  - `tag_ids`: JSON数组，存储用户的所有标签ID `[1,2,3,5]`
+  - `tag_details`: JSON对象，存储标签详细信息
+  - **核心优势**: 真正的标签合并逻辑，支持复杂查询，符合业务需求
+
+### 标签合并机制
+系统实现了真正的标签合并逻辑：
+- **新计算标签** + **已有标签** → **数组合并去重**
+- 支持增量更新，历史标签自动保留
+- MySQL JSON类型支持高效的标签查询：
+  ```sql
+  -- 查询具有特定标签的用户
+  SELECT user_id FROM user_tags WHERE JSON_CONTAINS(tag_ids, '1');
+  
+  -- 查询具有多个标签的用户
+  SELECT user_id FROM user_tags 
+  WHERE JSON_CONTAINS(tag_ids, '1') AND JSON_CONTAINS(tag_ids, '2');
+  ```
 
 ### 规则系统
 规则以JSON格式存储，支持：
@@ -189,6 +212,26 @@ PROD_GLUE_ROLE_ARN=arn:aws:iam::xxx:role/GlueServiceRole-prod
 - 支持中文日志记录，方便问题排查
 - 主入口支持多种执行模式（full/incremental/tags/health）
 
+### 测试数据生成
+本地环境支持生产级模拟数据生成，确保标签规则能够正确匹配：
+
+#### 数据生成策略
+- **高净值用户**: 50个用户，总资产 ≥ 150,000，现金余额 ≥ 60,000
+- **VIP客户**: 20个用户，等级为 VIP2/VIP3，KYC状态已验证
+- **年轻用户**: 30个用户，年龄在 18-30 岁之间
+- **活跃交易者**: 80个用户，30天交易次数 > 15次
+- **低风险用户**: 25个用户，风险评分 ≤ 30
+- **新注册用户**: 15个用户，注册时间在最近30天内
+- **最近活跃用户**: 15个用户，最近7天内有登录
+
+#### 测试数据生成位置
+- **完整生成器**: `environments/local/test_data_generator.py`
+- **内置生成器**: `src/scheduler/main_scheduler.py:_generate_production_like_data()`
+- **简化生成器**: `src/scheduler/main_scheduler.py:_generate_test_user_data()`
+
+#### 本地测试特殊说明
+由于本地环境的S3AFileSystem依赖问题，系统在本地模式下会自动使用内置数据生成器，而非从MinIO读取Parquet文件。这确保了本地测试的稳定性和完整性。
+
 ### 测试要求
 - 新功能必须包含单元测试
 - 重要流程需要集成测试
@@ -209,8 +252,30 @@ PROD_GLUE_ROLE_ARN=arn:aws:iam::xxx:role/GlueServiceRole-prod
 - `tag_definition`: 标签定义  
 - `tag_rules`: 标签规则（JSON格式）
 
-### 结果存储表
-- `user_tags`: 用户标签结果，包含user_id、tag_id、tag_detail等字段
+### 结果存储表（重构后）
+- `user_tags`: 用户标签结果表，采用**一个用户一条记录**的新设计
+  ```sql
+  CREATE TABLE user_tags (
+      id BIGINT PRIMARY KEY AUTO_INCREMENT,
+      user_id VARCHAR(100) NOT NULL,
+      tag_ids JSON NOT NULL COMMENT '用户的所有标签ID数组 [1,2,3,5]',
+      tag_details JSON COMMENT '标签详细信息 {"1": {"tag_name": "高净值用户"}}',
+      computed_date DATE NOT NULL,
+      created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      UNIQUE KEY uk_user_date (user_id, computed_date)
+  );
+  ```
+
+### 数据模型重构说明
+**重构前**：一个标签一条记录 → 违背标签合并需求
+**重构后**：一个用户一条记录 → 标签ID存储为JSON数组
+
+**核心改进**：
+1. 真正的标签合并：新老标签数组合并去重
+2. 查询高效：支持 `JSON_CONTAINS(tag_ids, '1')` 查询
+3. 存储紧凑：减少数据冗余，提高性能
+4. 业务友好：符合"用户拥有多个标签"的业务模型
 
 具体表结构和示例数据详见 `docs/` 目录下的相关文档。
 
