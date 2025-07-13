@@ -2,12 +2,12 @@ import json
 import logging
 from typing import List, Dict, Any
 from pyspark.sql import SparkSession, DataFrame
-from ..config.base_config import MySQLConfig
+from src.config.base import MySQLConfig
 
 logger = logging.getLogger(__name__)
 
 
-class TagRuleReader:
+class RuleReader:
     """标签规则读取器 - 从MySQL读取标签规则配置"""
     
     def __init__(self, spark: SparkSession, mysql_config: MySQLConfig):

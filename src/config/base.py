@@ -17,10 +17,11 @@ class SparkConfig:
     driver_memory: str = "1g"
     max_result_size: str = "1g"
     shuffle_partitions: int = 200
+    jars: str = ""  # JAR文件路径，逗号分隔
     
     def to_dict(self) -> Dict[str, Any]:
         """转换为Spark配置字典"""
-        return {
+        config = {
             "spark.app.name": self.app_name,
             "spark.master": self.master,
             "spark.executor.memory": self.executor_memory,
@@ -31,6 +32,12 @@ class SparkConfig:
             "spark.sql.adaptive.enabled": "true",
             "spark.sql.adaptive.coalescePartitions.enabled": "true"
         }
+        
+        # 添加JAR配置
+        if self.jars:
+            config["spark.jars"] = self.jars
+            
+        return config
 
 
 @dataclass

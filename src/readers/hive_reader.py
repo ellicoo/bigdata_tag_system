@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import Optional, List
 from pyspark.sql import SparkSession, DataFrame
 import pyspark.sql.functions as F
-from ..config.base_config import S3Config
+from src.config.base import S3Config
 
 logger = logging.getLogger(__name__)
 

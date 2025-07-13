@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Optional
 from pyspark.sql import DataFrame, SparkSession
 
-from ..config.base_config import MySQLConfig
+from src.config.base import MySQLConfig
 
 logger = logging.getLogger(__name__)
 

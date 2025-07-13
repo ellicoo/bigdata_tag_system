@@ -3,12 +3,12 @@ import time
 from typing import List, Dict, Any
 from pyspark.sql import SparkSession
 
-from ..config.base_config import TagSystemConfig
-from ..readers.rule_reader import TagRuleReader
-from ..readers.hive_reader import HiveDataReader
-from ..engine.tag_computer import TagComputeEngine
-from ..merger.tag_merger import TagMerger
-from ..writers.mysql_writer import MySQLTagWriter
+from src.config.base import BaseConfig
+from src.readers.rule_reader import RuleReader
+from src.readers.hive_reader import HiveDataReader
+from src.engine.tag_computer import TagComputeEngine
+from src.merger.tag_merger import TagMerger
+from src.writers.mysql_writer import MySQLTagWriter
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class TagComputeScheduler:
     """标签计算主调度器"""
     
-    def __init__(self, config: TagSystemConfig):
+    def __init__(self, config: BaseConfig):
         self.config = config
         self.spark = None
         
@@ -36,7 +36,7 @@ class TagComputeScheduler:
             self.spark = self._create_spark_session()
             
             # 初始化各个组件
-            self.rule_reader = TagRuleReader(self.spark, self.config.mysql)
+            self.rule_reader = RuleReader(self.spark, self.config.mysql)
             self.hive_reader = HiveDataReader(self.spark, self.config.s3)
             self.tag_engine = TagComputeEngine(self.spark)
             self.tag_merger = TagMerger(self.spark, self.config.mysql)

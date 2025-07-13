@@ -19,7 +19,8 @@ class LocalConfig(BaseConfig):
             master="local[*]",
             executor_memory="1g",
             driver_memory="512m",
-            shuffle_partitions=10  # 本地环境减少分区数
+            shuffle_partitions=10,  # 本地环境减少分区数
+            jars=os.path.join(os.path.dirname(__file__), "jars", "mysql-connector-j-8.0.33.jar")
         )
         
         # S3配置 - MinIO模拟

@@ -2,6 +2,7 @@
 
 # 核心依赖
 pyspark==3.4.0
+py4j==0.10.9.7  # PySpark Java桥接
 pymysql==1.1.1
 boto3==1.26.137
 botocore==1.29.137

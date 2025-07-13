@@ -6,7 +6,7 @@ from pyspark.sql import DataFrame, SparkSession
 import pyspark.sql.functions as F
 from pyspark.sql.types import StringType
 
-from ..config.base_config import MySQLConfig
+from src.config.base import MySQLConfig
 
 logger = logging.getLogger(__name__)
 
