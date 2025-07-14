@@ -62,7 +62,7 @@ class MySQLTagWriter:
             return False
     
     def _write_to_mysql(self, result_df: DataFrame, mode: str) -> bool:
-        """执行MySQL写入操作"""
+        """执行MySQL写入操作 - 集成连接优化方案"""
         try:
             # 将Spark数组转换为JSON字符串，保持数组结构
             from pyspark.sql.functions import to_json, col, when
@@ -79,28 +79,140 @@ class MySQLTagWriter:
             
             # 显示数据样例用于调试
             logger.info("准备写入MySQL的数据样例:")
-            mysql_ready_df.show(5, truncate=False)
+            mysql_ready_df.show(3, truncate=False)
             
-            # 优化写入参数，提升性能同时保证编码正确
-            write_properties = {
-                **self.mysql_config.connection_properties,
-                "batchsize": "5000",  # 适中的批次大小，平衡性能和稳定性
-                "isolationLevel": "READ_COMMITTED",
-                "numPartitions": "8"   # 适度增加并行度提升性能
-            }
+            total_count = mysql_ready_df.count()
+            logger.info(f"准备写入 {total_count} 条用户标签数据")
             
-            # 执行写入
-            mysql_ready_df.write.jdbc(
-                url=self.mysql_config.jdbc_url,
-                table="user_tags",
-                mode=mode,
-                properties=write_properties
-            )
+            # 处理overwrite模式：使用DELETE代替TRUNCATE支持并发
+            if mode == "overwrite":
+                from datetime import date
+                today = date.today()
+                logger.info(f"overwrite模式：删除 {today} 的用户标签数据")
+                self._delete_user_tags_for_date(today)
             
-            return True
+            # 统一使用foreachPartition策略，不分大小数据量
+            logger.info(f"使用 foreachPartition 批量写入 {total_count} 条数据")
+            return self._write_with_custom_batch(mysql_ready_df)
             
         except Exception as e:
             logger.error(f"MySQL写入操作失败: {str(e)}")
+            return False
+    
+    def _delete_user_tags_for_date(self, computed_date):
+        """删除指定日期的用户标签 - 使用行级锁，支持并发"""
+        import pymysql
+        from datetime import date
+        
+        connection = None
+        try:
+            connection = pymysql.connect(
+                host=self.mysql_config.host,
+                port=self.mysql_config.port,
+                user=self.mysql_config.username,
+                password=self.mysql_config.password,
+                database=self.mysql_config.database,
+                charset='utf8mb4',
+                autocommit=True
+            )
+            
+            cursor = connection.cursor()
+            # 使用DELETE代替TRUNCATE，支持并发
+            delete_sql = "DELETE FROM user_tags WHERE computed_date = %s"
+            cursor.execute(delete_sql, (computed_date,))
+            deleted_count = cursor.rowcount
+            logger.info(f"✅ 删除 {computed_date} 的用户标签数据，共 {deleted_count} 条")
+            
+        except Exception as e:
+            logger.error(f"❌ 删除用户标签数据失败: {str(e)}")
+            raise
+        finally:
+            if connection:
+                connection.close()
+    
+    # 移除了优化JDBC写入方法，统一使用foreachPartition
+    
+    def _write_with_custom_batch(self, df: DataFrame) -> bool:
+        """统一的自定义批量写入 - 使用foreachPartition控制连接数"""
+        import pymysql
+        
+        # 提取配置参数避免闭包序列化问题
+        host = self.mysql_config.host
+        port = self.mysql_config.port
+        username = self.mysql_config.username
+        password = self.mysql_config.password
+        database = self.mysql_config.database
+        
+        def write_partition_to_mysql(partition_data):
+            """每个分区的写入逻辑"""
+            import pymysql
+            
+            rows = list(partition_data)
+            if not rows:
+                return
+                
+            partition_size = len(rows)
+            batch_size = 2000
+            
+            connection = None
+            try:
+                connection = pymysql.connect(
+                    host=host,
+                    port=port,
+                    user=username,
+                    password=password,
+                    database=database,
+                    charset='utf8mb4',
+                    autocommit=False,
+                    connect_timeout=30,
+                    read_timeout=60,
+                    write_timeout=60
+                )
+                
+                cursor = connection.cursor()
+                
+                # 简化插入SQL避免锁冲突
+                insert_sql = """
+                INSERT INTO user_tags (user_id, tag_ids, tag_details, computed_date) 
+                VALUES (%s, %s, %s, %s)
+                """
+                
+                # 分批处理数据
+                for i in range(0, partition_size, batch_size):
+                    batch_rows = rows[i:i + batch_size]
+                    batch_data = []
+                    
+                    for row in batch_rows:
+                        user_id = str(row.user_id)
+                        tag_ids = str(row.tag_ids) if row.tag_ids else '[]'
+                        tag_details = str(row.tag_details) if row.tag_details else '{}'
+                        computed_date = row.computed_date
+                        
+                        batch_data.append((user_id, tag_ids, tag_details, computed_date))
+                    
+                    cursor.executemany(insert_sql, batch_data)
+                
+                # 提交事务
+                connection.commit()
+                
+            except Exception as e:
+                if connection:
+                    connection.rollback()
+                raise
+            finally:
+                if connection:
+                    connection.close()
+        
+        try:
+            # 合理分区避免过多连接
+            optimal_partitions = min(8, max(1, df.count() // 8000))
+            repartitioned_df = df.repartition(optimal_partitions, "user_id")
+            
+            repartitioned_df.foreachPartition(write_partition_to_mysql)
+            return True
+            
+        except Exception as e:
+            logger.error(f"自定义批量写入失败: {str(e)}")
             return False
     
     def _backup_current_data(self) -> bool:

@@ -1,49 +1,108 @@
 import json
 import logging
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from pyspark.sql import SparkSession, DataFrame
+from pyspark import StorageLevel
 from src.config.base import MySQLConfig
 
 logger = logging.getLogger(__name__)
 
 
 class RuleReader:
-    """标签规则读取器 - 从MySQL读取标签规则配置"""
+    """标签规则读取器 - 使用DataFrame + persist机制优化性能"""
     
     def __init__(self, spark: SparkSession, mysql_config: MySQLConfig):
         self.spark = spark
         self.mysql_config = mysql_config
-        # 缓存已读取的数据，避免重复数据库连接
-        self._cached_rules = None
-        self._cached_tag_definitions = None
+        # 使用DataFrame缓存，支持persist机制
+        self._rules_df = None
+        self._tag_definitions_df = None
+        self._initialized = False
+    
+    def initialize(self):
+        """一次性初始化所有规则数据，使用persist缓存"""
+        if self._initialized:
+            logger.info("规则读取器已初始化，使用缓存数据")
+            return
+        
+        logger.info("🔄 开始一次性加载规则数据...")
+        
+        try:
+            # 1. 加载标签规则（联表查询，一次搞定）
+            self._load_rules_df()
+            
+            # 2. 加载标签定义
+            self._load_tag_definitions_df()
+            
+            self._initialized = True
+            logger.info("✅ 规则读取器初始化完成")
+            
+        except Exception as e:
+            logger.error(f"❌ 规则读取器初始化失败: {str(e)}")
+            raise
+    
+    def _load_rules_df(self):
+        """加载标签规则DataFrame并persist"""
+        logger.info("📖 加载标签规则...")
+        
+        query = """
+        (SELECT 
+            tr.rule_id,
+            tr.tag_id,
+            tr.rule_conditions,
+            tr.is_active as rule_active,
+            td.tag_name,
+            td.tag_category,
+            td.description as tag_description,
+            td.is_active as tag_active
+         FROM tag_rules tr 
+         JOIN tag_definition td ON tr.tag_id = td.tag_id 
+         WHERE tr.is_active = 1 AND td.is_active = 1) as active_rules
+        """
+        
+        self._rules_df = self.spark.read.jdbc(
+            url=self.mysql_config.jdbc_url,
+            table=query,
+            properties=self.mysql_config.connection_properties
+        ).persist(StorageLevel.MEMORY_AND_DISK)
+        
+        # 触发持久化并获取统计
+        rule_count = self._rules_df.count()
+        logger.info(f"✅ 标签规则DataFrame加载完成，共 {rule_count} 条")
+    
+    def _load_tag_definitions_df(self):
+        """加载标签定义DataFrame并persist"""
+        logger.info("📖 加载标签定义...")
+        
+        self._tag_definitions_df = self.spark.read.jdbc(
+            url=self.mysql_config.jdbc_url,
+            table="tag_definition",
+            properties=self.mysql_config.connection_properties
+        ).persist(StorageLevel.MEMORY_AND_DISK)
+        
+        tag_def_count = self._tag_definitions_df.count()
+        logger.info(f"✅ 标签定义DataFrame加载完成，共 {tag_def_count} 条")
+    
+    def get_active_rules_df(self) -> DataFrame:
+        """获取活跃标签规则DataFrame"""
+        if not self._initialized:
+            self.initialize()
+        return self._rules_df
+    
+    def get_tag_definitions_df(self) -> DataFrame:
+        """获取标签定义DataFrame"""
+        if not self._initialized:
+            self.initialize()
+        return self._tag_definitions_df
     
     def read_active_rules(self) -> List[Dict[str, Any]]:
-        """读取所有启用的标签规则"""
+        """读取所有启用的标签规则 - 兼容原接口，内部使用DataFrame缓存"""
         try:
-            # 联表查询获取完整的标签规则信息
-            query = """
-            (SELECT 
-                tr.rule_id,
-                tr.tag_id,
-                tr.rule_conditions,
-                tr.is_active as rule_active,
-                td.tag_name,
-                td.tag_category,
-                td.description as tag_description,
-                td.is_active as tag_active
-             FROM tag_rules tr 
-             JOIN tag_definition td ON tr.tag_id = td.tag_id 
-             WHERE tr.is_active = 1 AND td.is_active = 1) as active_rules
-            """
-            
-            rules_df = self.spark.read.jdbc(
-                url=self.mysql_config.jdbc_url,
-                table=query,
-                properties=self.mysql_config.connection_properties
-            )
-            
+            # 使用persist的DataFrame，避免重复数据库连接
+            rules_df = self.get_active_rules_df()
             rules_list = rules_df.collect()
-            logger.info(f"成功读取 {len(rules_list)} 条活跃标签规则")
+            
+            logger.info(f"从缓存获取 {len(rules_list)} 条活跃标签规则")
             
             # 转换为字典列表
             result = []
@@ -171,3 +230,34 @@ class RuleReader:
         except Exception as e:
             logger.warning(f"规则格式验证失败: {str(e)}")
             return False
+    
+    def cleanup(self):
+        """清理缓存，释放资源"""
+        logger.info("🧹 清理规则读取器缓存...")
+        
+        try:
+            if self._rules_df is not None:
+                logger.info("🧹 释放规则DataFrame persist缓存")
+                self._rules_df.unpersist()
+                
+            if self._tag_definitions_df is not None:
+                logger.info("🧹 释放标签定义DataFrame persist缓存")
+                self._tag_definitions_df.unpersist()
+                
+            # 清空引用
+            self._rules_df = None
+            self._tag_definitions_df = None
+            self._initialized = False
+            
+            logger.info("✅ 规则读取器缓存清理完成")
+            
+        except Exception as e:
+            logger.warning(f"⚠️ 规则读取器缓存清理异常: {str(e)}")
+    
+    def get_statistics(self) -> dict:
+        """获取统计信息"""
+        return {
+            "total_rules": self._rules_df.count() if self._rules_df else 0,
+            "total_tag_definitions": self._tag_definitions_df.count() if self._tag_definitions_df else 0,
+            "initialized": self._initialized
+        }
