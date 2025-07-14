@@ -44,13 +44,33 @@ bigdata_tag_system/
 ### 🚀 本地环境
 
 ```bash
-# 1. 设置本地环境
+# 1. 一键部署基础环境
 cd environments/local
-./setup.sh
+./setup.sh                    # 启动Docker服务 + 安装依赖
 
-# 2. 运行标签计算
-python ../../main.py --env local --mode health    # 健康检查
-python ../../main.py --env local --mode full      # 全量计算
+# 2. 一键初始化数据
+./init_data.sh                # 初始化数据库 + 生成测试数据
+
+# 3. 运行标签计算
+cd ../../
+python main.py --env local --mode health    # 健康检查
+python main.py --env local --mode full      # 全量计算
+```
+
+**本地环境管理命令：**
+```bash
+# 部署管理
+./setup.sh                    # 部署基础环境（默认）
+./setup.sh start              # 启动已有环境
+./setup.sh stop               # 停止环境
+./setup.sh clean              # 清理环境
+
+# 数据管理  
+./init_data.sh                # 初始化数据（默认）
+./init_data.sh reset          # 重置所有数据
+./init_data.sh clean          # 清理数据
+./init_data.sh db-only        # 仅初始化数据库
+./init_data.sh data-only      # 仅生成测试数据
 ```
 
 ### ☁️ AWS Glue开发环境

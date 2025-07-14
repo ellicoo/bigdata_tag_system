@@ -98,7 +98,7 @@ class TagComputeEngine:
     
     def compute_tags_parallel(self, data_df: DataFrame, rules: List[Dict[str, Any]]) -> List[DataFrame]:
         """
-        并行计算多个标签 - 利用Spark原生并行能力
+        并行计算多个标签 - 利用Spark原生分布式并行能力
         
         Args:
             data_df: 业务数据DataFrame
@@ -107,58 +107,44 @@ class TagComputeEngine:
         Returns:
             标签结果DataFrame列表
         """
-        from concurrent.futures import ThreadPoolExecutor, as_completed
-        import threading
+        logger.info(f"🚀 开始Spark分布式并行计算 {len(rules)} 个标签")
         
-        logger.info(f"🚀 开始并行计算 {len(rules)} 个标签")
-        
-        # 缓存数据提升并行性能
-        cached_data = data_df.cache()
+        # 智能缓存策略：只有规则数量较多时才缓存
+        should_cache = len(rules) > 3
+        if should_cache:
+            logger.info("📦 缓存数据以提升多标签计算性能")
+            cached_data = data_df.cache()
+            # 触发缓存 - 使用轻量级操作
+            _ = cached_data.count()
+        else:
+            cached_data = data_df
         
         results = []
         failed_tags = []
-        lock = threading.Lock()
         
-        def compute_single_tag_threadsafe(rule):
-            """线程安全的单标签计算"""
+        # 直接使用Spark的分布式计算，无需Python线程池
+        for rule in rules:
             try:
-                # Spark操作本身是线程安全的，但我们加锁确保稳定性
-                with lock:
-                    result_df = self.compute_single_tag(cached_data, rule)
-                    return rule, result_df
-            except Exception as e:
-                logger.error(f"并行计算标签失败: {rule.get('tag_name', 'Unknown')}, 错误: {str(e)}")
-                return rule, None
-        
-        # 使用线程池并行处理
-        max_workers = min(self.max_workers, len(rules))  # 使用配置的最大线程数
-        
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            # 提交所有计算任务
-            future_to_rule = {
-                executor.submit(compute_single_tag_threadsafe, rule): rule 
-                for rule in rules
-            }
-            
-            # 收集结果
-            for future in as_completed(future_to_rule):
-                rule = future_to_rule[future]
-                try:
-                    rule_returned, result_df = future.result(timeout=300)  # 5分钟超时
-                    if result_df is not None:
-                        results.append(result_df)
-                        logger.info(f"✅ 标签 {rule['tag_name']} 并行计算完成")
-                    else:
-                        failed_tags.append(rule['tag_name'])
-                        
-                except Exception as e:
-                    logger.error(f"❌ 标签 {rule['tag_name']} 计算超时或异常: {str(e)}")
+                logger.info(f"🔄 计算标签: {rule['tag_name']}")
+                result_df = self.compute_single_tag(cached_data, rule)
+                
+                if result_df is not None:
+                    results.append(result_df)
+                    logger.info(f"✅ 标签 {rule['tag_name']} 计算完成")
+                else:
                     failed_tags.append(rule['tag_name'])
+                    logger.warning(f"⚠️ 标签 {rule['tag_name']} 无命中用户")
+                    
+            except Exception as e:
+                logger.error(f"❌ 标签 {rule['tag_name']} 计算失败: {str(e)}")
+                failed_tags.append(rule['tag_name'])
         
         # 清理缓存
-        cached_data.unpersist()
+        if should_cache:
+            logger.info("🧹 清理数据缓存")
+            cached_data.unpersist()
         
-        logger.info(f"🎉 并行计算完成 - 成功: {len(results)}, 失败: {len(failed_tags)}")
+        logger.info(f"🎉 Spark分布式计算完成 - 成功: {len(results)}, 失败: {len(failed_tags)}")
         if failed_tags:
             logger.warning(f"失败的标签: {failed_tags}")
         

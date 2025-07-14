@@ -81,12 +81,12 @@ class MySQLTagWriter:
             logger.info("准备写入MySQL的数据样例:")
             mysql_ready_df.show(5, truncate=False)
             
-            # 优化写入参数
+            # 优化写入参数，提升性能同时保证编码正确
             write_properties = {
                 **self.mysql_config.connection_properties,
-                "batchsize": "1000",  # 减小批次大小，提高稳定性
+                "batchsize": "5000",  # 适中的批次大小，平衡性能和稳定性
                 "isolationLevel": "READ_COMMITTED",
-                "numPartitions": "5"   # 减少并行度
+                "numPartitions": "8"   # 适度增加并行度提升性能
             }
             
             # 执行写入

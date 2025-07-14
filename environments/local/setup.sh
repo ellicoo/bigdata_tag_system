@@ -61,9 +61,9 @@ download_jdbc_driver() {
     fi
 }
 
-# 生成测试数据
-setup_test_data() {
-    echo "🗄️ 设置测试数据..."
+# 下载依赖和JDBC驱动
+setup_dependencies() {
+    echo "📦 设置依赖..."
     
     # 返回项目根目录
     cd ../..
@@ -78,32 +78,7 @@ setup_test_data() {
     # 下载JDBC驱动
     download_jdbc_driver
     
-    # 返回项目根目录
-    cd ../..
-    
-    # 返回本地环境目录初始化数据库
-    cd environments/local
-    
-    # 初始化数据库
-    echo "📋 初始化MySQL数据库..."
-    if mysql -h 127.0.0.1 -P 3307 -u root -proot123 < init_database.sql 2>/dev/null; then
-        echo "✅ 数据库初始化完成"
-    else
-        echo "⚠️ 数据库初始化失败，请手动执行: mysql -h 127.0.0.1 -P 3307 -u root -proot123 < init_database.sql"
-    fi
-    
-    # 返回项目根目录
-    cd ../..
-    
-    # 生成测试数据
-    python -c "
-import sys
-sys.path.append('.')
-from environments.local.test_data_generator import generate_test_data
-generate_test_data()
-" 2>/dev/null || echo "⚠️ 测试数据生成跳过（模块未找到）"
-    
-    echo "✅ 测试数据设置完成"
+    echo "✅ 依赖设置完成"
 }
 
 # 显示访问信息
@@ -135,8 +110,9 @@ show_info() {
     echo "   Token: tag_system_2024"
     echo "   (交互式数据分析)"
     echo ""
-    echo "🎯 快速测试:"
+    echo "🎯 下一步操作:"
     echo "--------------------------------"
+    echo "./init_data.sh                              # 初始化数据库和测试数据"
     echo "cd ../../  # 回到项目根目录"
     echo "python main.py --env local --mode health    # 健康检查"
     echo "python main.py --env local --mode full      # 全量计算"
@@ -152,7 +128,7 @@ main() {
         "setup")
             check_docker
             start_environment
-            setup_test_data
+            setup_dependencies
             show_info
             ;;
         "start")

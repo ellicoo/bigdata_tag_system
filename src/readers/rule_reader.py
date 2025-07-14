@@ -13,6 +13,9 @@ class RuleReader:
     def __init__(self, spark: SparkSession, mysql_config: MySQLConfig):
         self.spark = spark
         self.mysql_config = mysql_config
+        # 缓存已读取的数据，避免重复数据库连接
+        self._cached_rules = None
+        self._cached_tag_definitions = None
     
     def read_active_rules(self) -> List[Dict[str, Any]]:
         """读取所有启用的标签规则"""

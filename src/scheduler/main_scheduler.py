@@ -1,14 +1,13 @@
 import logging
 import time
-from typing import List, Dict, Any
+import json
+from typing import List, Dict, Any, Optional
 from pyspark.sql import SparkSession
 
 from src.config.base import BaseConfig
-from src.readers.rule_reader import RuleReader
 from src.readers.hive_reader import HiveDataReader
 from src.engine.tag_computer import TagComputeEngine
-from src.merger.tag_merger import TagMerger
-from src.writers.mysql_writer import MySQLTagWriter
+from src.data.data_manager import UnifiedDataManager
 
 logger = logging.getLogger(__name__)
 
@@ -23,12 +22,10 @@ class TagComputeScheduler:
         self.atomic_mode = atomic_mode
         self.max_workers = max_workers
         
-        # 组件初始化
-        self.rule_reader = None
+        # 组件初始化 - 使用统一数据管理器
+        self.data_manager = None
         self.hive_reader = None
         self.tag_engine = None
-        self.tag_merger = None
-        self.mysql_writer = None
     
     def initialize(self):
         """初始化Spark和各个组件"""
@@ -38,12 +35,13 @@ class TagComputeScheduler:
             # 初始化Spark
             self.spark = self._create_spark_session()
             
-            # 初始化各个组件
-            self.rule_reader = RuleReader(self.spark, self.config.mysql)
+            # 初始化各个组件 - 使用统一数据管理器
+            self.data_manager = UnifiedDataManager(self.spark, self.config.mysql)
             self.hive_reader = HiveDataReader(self.spark, self.config.s3)
             self.tag_engine = TagComputeEngine(self.spark, self.max_workers)
-            self.tag_merger = TagMerger(self.spark, self.config.mysql)
-            self.mysql_writer = MySQLTagWriter(self.spark, self.config.mysql)
+            
+            # 一次性初始化所有数据，避免重复连接
+            self.data_manager.initialize()
             
             logger.info("✅ 标签计算系统初始化完成")
             
@@ -75,8 +73,8 @@ class TagComputeScheduler:
             start_time = time.time()
             logger.info("🚀 开始执行完整标签计算...")
             
-            # 1. 读取所有活跃的标签规则
-            rules = self.rule_reader.read_active_rules()
+            # 1. 从统一数据管理器获取所有活跃的标签规则
+            rules = self.data_manager.get_rules_for_computation()
             if not rules:
                 logger.warning("没有找到活跃的标签规则")
                 return False
@@ -91,9 +89,19 @@ class TagComputeScheduler:
                 logger.info("生成生产级模拟用户数据...")
                 test_data = self._generate_production_like_data()
                 
-                # 使用串行计算，简单可靠
-                logger.info(f"开始串行计算 {len(rules)} 个标签...")
-                tag_results = self.tag_engine.compute_batch_tags(test_data, rules)
+                # 转换规则格式（从Row对象转为字典）
+                processed_rules = []
+                for rule_row in rules:
+                    rule_dict = rule_row.asDict()
+                    try:
+                        rule_dict['rule_conditions'] = json.loads(rule_dict['rule_conditions'])
+                        processed_rules.append(rule_dict)
+                    except (json.JSONDecodeError, TypeError):
+                        logger.warning(f"规则 {rule_dict['rule_id']} 条件格式错误，跳过")
+                
+                # 使用并行计算提升性能，同时确保编码正确
+                logger.info(f"开始并行计算 {len(processed_rules)} 个标签...")
+                tag_results = self.tag_engine.compute_tags_parallel(test_data, processed_rules)
                 
                 all_tag_results.extend(tag_results)
                 
@@ -107,22 +115,17 @@ class TagComputeScheduler:
                 logger.warning("没有成功计算出任何标签")
                 return False
             
-            # 4. 合并标签结果
+            # 4. 合并标签结果（使用统一数据管理器）
             logger.info("开始合并标签结果...")
-            merged_result = self.tag_merger.merge_user_tags(all_tag_results)
+            merged_result = self._merge_tag_results_unified(all_tag_results)
             
             if merged_result is None:
                 logger.error("标签合并失败")
                 return False
             
-            # 5. 验证合并结果
-            if not self.tag_merger.validate_merge_result(merged_result):
-                logger.error("合并结果验证失败")
-                return False
-            
-            # 6. 写入合并后的标签结果
+            # 5. 写入合并后的标签结果（使用统一数据管理器）
             logger.info("开始写入标签结果...")
-            write_success = self.mysql_writer.write_tag_results(merged_result)
+            write_success = self.data_manager.write_user_tags(merged_result, mode="overwrite")
             
             if not write_success:
                 logger.error("标签结果写入失败")
@@ -132,7 +135,7 @@ class TagComputeScheduler:
             end_time = time.time()
             execution_time = end_time - start_time
             
-            stats = self.mysql_writer.get_write_statistics()
+            stats = self.data_manager.get_statistics()
             
             logger.info(f"""
 🎉 标签计算完成！
@@ -256,8 +259,8 @@ class TagComputeScheduler:
     def cleanup(self):
         """清理资源"""
         try:
-            if self.hive_reader:
-                self.hive_reader.clear_cache()
+            if self.data_manager:
+                self.data_manager.cleanup()
             
             if self.spark:
                 self.spark.stop()
@@ -411,6 +414,102 @@ class TagComputeScheduler:
         logger.info(f"表 {table_name} 增量数据包含 {incremental_sample.count()} 个用户")
         return incremental_sample
     
+    def _merge_tag_results_unified(self, tag_results: List) -> Optional:
+        """使用统一数据管理器合并标签结果"""
+        try:
+            if not tag_results:
+                return None
+            
+            from functools import reduce
+            from pyspark.sql.functions import col, collect_list, struct, lit
+            from datetime import date
+            
+            # 1. 合并所有标签结果
+            all_new_tags = reduce(lambda df1, df2: df1.union(df2), tag_results)
+            
+            # 2. 获取标签定义信息
+            tag_definitions = self.data_manager.get_tag_definitions_df()
+            
+            # 3. 关联标签信息
+            enriched_tags = all_new_tags.join(
+                tag_definitions.select("tag_id", "tag_name", "tag_category"),
+                "tag_id",
+                "left"
+            )
+            
+            # 4. 按用户聚合标签（使用collect_set自动去重）
+            from pyspark.sql.functions import collect_set
+            user_new_tags = enriched_tags.groupBy("user_id").agg(
+                collect_set("tag_id").alias("new_tag_ids"),
+                collect_set(struct("tag_id", "tag_name", "tag_category")).alias("tag_info_list")
+            )
+            
+            # 5. 获取现有标签
+            existing_tags = self.data_manager.get_existing_user_tags_df()
+            
+            # 6. 合并新老标签
+            if existing_tags is None:
+                # 首次运行
+                final_df = user_new_tags.select(
+                    col("user_id"),
+                    col("new_tag_ids").alias("tag_ids"),
+                    self._build_tag_details_udf(col("tag_info_list")).alias("tag_details"),
+                    lit(date.today()).alias("computed_date")
+                )
+            else:
+                # 合并新老标签
+                merged_df = user_new_tags.join(existing_tags, "user_id", "left")
+                final_df = merged_df.select(
+                    col("user_id"),
+                    self._merge_tag_arrays_udf(col("tag_ids"), col("new_tag_ids")).alias("tag_ids"),
+                    self._build_tag_details_udf(col("tag_info_list")).alias("tag_details"),
+                    lit(date.today()).alias("computed_date")
+                )
+            
+            return final_df
+            
+        except Exception as e:
+            logger.error(f"统一标签合并失败: {str(e)}")
+            return None
+    
+    def _build_tag_details_udf(self, tag_info_col):
+        """构建标签详情的UDF"""
+        from pyspark.sql.functions import udf
+        from pyspark.sql.types import StringType
+        import json
+        
+        @udf(returnType=StringType())
+        def build_details(tag_info_list):
+            if not tag_info_list:
+                return "{}"
+            
+            details = {}
+            for info in tag_info_list:
+                tag_id = str(info['tag_id'])
+                details[tag_id] = {
+                    'tag_name': info['tag_name'],
+                    'tag_category': info['tag_category']
+                }
+            # 确保中文正确编码
+            return json.dumps(details, ensure_ascii=False)
+        
+        return build_details(tag_info_col)
+    
+    def _merge_tag_arrays_udf(self, existing_col, new_col):
+        """合并标签数组的UDF"""
+        from pyspark.sql.functions import udf
+        from pyspark.sql.types import ArrayType, IntegerType
+        
+        @udf(returnType=ArrayType(IntegerType()))
+        def merge_arrays(existing, new_tags):
+            if existing is None:
+                existing = []
+            if new_tags is None:
+                new_tags = []
+            return sorted(list(set(existing + new_tags)))
+        
+        return merge_arrays(existing_col, new_col)
+    
     def health_check(self) -> bool:
         """系统健康检查"""
         try:
@@ -432,13 +531,16 @@ class TagComputeScheduler:
                 logger.error("MySQL连接异常")
                 return False
             
-            # 检查S3连接
-            try:
-                test_schemas = self.hive_reader.get_table_schema("user_basic_info")
-                if not test_schemas:
-                    logger.warning("S3连接或数据访问可能有问题")
-            except:
-                logger.warning("S3连接检查失败")
+            # 检查S3连接（仅在非本地环境）
+            if self.config.environment != 'local':
+                try:
+                    test_schemas = self.hive_reader.get_table_schema("user_basic_info")
+                    if not test_schemas:
+                        logger.warning("S3连接或数据访问可能有问题")
+                except:
+                    logger.warning("S3连接检查失败")
+            else:
+                logger.info("💡 本地环境跳过S3连接检查，使用内存数据生成")
             
             logger.info("✅ 系统健康检查通过")
             return True
@@ -446,3 +548,40 @@ class TagComputeScheduler:
         except Exception as e:
             logger.error(f"❌ 系统健康检查失败: {str(e)}")
             return False
+    
+    def cleanup(self):
+        """清理所有资源"""
+        try:
+            logger.info("🧹 开始清理系统资源...")
+            
+            # 清理Spark缓存
+            if self.spark:
+                try:
+                    self.spark.catalog.clearCache()
+                    logger.info("✅ Spark缓存已清理")
+                except Exception as e:
+                    logger.warning(f"⚠️ Spark缓存清理失败: {e}")
+                
+                # 停止Spark Session
+                try:
+                    self.spark.stop()
+                    logger.info("✅ Spark Session已停止")
+                except Exception as e:
+                    logger.warning(f"⚠️ Spark Session停止失败: {e}")
+            
+            # 清理组件引用
+            self.data_manager = None
+            self.hive_reader = None
+            self.tag_engine = None
+            self.spark = None
+            
+            logger.info("✅ 系统资源清理完成")
+            
+        except Exception as e:
+            logger.error(f"❌ 资源清理异常: {str(e)}")
+            # 强制清理
+            try:
+                if self.spark:
+                    self.spark.stop()
+            except:
+                pass

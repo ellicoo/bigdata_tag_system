@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS tag_category (
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_active (is_active)
-) COMMENT '标签分类表';
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '标签分类表';
 
 -- 2. 标签定义表
 CREATE TABLE IF NOT EXISTS tag_definition (
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS tag_definition (
     updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_category (tag_category),
     INDEX idx_active (is_active)
-) COMMENT '标签定义表';
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '标签定义表';
 
 -- 3. 标签规则表
 CREATE TABLE IF NOT EXISTS tag_rules (
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS tag_rules (
     FOREIGN KEY (tag_id) REFERENCES tag_definition(tag_id) ON DELETE CASCADE,
     INDEX idx_tag_id (tag_id),
     INDEX idx_active (is_active)
-) COMMENT '标签规则表';
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '标签规则表';
 
 -- 4. 用户标签结果表（修正版：一个用户一条记录，包含所有标签ID数组）
 CREATE TABLE IF NOT EXISTS user_tags (
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS user_tags (
     INDEX idx_user_id (user_id),
     INDEX idx_computed_date (computed_date),
     UNIQUE KEY uk_user_date (user_id, computed_date)
-) COMMENT '用户标签结果表（一个用户一条记录，包含标签ID数组）';
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '用户标签结果表（一个用户一条记录，包含标签ID数组）';
 
 -- 插入初始测试数据
 -- 标签分类
@@ -65,9 +65,9 @@ INSERT IGNORE INTO tag_category (category_id, category_name, description) VALUES
 (4, '生命周期', '基于用户注册和活跃状态的生命周期标签'),
 (5, '偏好特征', '基于用户交易偏好的特征标签');
 
--- 标签定义
+-- 标签定义（确保中文字符正确）
 INSERT IGNORE INTO tag_definition (tag_id, tag_name, tag_category, description) VALUES 
-(1, '高净值用户', '用户价值', '总资产价值超过10万的用户'),
+(1, '高净值用户', '用户价值', '总资产价值超过15万的用户'),
 (2, '活跃交易者', '行为特征', '近30天交易次数超过10次的用户'),
 (3, '低风险用户', '风险等级', '风险评估为低风险的用户'),
 (4, '新注册用户', '生命周期', '注册时间在30天内的新用户'),
