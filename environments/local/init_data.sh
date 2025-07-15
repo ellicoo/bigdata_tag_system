@@ -32,12 +32,12 @@ wait_for_mysql() {
 init_database() {
     echo "📋 初始化MySQL数据库表结构..."
     
-    if docker exec -i tag_system_mysql mysql -u root -proot123 < init_database.sql; then
+    if docker exec -i tag_system_mysql mysql -u root -proot123 --default-character-set=utf8mb4 < init_database.sql; then
         echo "✅ 数据库表结构初始化完成"
         
         # 显示初始化结果
         echo "📊 数据库初始化统计:"
-        docker exec tag_system_mysql mysql -u root -proot123 -e "
+        docker exec tag_system_mysql mysql -u root -proot123 --default-character-set=utf8mb4 -e "
             USE tag_system;
             SELECT '标签分类数量:' as info, COUNT(*) as count FROM tag_category WHERE is_active = 1;
             SELECT '标签定义数量:' as info, COUNT(*) as count FROM tag_definition WHERE is_active = 1;  
@@ -86,7 +86,7 @@ clean_data() {
     
     # 清理数据库
     echo "  - 清理MySQL数据..."
-    docker exec tag_system_mysql mysql -u root -proot123 -e "
+    docker exec tag_system_mysql mysql -u root -proot123 --default-character-set=utf8mb4 -e "
         DROP DATABASE IF EXISTS tag_system;
         CREATE DATABASE IF NOT EXISTS tag_system CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
     " 2>/dev/null || echo "⚠️ 数据库清理失败"

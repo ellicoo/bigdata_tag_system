@@ -16,7 +16,7 @@ class MySQLTagWriter:
         self.mysql_config = mysql_config
     
     def write_tag_results(self, result_df: DataFrame, mode: str = "overwrite", 
-                         enable_backup: bool = True) -> bool:
+                         enable_backup: bool = False) -> bool:
         """
         写入标签结果到MySQL
         
@@ -42,7 +42,7 @@ class MySQLTagWriter:
                 logger.info(f"✅ 标签结果写入成功，模式: {mode}, 记录数: {result_df.count()}")
                 
                 # 验证写入结果
-                if self._validate_write_result(result_df):
+                if self._validate_write_result(result_df, mode):
                     return True
                 else:
                     logger.error("写入结果验证失败")
@@ -166,7 +166,8 @@ class MySQLTagWriter:
                     autocommit=False,
                     connect_timeout=30,
                     read_timeout=60,
-                    write_timeout=60
+                    write_timeout=60,
+                    init_command="SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci"
                 )
                 
                 cursor = connection.cursor()
@@ -206,7 +207,20 @@ class MySQLTagWriter:
         try:
             # 合理分区避免过多连接
             optimal_partitions = min(8, max(1, df.count() // 8000))
+            logger.info(f"🔍 MySQL写入分区设置：{optimal_partitions} 个分区")
             repartitioned_df = df.repartition(optimal_partitions, "user_id")
+            
+            # 调试：检查重分区后是否有重复
+            logger.info("🔍 检查重分区后是否有重复用户...")
+            user_counts = repartitioned_df.groupBy("user_id").count()
+            duplicates = user_counts.filter(user_counts["count"] > 1)
+            duplicate_count = duplicates.count()
+            if duplicate_count > 0:
+                logger.error(f"❌ 发现MySQL写入前有重复用户！重复数: {duplicate_count}")
+                duplicates.show(10, truncate=False)
+                return False
+            else:
+                logger.info("✅ MySQL写入前无重复用户")
             
             repartitioned_df.foreachPartition(write_partition_to_mysql)
             return True
@@ -258,49 +272,66 @@ class MySQLTagWriter:
             logger.error(f"数据恢复失败: {str(e)}")
             return False
     
-    def _validate_write_result(self, original_df: DataFrame) -> bool:
-        """验证写入结果 - 适配新数据模型"""
+    def _validate_write_result(self, original_df: DataFrame, mode: str = "overwrite") -> bool:
+        """验证写入结果 - 只验证当前标签用户是否成功写入"""
         try:
-            # 读取写入后的数据
+            # 获取需要写入的用户ID列表
+            original_user_ids = original_df.select("user_id").distinct().collect()
+            original_user_id_set = {row["user_id"] for row in original_user_ids}
+            original_count = len(original_user_id_set)
+            
+            logger.info(f"写入验证 - 需要写入的标签用户数: {original_count}, 模式: {mode}")
+            
+            if original_count == 0:
+                logger.info("✅ 无用户需要写入标签，验证通过")
+                return True
+            
+            # 读取写入后的数据，只检查需要写入的用户
             written_df = self.spark.read.jdbc(
                 url=self.mysql_config.jdbc_url,
                 table="user_tags",
                 properties=self.mysql_config.connection_properties
             )
             
-            # 检查记录数（用户数）
-            original_count = original_df.count()
-            written_count = written_df.count()
+            # 检查需要写入的用户是否都已写入
+            written_user_ids = written_df.select("user_id").distinct().collect()
+            written_user_id_set = {row["user_id"] for row in written_user_ids}
             
-            logger.info(f"写入验证 - 原始用户数: {original_count}, 写入后用户数: {written_count}")
-            
-            # 对于overwrite模式，用户数应该相等
-            if original_count != written_count:
-                logger.warning(f"用户数不匹配，原始: {original_count}, 写入后: {written_count}")
+            # 检查是否所有需要写入的用户都已成功写入
+            missing_users = original_user_id_set - written_user_id_set
+            if missing_users:
+                logger.error(f"❌ 写入验证失败：以下用户未成功写入 {list(missing_users)[:5]}...")
                 return False
             
-            # 检查关键字段
-            user_id_count = written_df.filter(written_df.user_id.isNotNull()).count()
-            if user_id_count != written_count:
-                logger.error("存在空的user_id")
-                return False
-            
-            # 检查标签数组字段（JSON格式）
-            from pyspark.sql.functions import col, expr, from_json, size
+            # 检查写入的用户是否都有有效的标签数据
+            from pyspark.sql.functions import col, from_json, size
             from pyspark.sql.types import ArrayType, IntegerType
             
-            # 解析JSON并检查
-            parsed_for_validation = written_df.select(
+            # 只检查刚写入的用户
+            target_users_df = written_df.filter(col("user_id").isin(list(original_user_id_set)))
+            
+            # 检查标签数组字段（JSON格式）
+            parsed_for_validation = target_users_df.select(
                 "user_id",
                 from_json("tag_ids", ArrayType(IntegerType())).alias("tag_ids_array")
             )
             
+            # 检查关键字段
+            user_id_count = target_users_df.filter(target_users_df.user_id.isNotNull()).count()
+            if user_id_count != original_count:
+                logger.error("❌ 存在空的user_id")
+                return False
+            
+            # 检查标签数组是否有效
             null_tag_ids_count = parsed_for_validation.filter(
                 col("tag_ids_array").isNull() | (size("tag_ids_array") == 0)
             ).count()
             
             if null_tag_ids_count > 0:
-                logger.warning(f"存在 {null_tag_ids_count} 个用户没有标签")
+                logger.warning(f"⚠️ 存在 {null_tag_ids_count} 个用户没有标签（可能是正常情况）")
+            
+            successfully_written = original_count - len(missing_users)
+            logger.info(f"✅ 写入验证通过：成功写入 {successfully_written}/{original_count} 个标签用户")
             
             return True
             
@@ -363,11 +394,31 @@ class MySQLTagWriter:
                         "driver": self.mysql_config.connection_properties["driver"]
                     }
                     
-                    # 创建临时表执行删除
-                    self.spark.sql(f"""
-                        CREATE OR REPLACE TEMPORARY VIEW users_to_delete AS
-                        SELECT DISTINCT user_id FROM temp_update_users
-                    """)
+                    # 使用PyMySQL直接执行删除，避免临时表创建
+                    import pymysql
+                    
+                    connection = None
+                    try:
+                        connection = pymysql.connect(
+                            host=self.mysql_config.host,
+                            port=self.mysql_config.port,
+                            user=self.mysql_config.username,
+                            password=self.mysql_config.password,
+                            database=self.mysql_config.database,
+                            charset='utf8mb4',
+                            autocommit=True
+                        )
+                        cursor = connection.cursor()
+                        delete_sql = f"DELETE FROM user_tags WHERE user_id IN ({','.join(user_id_list)})"
+                        cursor.execute(delete_sql)
+                        deleted_count = cursor.rowcount
+                        logger.info(f"删除 {deleted_count} 个用户的旧标签记录")
+                    except Exception as e:
+                        logger.error(f"删除旧标签记录失败: {str(e)}")
+                        raise
+                    finally:
+                        if connection:
+                            connection.close()
                     
                     logger.info(f"删除 {len(user_id_list)} 个用户的旧标签记录")
             

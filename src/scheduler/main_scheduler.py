@@ -111,17 +111,17 @@ class TagComputeScheduler:
                 logger.warning("没有成功计算出任何标签")
                 return False
             
-            # 4. 合并标签结果（使用标签合并器）
-            logger.info("开始合并标签结果...")
-            merged_result = self.tag_merger.merge_user_tags(all_tag_results)
+            # 4. 全量模式：直接使用tag_merger进行完整的标签合并（包含内存合并+数据库合并）
+            logger.info("全量模式：使用tag_merger进行完整标签合并...")
+            final_merged_result = self.tag_merger.merge_user_tags(all_tag_results)
             
-            if merged_result is None:
+            if final_merged_result is None:
                 logger.error("标签合并失败")
                 return False
             
             # 5. 写入合并后的标签结果（使用MySQL写入器）
             logger.info("开始写入标签结果...")
-            write_success = self.mysql_writer.write_tag_results(merged_result, mode="overwrite")
+            write_success = self.mysql_writer.write_tag_results(final_merged_result, mode="overwrite")
             
             if not write_success:
                 logger.error("标签结果写入失败")
@@ -151,59 +151,69 @@ class TagComputeScheduler:
             return False
     
     def run_incremental_compute(self, days_back: int = 1) -> bool:
-        """运行增量标签计算"""
+        """运行增量标签计算 - 正确逻辑：识别真正的新增用户"""
         try:
             logger.info(f"🚀 开始执行增量标签计算，回溯 {days_back} 天...")
             
-            # 读取规则
+            # 1. 读取所有活跃的标签规则（新增用户需要计算所有标签）
             rules = self.rule_reader.read_active_rules()
             if not rules:
                 logger.warning("没有找到活跃的标签规则")
                 return False
             
-            table_groups = self.rule_reader.group_rules_by_table(rules)
-            all_tag_results = []
+            logger.info(f"增量模式：对新增用户计算所有 {len(rules)} 个标签规则")
             
-            for table_name, table_rules in table_groups.items():
-                try:
-                    # 读取增量数据
-                    required_fields = self.rule_reader.get_all_required_fields(table_rules)
-                    
-                    # 根据环境决定数据读取方式
-                    if self.config.environment == 'local':
-                        # 本地环境：生成模拟增量数据
-                        logger.info(f"本地环境：为表 {table_name} 生成模拟增量数据")
-                        incremental_data = self._generate_incremental_data_for_table(table_name, days_back)
-                    else:
-                        # 生产环境：从S3读取真实增量数据
-                        date_field = "updated_time"  # 可以根据表配置
-                        incremental_data = self.hive_reader.read_incremental_data(
-                            table_name, date_field, days_back, required_fields
-                        )
-                    
-                    if incremental_data.count() == 0:
-                        logger.info(f"表 {table_name} 没有增量数据")
-                        continue
-                    
-                    # 计算标签
-                    table_results = self.tag_engine.compute_batch_tags(incremental_data, table_rules)
-                    all_tag_results.extend(table_results)
-                    
-                except Exception as e:
-                    logger.error(f"处理增量表 {table_name} 失败: {str(e)}")
-                    continue
+            # 2. 识别真正的新增用户
+            new_users_data = self._identify_truly_new_users(days_back)
             
-            if not all_tag_results:
-                logger.info("没有增量标签需要更新")
+            if new_users_data.count() == 0:
+                logger.info("没有发现新增用户")
                 return True
             
-            # 合并和写入
-            merged_result = self.tag_merger.merge_user_tags(all_tag_results)
+            logger.info(f"发现 {new_users_data.count()} 个真正的新增用户")
+            
+            # 3. 对新增用户计算所有标签规则
+            all_tag_results = []
+            try:
+                # 计算所有标签（新用户需要全量打标签）
+                tag_results = self.tag_engine.compute_tags_parallel(new_users_data, rules)
+                all_tag_results.extend(tag_results)
+                
+                logger.info(f"✅ 为新增用户计算完成 {len(tag_results)} 个标签")
+                
+                # 调试：检查标签计算结果
+                total_tag_records = sum(df.count() for df in tag_results)
+                logger.info(f"🔍 标签计算产生 {total_tag_records} 条标签记录")
+                if total_tag_records > 0 and tag_results:
+                    logger.info("标签计算结果示例:")
+                    tag_results[0].select("user_id", "tag_id").show(5, truncate=False)
+                
+            except Exception as e:
+                logger.error(f"❌ 新增用户标签计算失败: {str(e)}")
+                raise
+            
+            if not all_tag_results:
+                logger.info("新增用户没有命中任何标签")
+                return True
+            
+            # 4. 内存合并新用户的多个标签
+            logger.info("内存合并新增用户多标签...")
+            merged_result = self._merge_user_multi_tags_in_memory(all_tag_results)
+            
             if merged_result is None:
+                logger.error("新增用户标签内存合并失败")
                 return False
             
-            # 增量写入
-            return self.mysql_writer.write_incremental_tags(merged_result)
+            # 调试：检查合并结果
+            merged_count = merged_result.count()
+            logger.info(f"🔍 内存合并后得到 {merged_count} 个有标签的新增用户")
+            if merged_count > 0:
+                logger.info("新增用户标签示例:")
+                merged_result.select("user_id", "tag_ids").show(5, truncate=False)
+            
+            # 5. 直接追加写入（新用户不存在于数据库中）
+            logger.info("新增用户标签直接追加到数据库...")
+            return self.mysql_writer.write_tag_results(merged_result, mode="append")
             
         except Exception as e:
             logger.error(f"增量计算失败: {str(e)}")
@@ -395,8 +405,341 @@ class TagComputeScheduler:
         logger.info(f"生成了 {test_df.count()} 条测试用户数据")
         return test_df
     
+    def _identify_truly_new_users(self, days_back: int):
+        """识别真正的新增用户：Hive中有但MySQL中没有的用户"""
+        try:
+            logger.info(f"🔍 开始识别最近 {days_back} 天的真正新增用户...")
+            
+            # 1. 获取模拟的全量Hive数据（包含新增用户）
+            hive_all_users = self._generate_hive_data_with_new_users(days_back)
+            
+            # 2. 读取MySQL中已有的用户列表
+            mysql_existing_users = self._read_existing_users_from_mysql()
+            
+            # 3. 对比找出新增用户（left_anti join）
+            new_users = hive_all_users.join(
+                mysql_existing_users,
+                "user_id",
+                "left_anti"  # 找出Hive中有但MySQL中没有的用户
+            )
+            
+            new_user_count = new_users.count()
+            logger.info(f"✅ 识别出 {new_user_count} 个真正的新增用户")
+            
+            if new_user_count > 0:
+                logger.info("新增用户示例:")
+                new_users.select("user_id", "registration_date").show(5, truncate=False)
+            
+            return new_users
+            
+        except Exception as e:
+            logger.error(f"识别新增用户失败: {str(e)}")
+            raise
+    
+    def _generate_hive_data_with_new_users(self, days_back: int):
+        """生成包含新增用户的Hive模拟数据"""
+        from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType, DateType
+        from pyspark.sql import Row
+        from datetime import date, timedelta
+        import random
+        
+        logger.info(f"生成包含新增用户的Hive模拟数据...")
+        
+        # 定义用户数据schema
+        schema = StructType([
+            StructField("user_id", StringType(), True),
+            StructField("age", IntegerType(), True),
+            StructField("total_asset_value", DoubleType(), True),
+            StructField("trade_count_30d", IntegerType(), True),
+            StructField("risk_score", DoubleType(), True),
+            StructField("registration_date", DateType(), True),
+            StructField("user_level", StringType(), True),
+            StructField("kyc_status", StringType(), True),
+            StructField("cash_balance", DoubleType(), True),
+            StructField("last_login_date", DateType(), True)
+        ])
+        
+        all_users = []
+        
+        # 1. 添加一些现有用户（与MySQL中重复，模拟老用户）
+        for i in range(1, 6):  # user_000001 到 user_000005
+            user_data = Row(
+                user_id=f"user_{i:06d}",
+                age=random.randint(25, 50),
+                total_asset_value=random.uniform(50000, 300000),
+                trade_count_30d=random.randint(10, 30),
+                risk_score=random.uniform(20, 70),
+                registration_date=date.today() - timedelta(days=random.randint(30, 365)),
+                user_level=random.choice(["SILVER", "GOLD", "VIP1"]),
+                kyc_status="verified",
+                cash_balance=random.uniform(10000, 100000),
+                last_login_date=date.today() - timedelta(days=random.randint(0, 7))
+            )
+            all_users.append(user_data)
+        
+        # 2. 添加新增用户（MySQL中不存在）
+        for i in range(10):  # 10个新用户
+            # 新用户注册时间在指定天数内
+            reg_date = date.today() - timedelta(days=random.randint(1, days_back))
+            
+            user_data = Row(
+                user_id=f"new_user_{i+1:04d}",
+                age=random.randint(18, 45),
+                total_asset_value=random.uniform(10000, 200000),
+                trade_count_30d=random.randint(5, 25),
+                risk_score=random.uniform(15, 60),
+                registration_date=reg_date,
+                user_level=random.choice(["BRONZE", "SILVER", "GOLD", "VIP1"]),
+                kyc_status=random.choice(["verified", "pending"]),
+                cash_balance=random.uniform(5000, 80000),
+                last_login_date=date.today() - timedelta(days=random.randint(0, 3))
+            )
+            all_users.append(user_data)
+        
+        hive_df = self.spark.createDataFrame(all_users, schema)
+        logger.info(f"生成了 {hive_df.count()} 条Hive模拟数据（包含新老用户）")
+        return hive_df
+    
+    def _read_existing_users_from_mysql(self):
+        """从MySQL读取已有的用户列表"""
+        try:
+            logger.info("📖 从MySQL读取已有用户列表...")
+            
+            existing_users_df = self.spark.read.jdbc(
+                url=self.config.mysql.jdbc_url,
+                table="user_tags",
+                properties=self.config.mysql.connection_properties
+            ).select("user_id").distinct()
+            
+            existing_count = existing_users_df.count()
+            logger.info(f"MySQL中已有 {existing_count} 个用户")
+            
+            return existing_users_df
+            
+        except Exception as e:
+            logger.warning(f"读取MySQL已有用户失败（可能是首次运行）: {str(e)}")
+            # 返回空DataFrame
+            from pyspark.sql.types import StructType, StructField, StringType
+            empty_schema = StructType([StructField("user_id", StringType(), True)])
+            return self.spark.createDataFrame([], empty_schema)
+    
+    def _generate_new_users_data(self, days_back: int):
+        """生成新增用户数据（已废弃，保留兼容性）"""
+        logger.warning("该方法已废弃，请使用 _identify_truly_new_users")
+        return self._identify_truly_new_users(days_back)
+    
+    def _merge_user_multi_tags_in_memory(self, tag_results_list: List):
+        """统一的用户多标签内存合并 - 将一个用户的多个并行标签在内存中合并"""
+        try:
+            if not tag_results_list:
+                logger.warning("没有标签结果需要合并")
+                return None
+            
+            logger.info(f"开始内存合并 {len(tag_results_list)} 个标签结果...")
+            
+            from pyspark.sql.functions import col, collect_list, struct, lit
+            from pyspark.sql.types import ArrayType, IntegerType
+            from datetime import date
+            from functools import reduce
+            
+            # 1. 合并所有标签计算结果
+            all_tags = reduce(lambda df1, df2: df1.union(df2), tag_results_list)
+            
+            if all_tags.count() == 0:
+                logger.warning("合并后没有标签数据")
+                return None
+            
+            logger.info(f"合并前总记录数: {all_tags.count()}")
+            
+            # 调试：检查是否在计算阶段就有重复
+            logger.info("🔍 检查标签计算阶段是否有重复...")
+            user_tag_counts = all_tags.groupBy("user_id", "tag_id").count()
+            duplicates = user_tag_counts.filter(user_tag_counts["count"] > 1)
+            duplicate_count = duplicates.count()
+            if duplicate_count > 0:
+                logger.warning(f"⚠️ 发现标签计算阶段就有重复！重复记录数: {duplicate_count}")
+                duplicates.show(10, truncate=False)
+            else:
+                logger.info("✅ 标签计算阶段无重复")
+            
+            # 2. 获取标签定义信息
+            enriched_tags = self._enrich_tags_with_definition_info(all_tags)
+            
+            # 3. 先去重，再按用户聚合（关键修复：避免标签重复）
+            from pyspark.sql.functions import array_distinct, collect_set
+            
+            # 先去除每个用户的重复标签
+            deduplicated_tags = enriched_tags.dropDuplicates(["user_id", "tag_id"])
+            
+            # 然后聚合成数组
+            user_aggregated_tags = deduplicated_tags.groupBy("user_id").agg(
+                collect_list("tag_id").alias("tag_ids_raw"),
+                collect_list(struct("tag_id", "tag_name", "tag_category")).alias("tag_info_list")
+            )
+            
+            # 对标签ID数组进行去重和排序
+            user_aggregated_tags = user_aggregated_tags.select(
+                "user_id",
+                array_distinct("tag_ids_raw").alias("tag_ids"),
+                "tag_info_list"
+            )
+            
+            # 4. 格式化为标准的用户标签格式
+            formatted_result = self._format_user_tags_output(user_aggregated_tags)
+            
+            logger.info(f"✅ 用户多标签内存合并完成，影响 {formatted_result.count()} 个用户")
+            return formatted_result
+            
+        except Exception as e:
+            logger.error(f"用户多标签内存合并失败: {str(e)}")
+            return None
+    
+    def _merge_new_user_tags_in_memory(self, new_tag_results: List):
+        """增量模式专用：新用户标签内存合并（复用统一逻辑）"""
+        return self._merge_user_multi_tags_in_memory(new_tag_results)
+    
+    def _enrich_tags_with_definition_info(self, tags_df):
+        """统一的标签定义信息补充方法"""
+        try:
+            from pyspark.sql.functions import col, lit
+            
+            # 读取标签定义
+            tag_definitions = self.spark.read.jdbc(
+                url=self.config.mysql.jdbc_url,
+                table="tag_definition",
+                properties=self.config.mysql.connection_properties
+            ).select("tag_id", "tag_name", "tag_category")
+            
+            # 关联标签定义信息
+            enriched_df = tags_df.join(
+                tag_definitions,
+                "tag_id",
+                "left"
+            ).select(
+                "user_id",
+                "tag_id", 
+                col("tag_name").alias("tag_name"),
+                col("tag_category").alias("tag_category"),
+                "tag_detail"
+            )
+            
+            return enriched_df
+            
+        except Exception as e:
+            logger.error(f"丰富标签信息失败: {str(e)}")
+            # 降级处理：使用默认值
+            from pyspark.sql.functions import lit
+            return tags_df.select(
+                "user_id",
+                "tag_id",
+                lit("unknown").alias("tag_name"),
+                lit("unknown").alias("tag_category"),
+                "tag_detail"
+            )
+    
+    def _format_user_tags_output(self, user_tags_df):
+        """统一的用户标签输出格式化方法"""
+        from pyspark.sql.functions import udf, col, lit
+        from pyspark.sql.types import StringType
+        from datetime import date
+        import json
+        
+        # 使用UDF构建标签详情
+        @udf(returnType=StringType())
+        def build_tag_details(tag_info_list):
+            if not tag_info_list:
+                return "{}"
+            
+            tag_details = {}
+            for tag_info in tag_info_list:
+                tag_id = str(tag_info['tag_id'])
+                tag_details[tag_id] = {
+                    'tag_name': tag_info['tag_name'],
+                    'tag_category': tag_info['tag_category']
+                }
+            return json.dumps(tag_details, ensure_ascii=False)
+        
+        formatted_df = user_tags_df.select(
+            col("user_id"),
+            col("tag_ids"),
+            build_tag_details(col("tag_info_list")).alias("tag_details"),
+            lit(date.today()).alias("computed_date")
+        )
+        
+        return formatted_df
+    
+    def _enrich_new_user_tags_with_info(self, tags_df):
+        """为新用户标签补充标签定义信息"""
+        try:
+            from pyspark.sql.functions import col, lit
+            
+            # 读取标签定义
+            tag_definitions = self.spark.read.jdbc(
+                url=self.config.mysql.jdbc_url,
+                table="tag_definition",
+                properties=self.config.mysql.connection_properties
+            ).select("tag_id", "tag_name", "tag_category")
+            
+            # 关联标签定义信息
+            enriched_df = tags_df.join(
+                tag_definitions,
+                "tag_id",
+                "left"
+            ).select(
+                "user_id",
+                "tag_id", 
+                col("tag_name").alias("tag_name"),
+                col("tag_category").alias("tag_category"),
+                "tag_detail"
+            )
+            
+            return enriched_df
+            
+        except Exception as e:
+            logger.error(f"丰富新用户标签信息失败: {str(e)}")
+            # 降级处理：使用默认值
+            from pyspark.sql.functions import lit
+            return tags_df.select(
+                "user_id",
+                "tag_id",
+                lit("unknown").alias("tag_name"),
+                lit("unknown").alias("tag_category"),
+                "tag_detail"
+            )
+    
+    def _format_new_user_final_output(self, user_tags_df):
+        """格式化新用户最终输出"""
+        from pyspark.sql.functions import udf, col, lit
+        from pyspark.sql.types import StringType
+        from datetime import date
+        import json
+        
+        # 使用UDF构建标签详情
+        @udf(returnType=StringType())
+        def build_tag_details(tag_info_list):
+            if not tag_info_list:
+                return "{}"
+            
+            tag_details = {}
+            for tag_info in tag_info_list:
+                tag_id = str(tag_info['tag_id'])
+                tag_details[tag_id] = {
+                    'tag_name': tag_info['tag_name'],
+                    'tag_category': tag_info['tag_category']
+                }
+            return json.dumps(tag_details, ensure_ascii=False)
+        
+        formatted_df = user_tags_df.select(
+            col("user_id"),
+            col("tag_ids"),
+            build_tag_details(col("tag_info_list")).alias("tag_details"),
+            lit(date.today()).alias("computed_date")
+        )
+        
+        return formatted_df
+    
     def _generate_incremental_data_for_table(self, table_name: str, days_back: int):
-        """为指定表生成增量数据 - 本地环境专用"""
+        """为指定表生成增量数据 - 本地环境专用（遗留方法，保持兼容性）"""
         # 为了简化，所有表都使用相同的用户数据结构
         # 在生产环境中，不同表会有不同的schema
         logger.info(f"为表 {table_name} 生成最近 {days_back} 天的增量数据")

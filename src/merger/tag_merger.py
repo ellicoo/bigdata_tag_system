@@ -37,10 +37,22 @@ class TagMerger:
             # 2. 首先从规则中获取标签名称和分类信息
             enriched_tags = self._enrich_with_tag_info(all_new_tags)
             
-            # 3. 按用户聚合，将每个用户的所有标签聚合成数组
-            user_new_tags = enriched_tags.groupBy("user_id").agg(
-                collect_list("tag_id").alias("new_tag_ids"),
+            # 3. 先去重，再按用户聚合（关键修复：避免标签重复）
+            # 先去除每个用户的重复标签
+            deduplicated_tags = enriched_tags.dropDuplicates(["user_id", "tag_id"])
+            
+            # 然后聚合成数组
+            user_new_tags = deduplicated_tags.groupBy("user_id").agg(
+                collect_list("tag_id").alias("new_tag_ids_raw"),
                 collect_list(struct("tag_id", "tag_name", "tag_category")).alias("tag_info_list")
+            )
+            
+            # 对标签ID数组进行去重
+            from pyspark.sql.functions import array_distinct
+            user_new_tags = user_new_tags.select(
+                "user_id",
+                array_distinct("new_tag_ids_raw").alias("new_tag_ids"),
+                "tag_info_list"
             )
             
             # 4. 读取现有用户标签（如果存在）
@@ -50,6 +62,11 @@ class TagMerger:
             merged_result = self._merge_new_and_existing_tags(user_new_tags, existing_tags)
             
             logger.info(f"✅ 标签合并完成，影响 {merged_result.count()} 个用户")
+            
+            # 调试：检查tag_merger输出的最终结果是否有重复
+            logger.info("🔍 检查tag_merger输出结果是否有重复...")
+            merged_result.select("user_id", "tag_ids").show(5, truncate=False)
+            
             return merged_result
             
         except Exception as e:

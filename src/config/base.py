@@ -87,7 +87,7 @@ class MySQLConfig:
     @property
     def jdbc_url(self) -> str:
         """JDBC连接URL"""
-        return f"jdbc:mysql://{self.host}:{self.port}/{self.database}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=utf8&useUnicode=true&connectionCollation=utf8mb4_unicode_ci"
+        return f"jdbc:mysql://{self.host}:{self.port}/{self.database}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&useUnicode=true&connectionCollation=utf8mb4_unicode_ci"
     
     @property
     def connection_properties(self) -> Dict[str, str]:
@@ -98,8 +98,8 @@ class MySQLConfig:
             "driver": "com.mysql.cj.jdbc.Driver",
             "batchsize": "10000",
             "isolationLevel": "READ_COMMITTED",
-            "characterEncoding": "utf8",
-            "useUnicode": "true"
+            "useUnicode": "true",
+            "connectionCollation": "utf8mb4_unicode_ci"
         }
 
 

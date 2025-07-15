@@ -52,19 +52,91 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 常用命令
 
-### 环境管理
+### 本地环境管理详细指南
+
+#### 🚀 快速开始
 ```bash
-# 本地环境一键搭建
-cd environments/local && ./setup.sh
+# 进入本地环境目录
+cd environments/local
 
-# 启动本地服务
-cd environments/local && ./setup.sh start
+# 一键部署所有服务
+./setup.sh
 
-# 停止本地服务
-cd environments/local && ./setup.sh stop
+# 初始化数据库和测试数据
+./init_data.sh
 
-# 清理本地环境
-cd environments/local && ./setup.sh clean
+# 测试系统运行
+cd ../../
+python main.py --env local --mode health    # 健康检查
+python main.py --env local --mode full      # 全量标签计算
+python main.py --env local --mode incremental --days 7  # 增量计算
+```
+
+#### 📦 环境部署命令
+```bash
+# 基础服务管理
+cd environments/local
+./setup.sh                    # 启动所有服务（默认）
+./setup.sh start              # 启动服务
+./setup.sh stop               # 停止服务
+./setup.sh clean              # 清理数据卷和网络
+./setup.sh status             # 检查服务状态
+```
+
+#### 🗄️ 数据初始化命令
+```bash
+# 数据库和测试数据管理
+cd environments/local
+./init_data.sh                # 初始化数据库和测试数据（默认）
+./init_data.sh clean          # 清理所有数据
+./init_data.sh reset          # 清理并重新初始化
+./init_data.sh db-only        # 仅初始化数据库表结构
+./init_data.sh data-only      # 仅生成测试数据
+```
+
+#### 🔧 完整重新部署流程
+```bash
+# 完全重新部署（解决服务问题或配置更新）
+cd environments/local
+
+# 1. 停止所有服务
+./setup.sh stop
+
+# 2. 清理数据卷（会清空所有数据）
+./setup.sh clean
+
+# 3. 重新启动服务
+./setup.sh
+
+# 4. 重新初始化数据
+./init_data.sh
+
+# 5. 验证部署
+cd ../../
+python main.py --env local --mode health
+```
+
+#### 🐛 常见问题解决
+```bash
+# 问题1: MySQL连接超时或锁死
+cd environments/local
+./setup.sh stop
+./setup.sh clean  # 清理数据卷
+./setup.sh        # 重新部署
+
+# 问题2: 中文字符乱码
+# 确保使用正确的字符集初始化
+./init_data.sh reset  # 重置数据库
+
+# 问题3: 服务端口冲突
+docker ps -a  # 检查端口占用
+./setup.sh stop
+./setup.sh clean
+./setup.sh
+
+# 问题4: 数据不一致
+./init_data.sh clean   # 清理数据
+./init_data.sh         # 重新初始化
 ```
 
 ### 运行系统（三环境支持）
@@ -211,6 +283,38 @@ PROD_GLUE_ROLE_ARN=arn:aws:iam::xxx:role/GlueServiceRole-prod
 - 完整的错误处理，包含重试机制和优雅降级
 - 支持中文日志记录，方便问题排查
 - 主入口支持多种执行模式（full/incremental/tags/health）
+
+### 🔧 重要技术修复说明
+
+#### 中文字符编码问题解决
+**问题**: 数据库中中文字符显示为乱码
+**根本原因**: 数据库初始化时MySQL客户端字符集配置不正确
+**解决方案**: 
+1. 修改 `init_data.sh` 中的MySQL命令，添加 `--default-character-set=utf8mb4`
+2. 移除JDBC连接中的 `characterEncoding=utf8mb4` 参数（该参数不被支持）
+3. 保留 `connectionCollation=utf8mb4_unicode_ci` 确保字符集正确
+
+#### 写入验证逻辑优化
+**问题**: 验证逻辑错误地比较数据库总用户数和标签用户数
+**根本原因**: 数据库用户数不等于标签用户数，用户标签匹配会动态变化
+**解决方案**: 
+1. 只验证当前计算出标签的用户是否成功写入数据库
+2. 使用用户ID集合精确匹配，而不是总数比较
+3. 支持空标签用户的正常处理
+
+#### 标签去重机制完善
+**问题**: 用户可能获得重复的标签ID
+**解决方案**: 
+1. 在 `tag_merger.py` 中使用 `dropDuplicates(["user_id", "tag_id"])` 
+2. 在数组聚合时使用 `array_distinct()` 确保标签ID唯一
+3. 多层级去重保证数据一致性
+
+#### 增量模式逻辑改进
+**实现**: 采用方案2 - 独立内存处理
+1. 通过 `left_anti` join 识别真正的新用户（Hive中有但MySQL中没有的用户）
+2. 对新用户计算所有现有标签规则
+3. 直接追加到数据库，无需与现有标签合并
+4. 避免了复杂的标签合并逻辑，提高性能
 
 ### 测试数据生成
 本地环境支持生产级模拟数据生成，确保标签规则能够正确匹配：

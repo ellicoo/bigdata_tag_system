@@ -49,8 +49,6 @@ CREATE TABLE IF NOT EXISTS user_tags (
     tag_ids JSON NOT NULL COMMENT '用户的所有标签ID数组',
     tag_details JSON COMMENT '标签详细信息（key-value形式）',
     computed_date DATE NOT NULL COMMENT '计算日期',
-    created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_user_id (user_id),
     INDEX idx_computed_date (computed_date),
     UNIQUE KEY uk_user_date (user_id, computed_date)

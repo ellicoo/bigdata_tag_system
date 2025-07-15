@@ -33,6 +33,13 @@ services:
       MYSQL_DATABASE: tag_system
       MYSQL_USER: tag_user
       MYSQL_PASSWORD: tag_pass
+    command: [
+      '--character-set-server=utf8mb4',
+      '--collation-server=utf8mb4_unicode_ci',
+      '--default-time-zone=+00:00',
+      '--innodb-buffer-pool-size=256M',
+      '--init-connect=SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci'
+    ]
     volumes:
       - mysql_data:/var/lib/mysql
       - ./test_env/sql:/docker-entrypoint-initdb.d
