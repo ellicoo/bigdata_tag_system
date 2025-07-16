@@ -1,12 +1,16 @@
 # 🏷️ 大数据标签系统
 
-企业级的大数据标签计算系统，支持多环境部署（本地、AWS Glue开发、AWS Glue生产），通过PySpark从S3读取数据，结合MySQL中的规则进行标签计算，并将结果存储回MySQL。
+企业级的大数据标签计算系统，支持多环境部署（本地、AWS Glue开发、AWS Glue生产），通过PySpark从S3读取数据，结合MySQL中的规则进行并行标签计算，并将结果存储回MySQL。
 
 ## 🎯 系统功能
 
 - ✅ 从S3读取Hive表数据
 - ✅ 从MySQL读取标签规则配置
 - ✅ 基于规则引擎计算用户标签
+- ✅ **多标签并行计算**：支持多个标签同时计算，大幅提升性能
+- ✅ **智能标签合并**：内存合并 + MySQL现有标签合并，确保标签一致性
+- ✅ **UPSERT写入策略**：避免数据覆盖，支持增量更新
+- ✅ **6种计算场景**：全量/增量用户 × 全量/指定标签 × 指定用户组合
 - ✅ 支持标签合并和去重
 - ✅ 将标签结果写入MySQL
 - ✅ 支持全量和增量计算
@@ -51,10 +55,15 @@ cd environments/local
 # 2. 一键初始化数据
 ./init_data.sh                # 初始化数据库 + 生成测试数据
 
-# 3. 运行标签计算
+# 3. 运行标签计算 - 6种并行计算场景
 cd ../../
-python main.py --env local --mode health    # 健康检查
-python main.py --env local --mode full      # 全量计算
+python main.py --env local --mode health                           # 健康检查
+python main.py --env local --mode full-parallel                    # 场景1: 全量用户打全量标签
+python main.py --env local --mode tags-parallel --tag-ids 1,3,5    # 场景2: 全量用户打指定标签
+python main.py --env local --mode incremental-parallel --days 7    # 场景3: 增量用户打全量标签
+python main.py --env local --mode incremental-tags-parallel --days 7 --tag-ids 1,3,5  # 场景4: 增量用户打指定标签
+python main.py --env local --mode users-parallel --user-ids user_000001,user_000002    # 场景5: 指定用户打全量标签
+python main.py --env local --mode user-tags-parallel --user-ids user_000001,user_000002 --tag-ids 1,3,5  # 场景6: 指定用户打指定标签
 ```
 
 **本地环境管理命令：**
@@ -80,9 +89,13 @@ python main.py --env local --mode full      # 全量计算
 cd environments/glue-dev
 python deploy.py
 
-# 2. 运行作业
-aws glue start-job-run --job-name tag-compute-dev \
-  --arguments='--mode=full'
+# 2. 运行作业 - 6种并行计算场景
+aws glue start-job-run --job-name tag-compute-dev --arguments='--mode=full-parallel'
+aws glue start-job-run --job-name tag-compute-dev --arguments='--mode=tags-parallel,--tag-ids=1,3,5'
+aws glue start-job-run --job-name tag-compute-dev --arguments='--mode=incremental-parallel,--days=7'
+aws glue start-job-run --job-name tag-compute-dev --arguments='--mode=incremental-tags-parallel,--days=7,--tag-ids=1,3,5'
+aws glue start-job-run --job-name tag-compute-dev --arguments='--mode=users-parallel,--user-ids=user_000001,user_000002'
+aws glue start-job-run --job-name tag-compute-dev --arguments='--mode=user-tags-parallel,--user-ids=user_000001,user_000002,--tag-ids=1,3,5'
 ```
 
 ### 🏭 AWS Glue生产环境
@@ -92,9 +105,13 @@ aws glue start-job-run --job-name tag-compute-dev \
 cd environments/glue-prod  
 python deploy.py
 
-# 2. 运行作业
-aws glue start-job-run --job-name tag-compute-prod \
-  --arguments='--mode=full'
+# 2. 运行作业 - 6种并行计算场景
+aws glue start-job-run --job-name tag-compute-prod --arguments='--mode=full-parallel'
+aws glue start-job-run --job-name tag-compute-prod --arguments='--mode=tags-parallel,--tag-ids=1,3,5'
+aws glue start-job-run --job-name tag-compute-prod --arguments='--mode=incremental-parallel,--days=7'
+aws glue start-job-run --job-name tag-compute-prod --arguments='--mode=incremental-tags-parallel,--days=7,--tag-ids=1,3,5'
+aws glue start-job-run --job-name tag-compute-prod --arguments='--mode=users-parallel,--user-ids=user_000001,user_000002'
+aws glue start-job-run --job-name tag-compute-prod --arguments='--mode=user-tags-parallel,--user-ids=user_000001,user_000002,--tag-ids=1,3,5'
 ```
 
 ## ⚙️ 配置说明

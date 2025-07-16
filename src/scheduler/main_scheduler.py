@@ -10,6 +10,7 @@ from src.readers.rule_reader import RuleReader
 from src.engine.tag_computer import TagComputeEngine
 from src.writers.mysql_writer import MySQLTagWriter
 from src.merger.tag_merger import TagMerger
+from src.scheduler.scenario_scheduler import ScenarioScheduler
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,9 @@ class TagComputeScheduler:
         self.tag_engine = None
         self.mysql_writer = None
         self.tag_merger = None
+        
+        # 新增场景调度器
+        self.scenario_scheduler = None
     
     def initialize(self):
         """初始化Spark和各个组件"""
@@ -45,6 +49,10 @@ class TagComputeScheduler:
             self.tag_engine = TagComputeEngine(self.spark, self.max_workers)
             self.mysql_writer = MySQLTagWriter(self.spark, self.config.mysql)
             self.tag_merger = TagMerger(self.spark, self.config.mysql)
+            
+            # 初始化场景调度器
+            self.scenario_scheduler = ScenarioScheduler(self.config, self.max_workers)
+            self.scenario_scheduler.initialize()
             
             # 一次性初始化规则数据，避免重复连接
             self.rule_reader.initialize()
@@ -121,7 +129,8 @@ class TagComputeScheduler:
             
             # 5. 写入合并后的标签结果（使用MySQL写入器）
             logger.info("开始写入标签结果...")
-            write_success = self.mysql_writer.write_tag_results(final_merged_result, mode="overwrite")
+            # 全量模式：不需要与现有标签合并
+            write_success = self.mysql_writer.write_tag_results(final_merged_result, mode="overwrite", merge_with_existing=False)
             
             if not write_success:
                 logger.error("标签结果写入失败")
@@ -213,7 +222,8 @@ class TagComputeScheduler:
             
             # 5. 直接追加写入（新用户不存在于数据库中）
             logger.info("新增用户标签直接追加到数据库...")
-            return self.mysql_writer.write_tag_results(merged_result, mode="append")
+            # 增量模式：不需要与现有标签合并（新用户）
+            return self.mysql_writer.write_tag_results(merged_result, mode="append", merge_with_existing=False)
             
         except Exception as e:
             logger.error(f"增量计算失败: {str(e)}")
@@ -256,7 +266,8 @@ class TagComputeScheduler:
             if merged_result is None:
                 return False
             
-            return self.mysql_writer.write_tag_results(merged_result)
+            # 指定标签模式：需要与现有标签合并
+            return self.mysql_writer.write_tag_results(merged_result, mode="overwrite", merge_with_existing=True)
             
         except Exception as e:
             logger.error(f"指定标签计算失败: {str(e)}")
@@ -816,9 +827,13 @@ class TagComputeScheduler:
                     logger.warning(f"⚠️ Spark Session停止失败: {e}")
             
             # 清理组件引用
+            if self.scenario_scheduler:
+                self.scenario_scheduler.cleanup()
+            
             self.data_manager = None
             self.hive_reader = None
             self.tag_engine = None
+            self.scenario_scheduler = None
             self.spark = None
             
             logger.info("✅ 系统资源清理完成")
@@ -831,3 +846,198 @@ class TagComputeScheduler:
                     self.spark.stop()
             except:
                 pass
+    
+    def run_specific_users(self, user_ids: List[str]) -> bool:
+        """运行指定用户的全量标签计算"""
+        try:
+            logger.info(f"🎯 开始计算指定用户的全量标签: {user_ids}")
+            
+            # 读取所有激活的标签规则
+            all_rules = self.rule_reader.read_active_rules()
+            if not all_rules:
+                logger.warning("没有找到激活的标签规则")
+                return False
+            
+            # 生成测试用户数据
+            test_data = self._generate_test_user_data()
+            
+            # 过滤出指定的用户
+            from pyspark.sql.functions import col
+            filtered_data = test_data.filter(col("user_id").isin(user_ids))
+            
+            filtered_count = filtered_data.count()
+            if filtered_count == 0:
+                logger.warning(f"没有找到指定的用户: {user_ids}")
+                return False
+            
+            logger.info(f"找到 {filtered_count} 个指定用户")
+            
+            # 计算所有标签
+            all_tag_results = []
+            tag_results = self.tag_engine.compute_batch_tags(filtered_data, all_rules)
+            all_tag_results.extend(tag_results)
+            
+            if not all_tag_results:
+                logger.warning("指定用户没有计算出任何标签")
+                return False
+            
+            # 合并和写入
+            merged_result = self.tag_merger.merge_user_tags(all_tag_results)
+            if merged_result is None:
+                return False
+            
+            # 指定用户模式：需要与现有标签合并
+            return self.mysql_writer.write_tag_results(merged_result, mode="overwrite", merge_with_existing=True)
+            
+        except Exception as e:
+            logger.error(f"指定用户标签计算失败: {str(e)}")
+            return False
+    
+    def run_specific_user_tags(self, user_ids: List[str], tag_ids: List[int]) -> bool:
+        """运行指定用户的指定标签计算"""
+        try:
+            logger.info(f"🎯 开始计算指定用户的指定标签: 用户{user_ids}, 标签{tag_ids}")
+            
+            # 读取指定标签的规则
+            all_rules = self.rule_reader.read_active_rules()
+            target_rules = [rule for rule in all_rules if rule['tag_id'] in tag_ids]
+            
+            if not target_rules:
+                logger.warning(f"没有找到指定标签的规则: {tag_ids}")
+                return False
+            
+            # 生成测试用户数据
+            test_data = self._generate_test_user_data()
+            
+            # 过滤出指定的用户
+            from pyspark.sql.functions import col
+            filtered_data = test_data.filter(col("user_id").isin(user_ids))
+            
+            filtered_count = filtered_data.count()
+            if filtered_count == 0:
+                logger.warning(f"没有找到指定的用户: {user_ids}")
+                return False
+            
+            logger.info(f"找到 {filtered_count} 个指定用户")
+            
+            # 计算指定标签
+            all_tag_results = []
+            tag_results = self.tag_engine.compute_batch_tags(filtered_data, target_rules)
+            all_tag_results.extend(tag_results)
+            
+            if not all_tag_results:
+                logger.warning("指定用户和标签没有计算出结果")
+                return False
+            
+            # 合并和写入
+            merged_result = self.tag_merger.merge_user_tags(all_tag_results)
+            if merged_result is None:
+                return False
+            
+            # 指定用户指定标签模式：需要与现有标签合并
+            return self.mysql_writer.write_tag_results(merged_result, mode="overwrite", merge_with_existing=True)
+            
+        except Exception as e:
+            logger.error(f"指定用户指定标签计算失败: {str(e)}")
+            return False
+    
+    def run_incremental_specific_tags(self, days_back: int, tag_ids: List[int]) -> bool:
+        """运行增量指定标签计算（新增用户，指定标签）"""
+        try:
+            logger.info(f"🎯 开始增量指定标签计算，回溯{days_back}天，标签: {tag_ids}")
+            
+            # 读取指定标签的规则
+            all_rules = self.rule_reader.read_active_rules()
+            target_rules = [rule for rule in all_rules if rule['tag_id'] in tag_ids]
+            
+            if not target_rules:
+                logger.warning(f"没有找到指定标签的规则: {tag_ids}")
+                return False
+            
+            # 识别新增用户
+            new_users = self._identify_truly_new_users(days_back)
+            new_user_count = new_users.count()
+            
+            if new_user_count == 0:
+                logger.info("没有找到新增用户，跳过计算")
+                return True
+            
+            logger.info(f"找到 {new_user_count} 个新增用户")
+            
+            # 计算指定标签
+            all_tag_results = []
+            tag_results = self.tag_engine.compute_batch_tags(new_users, target_rules)
+            all_tag_results.extend(tag_results)
+            
+            if not all_tag_results:
+                logger.warning("新增用户没有计算出指定标签")
+                return True  # 没有结果也算成功
+            
+            # 方案2：独立内存处理 - 合并多个标签结果
+            merged_result = self._merge_user_multi_tags_in_memory(all_tag_results)
+            if merged_result is None:
+                return False
+            
+            # 写入数据库（追加模式）
+            # 增量指定标签模式：不需要与现有标签合并（新用户）
+            return self.mysql_writer.write_tag_results(merged_result, mode="append", merge_with_existing=False)
+            
+        except Exception as e:
+            logger.error(f"增量指定标签计算失败: {str(e)}")
+            return False
+    
+    # ==================== 新增6个功能场景方法 ====================
+    
+    def run_scenario_1_full_users_full_tags(self) -> bool:
+        """场景1: 全量用户打全量标签"""
+        try:
+            logger.info("🎯 执行场景1: 全量用户打全量标签")
+            return self.scenario_scheduler.scenario_1_full_users_full_tags()
+        except Exception as e:
+            logger.error(f"场景1执行失败: {str(e)}")
+            return False
+    
+    def run_scenario_2_full_users_specific_tags(self, tag_ids: List[int]) -> bool:
+        """场景2: 全量用户打指定标签"""
+        try:
+            logger.info(f"🎯 执行场景2: 全量用户打指定标签 {tag_ids}")
+            return self.scenario_scheduler.scenario_2_full_users_specific_tags(tag_ids)
+        except Exception as e:
+            logger.error(f"场景2执行失败: {str(e)}")
+            return False
+    
+    def run_scenario_3_incremental_users_full_tags(self, days_back: int = 1) -> bool:
+        """场景3: 增量用户打全量标签"""
+        try:
+            logger.info(f"🎯 执行场景3: 增量用户打全量标签（回溯{days_back}天）")
+            return self.scenario_scheduler.scenario_3_incremental_users_full_tags(days_back)
+        except Exception as e:
+            logger.error(f"场景3执行失败: {str(e)}")
+            return False
+    
+    def run_scenario_4_incremental_users_specific_tags(self, days_back: int, tag_ids: List[int]) -> bool:
+        """场景4: 增量用户打指定标签"""
+        try:
+            logger.info(f"🎯 执行场景4: 增量用户打指定标签（回溯{days_back}天，标签{tag_ids}）")
+            return self.scenario_scheduler.scenario_4_incremental_users_specific_tags(days_back, tag_ids)
+        except Exception as e:
+            logger.error(f"场景4执行失败: {str(e)}")
+            return False
+    
+    def run_scenario_5_specific_users_full_tags(self, user_ids: List[str]) -> bool:
+        """场景5: 指定用户打全量标签"""
+        try:
+            logger.info(f"🎯 执行场景5: 指定用户打全量标签 {user_ids}")
+            return self.scenario_scheduler.scenario_5_specific_users_full_tags(user_ids)
+        except Exception as e:
+            logger.error(f"场景5执行失败: {str(e)}")
+            return False
+    
+    def run_scenario_6_specific_users_specific_tags(self, user_ids: List[str], tag_ids: List[int]) -> bool:
+        """场景6: 指定用户打指定标签"""
+        try:
+            logger.info(f"🎯 执行场景6: 指定用户打指定标签（用户{user_ids}，标签{tag_ids}）")
+            return self.scenario_scheduler.scenario_6_specific_users_specific_tags(user_ids, tag_ids)
+        except Exception as e:
+            logger.error(f"场景6执行失败: {str(e)}")
+            return False

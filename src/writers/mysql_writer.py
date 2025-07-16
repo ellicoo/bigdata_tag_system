@@ -16,7 +16,7 @@ class MySQLTagWriter:
         self.mysql_config = mysql_config
     
     def write_tag_results(self, result_df: DataFrame, mode: str = "overwrite", 
-                         enable_backup: bool = False) -> bool:
+                         enable_backup: bool = False, merge_with_existing: bool = True) -> bool:
         """
         写入标签结果到MySQL
         
@@ -24,6 +24,7 @@ class MySQLTagWriter:
             result_df: 标签结果DataFrame
             mode: 写入模式 (overwrite/append)
             enable_backup: 是否启用备份
+            merge_with_existing: 是否与现有标签合并
             
         Returns:
             写入是否成功
@@ -36,7 +37,7 @@ class MySQLTagWriter:
                     logger.warning("备份失败，但继续执行写入操作")
             
             # 执行写入
-            success = self._write_to_mysql(result_df, mode)
+            success = self._write_to_mysql(result_df, mode, merge_with_existing)
             
             if success:
                 logger.info(f"✅ 标签结果写入成功，模式: {mode}, 记录数: {result_df.count()}")
@@ -61,13 +62,19 @@ class MySQLTagWriter:
             
             return False
     
-    def _write_to_mysql(self, result_df: DataFrame, mode: str) -> bool:
-        """执行MySQL写入操作 - 集成连接优化方案"""
+    def _write_to_mysql(self, result_df: DataFrame, mode: str, merge_with_existing: bool = True) -> bool:
+        """执行MySQL写入操作 - 统一UPSERT逻辑"""
         try:
+            # 根据是否需要合并决定处理逻辑
+            if merge_with_existing:
+                final_df = self._merge_with_existing_tags(result_df)
+            else:
+                final_df = result_df
+            
             # 将Spark数组转换为JSON字符串，保持数组结构
             from pyspark.sql.functions import to_json, col, when
             
-            mysql_ready_df = result_df.select(
+            mysql_ready_df = final_df.select(
                 col("user_id"),
                 # 确保tag_ids是JSON数组字符串格式
                 when(col("tag_ids").isNotNull(), to_json(col("tag_ids")))
@@ -82,18 +89,11 @@ class MySQLTagWriter:
             mysql_ready_df.show(3, truncate=False)
             
             total_count = mysql_ready_df.count()
-            logger.info(f"准备写入 {total_count} 条用户标签数据")
+            logger.info(f"准备UPSERT {total_count} 条用户标签数据")
             
-            # 处理overwrite模式：使用DELETE代替TRUNCATE支持并发
-            if mode == "overwrite":
-                from datetime import date
-                today = date.today()
-                logger.info(f"overwrite模式：删除 {today} 的用户标签数据")
-                self._delete_user_tags_for_date(today)
-            
-            # 统一使用foreachPartition策略，不分大小数据量
-            logger.info(f"使用 foreachPartition 批量写入 {total_count} 条数据")
-            return self._write_with_custom_batch(mysql_ready_df)
+            # 统一使用UPSERT策略
+            logger.info(f"使用 UPSERT 策略写入 {total_count} 条数据")
+            return self._write_with_upsert(mysql_ready_df)
             
         except Exception as e:
             logger.error(f"MySQL写入操作失败: {str(e)}")
@@ -132,8 +132,64 @@ class MySQLTagWriter:
     
     # 移除了优化JDBC写入方法，统一使用foreachPartition
     
-    def _write_with_custom_batch(self, df: DataFrame) -> bool:
-        """统一的自定义批量写入 - 使用foreachPartition控制连接数"""
+    def _merge_with_existing_tags(self, result_df: DataFrame) -> DataFrame:
+        """与现有标签合并"""
+        try:
+            logger.info("开始与现有标签合并...")
+            
+            # 读取现有标签
+            try:
+                existing_df = self.spark.read.jdbc(
+                    url=self.mysql_config.jdbc_url,
+                    table="user_tags",
+                    properties=self.mysql_config.connection_properties
+                )
+                
+                if existing_df.count() == 0:
+                    logger.info("数据库中没有现有标签，直接使用新计算的标签")
+                    return result_df
+                    
+            except Exception as e:
+                logger.info(f"读取现有标签失败（可能是首次运行）: {str(e)}")
+                return result_df
+            
+            # 将JSON字符串转换为数组进行合并
+            from pyspark.sql.functions import from_json, col, array_union, array_distinct
+            from pyspark.sql.types import ArrayType, IntegerType
+            
+            existing_with_arrays = existing_df.select(
+                col("user_id"),
+                from_json(col("tag_ids"), ArrayType(IntegerType())).alias("existing_tag_ids")
+            )
+            
+            # 左连接合并标签
+            merged_df = result_df.join(
+                existing_with_arrays,
+                "user_id",
+                "left"
+            )
+            
+            # 合并标签数组并去重
+            from pyspark.sql.functions import when, array_distinct, array_union
+            
+            final_merged_df = merged_df.select(
+                col("user_id"),
+                when(col("existing_tag_ids").isNull(), col("tag_ids"))
+                .otherwise(array_distinct(array_union(col("existing_tag_ids"), col("tag_ids"))))
+                .alias("tag_ids"),
+                col("tag_details"),
+                col("computed_date")
+            )
+            
+            logger.info("✅ 标签合并完成")
+            return final_merged_df
+            
+        except Exception as e:
+            logger.error(f"标签合并失败: {str(e)}")
+            return result_df
+    
+    def _write_with_upsert(self, df: DataFrame) -> bool:
+        """统一的UPSERT写入 - 使用INSERT ... ON DUPLICATE KEY UPDATE"""
         import pymysql
         
         # 提取配置参数避免闭包序列化问题
@@ -143,8 +199,8 @@ class MySQLTagWriter:
         password = self.mysql_config.password
         database = self.mysql_config.database
         
-        def write_partition_to_mysql(partition_data):
-            """每个分区的写入逻辑"""
+        def upsert_partition_to_mysql(partition_data):
+            """每个分区的UPSERT逻辑"""
             import pymysql
             
             rows = list(partition_data)
@@ -172,10 +228,14 @@ class MySQLTagWriter:
                 
                 cursor = connection.cursor()
                 
-                # 简化插入SQL避免锁冲突
-                insert_sql = """
+                # UPSERT SQL: 用户存在则更新，不存在则插入
+                upsert_sql = """
                 INSERT INTO user_tags (user_id, tag_ids, tag_details, computed_date) 
                 VALUES (%s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE
+                    tag_ids = VALUES(tag_ids),
+                    tag_details = VALUES(tag_details),
+                    computed_date = VALUES(computed_date)
                 """
                 
                 # 分批处理数据
@@ -191,7 +251,7 @@ class MySQLTagWriter:
                         
                         batch_data.append((user_id, tag_ids, tag_details, computed_date))
                     
-                    cursor.executemany(insert_sql, batch_data)
+                    cursor.executemany(upsert_sql, batch_data)
                 
                 # 提交事务
                 connection.commit()
@@ -207,7 +267,7 @@ class MySQLTagWriter:
         try:
             # 合理分区避免过多连接
             optimal_partitions = min(8, max(1, df.count() // 8000))
-            logger.info(f"🔍 MySQL写入分区设置：{optimal_partitions} 个分区")
+            logger.info(f"🔍 MySQL UPSERT分区设置：{optimal_partitions} 个分区")
             repartitioned_df = df.repartition(optimal_partitions, "user_id")
             
             # 调试：检查重分区后是否有重复
@@ -222,11 +282,11 @@ class MySQLTagWriter:
             else:
                 logger.info("✅ MySQL写入前无重复用户")
             
-            repartitioned_df.foreachPartition(write_partition_to_mysql)
+            repartitioned_df.foreachPartition(upsert_partition_to_mysql)
             return True
             
         except Exception as e:
-            logger.error(f"自定义批量写入失败: {str(e)}")
+            logger.error(f"UPSERT写入失败: {str(e)}")
             return False
     
     def _backup_current_data(self) -> bool:
@@ -273,17 +333,17 @@ class MySQLTagWriter:
             return False
     
     def _validate_write_result(self, original_df: DataFrame, mode: str = "overwrite") -> bool:
-        """验证写入结果 - 只验证当前标签用户是否成功写入"""
+        """验证写入结果 - 统一以打到标签的用户数为核对标准"""
         try:
-            # 获取需要写入的用户ID列表
+            # 获取需要写入的用户ID列表（这些是计算出标签的用户）
             original_user_ids = original_df.select("user_id").distinct().collect()
             original_user_id_set = {row["user_id"] for row in original_user_ids}
-            original_count = len(original_user_id_set)
+            tagged_user_count = len(original_user_id_set)
             
-            logger.info(f"写入验证 - 需要写入的标签用户数: {original_count}, 模式: {mode}")
+            logger.info(f"写入验证 - 本次打到标签的用户数: {tagged_user_count}, 模式: {mode}")
             
-            if original_count == 0:
-                logger.info("✅ 无用户需要写入标签，验证通过")
+            if tagged_user_count == 0:
+                logger.info("✅ 无用户打到标签，验证通过")
                 return True
             
             # 读取写入后的数据，只检查需要写入的用户
@@ -293,21 +353,21 @@ class MySQLTagWriter:
                 properties=self.mysql_config.connection_properties
             )
             
-            # 检查需要写入的用户是否都已写入
+            # 检查打到标签的用户是否都已成功写入
             written_user_ids = written_df.select("user_id").distinct().collect()
             written_user_id_set = {row["user_id"] for row in written_user_ids}
             
-            # 检查是否所有需要写入的用户都已成功写入
+            # 检查是否所有打到标签的用户都已成功写入
             missing_users = original_user_id_set - written_user_id_set
             if missing_users:
-                logger.error(f"❌ 写入验证失败：以下用户未成功写入 {list(missing_users)[:5]}...")
+                logger.error(f"❌ 写入验证失败：以下打到标签的用户未成功写入 {list(missing_users)[:5]}...")
                 return False
             
             # 检查写入的用户是否都有有效的标签数据
             from pyspark.sql.functions import col, from_json, size
             from pyspark.sql.types import ArrayType, IntegerType
             
-            # 只检查刚写入的用户
+            # 只检查本次打到标签的用户
             target_users_df = written_df.filter(col("user_id").isin(list(original_user_id_set)))
             
             # 检查标签数组字段（JSON格式）
@@ -318,7 +378,7 @@ class MySQLTagWriter:
             
             # 检查关键字段
             user_id_count = target_users_df.filter(target_users_df.user_id.isNotNull()).count()
-            if user_id_count != original_count:
+            if user_id_count != tagged_user_count:
                 logger.error("❌ 存在空的user_id")
                 return False
             
@@ -330,8 +390,8 @@ class MySQLTagWriter:
             if null_tag_ids_count > 0:
                 logger.warning(f"⚠️ 存在 {null_tag_ids_count} 个用户没有标签（可能是正常情况）")
             
-            successfully_written = original_count - len(missing_users)
-            logger.info(f"✅ 写入验证通过：成功写入 {successfully_written}/{original_count} 个标签用户")
+            successfully_written = tagged_user_count - len(missing_users)
+            logger.info(f"✅ 写入验证通过：成功写入 {successfully_written}/{tagged_user_count} 个打到标签的用户")
             
             return True
             

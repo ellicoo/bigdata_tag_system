@@ -116,6 +116,16 @@ cd ../../
 python main.py --env local --mode health
 ```
 
+#### 🚀 一键重新部署（推荐）
+```bash
+# 自动化重新部署脚本（包含验证）
+cd environments/local
+./redeploy.sh
+
+# 快速验证部署结果
+./verify_deployment.sh
+```
+
 #### 🐛 常见问题解决
 ```bash
 # 问题1: MySQL连接超时或锁死
@@ -141,17 +151,34 @@ docker ps -a  # 检查端口占用
 
 ### 运行系统（三环境支持）
 ```bash
-# 本地环境
-python main.py --env local --mode full                    # 全量计算
-python main.py --env local --mode incremental --days 3    # 增量计算
-python main.py --env local --mode tags --tag-ids 1,3,5    # 指定标签
+# 本地环境 - 基础模式
 python main.py --env local --mode health                  # 健康检查
+python main.py --env local --mode full                    # 全量计算（全量用户，全量标签）
+python main.py --env local --mode incremental --days 3    # 增量计算（新增用户，全量标签）
+
+# 本地环境 - 精细化控制
+python main.py --env local --mode tags --tag-ids 1,3,5    # 指定标签打全量用户
+python main.py --env local --mode users --user-ids user_000001,user_000002    # 指定用户打全量标签
+python main.py --env local --mode user-tags --user-ids user_000001,user_000002 --tag-ids 1,3,5    # 指定用户指定标签
+python main.py --env local --mode incremental-tags --days 7 --tag-ids 1,3,5    # 增量用户指定标签
+
+# 🎯 并行优化版本（推荐使用）
+python main.py --env local --mode full-parallel                      # 全量用户打全量标签（并行优化版）
+python main.py --env local --mode tags-parallel --tag-ids 1,2,3      # 全量用户打指定标签（并行优化版）
+python main.py --env local --mode incremental-parallel --days 7      # 增量用户打全量标签（并行优化版）
+python main.py --env local --mode incremental-tags-parallel --days 7 --tag-ids 2,4    # 增量用户打指定标签（并行优化版）
+python main.py --env local --mode users-parallel --user-ids user_000001,user_000002    # 指定用户打全量标签（并行优化版）
+python main.py --env local --mode user-tags-parallel --user-ids user_000001,user_000002 --tag-ids 1,3,5    # 指定用户打指定标签（并行优化版）
 
 # Glue开发环境
 python main.py --env glue-dev --mode full
+python main.py --env glue-dev --mode tags --tag-ids 1,2,3
+python main.py --env glue-dev --mode full-parallel        # 并行优化版本也支持
 
 # Glue生产环境  
 python main.py --env glue-prod --mode full
+python main.py --env glue-prod --mode incremental --days 7
+python main.py --env glue-prod --mode full-parallel       # 并行优化版本也支持
 ```
 
 ### 部署管理
@@ -189,6 +216,9 @@ python -m pytest tests/integration/test_end_to_end.py::TestEndToEndIntegration::
 python -m pytest tests/integration/test_end_to_end.py::TestEndToEndIntegration::test_specific_tags_workflow -v      # 特定标签测试
 python -m pytest tests/integration/test_end_to_end.py::TestEndToEndIntegration::test_incremental_compute_workflow -v # 增量计算测试
 python -m pytest tests/integration/test_end_to_end.py::TestEndToEndIntegration::test_health_check_workflow -v       # 健康检查测试
+
+# 🎯 并行优化版本测试
+python test_scenarios.py                                  # 测试所有6个并行优化场景
 ```
 
 ## 配置管理

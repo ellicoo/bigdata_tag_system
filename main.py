@@ -44,9 +44,27 @@ def parse_arguments():
     # 执行模式
     parser.add_argument(
         '--mode',
-        choices=['health', 'full', 'incremental', 'tags'],
+        choices=[
+            'health', 'full', 'incremental', 'tags', 'users', 'user-tags', 'incremental-tags',
+            'full-parallel', 'tags-parallel', 'incremental-parallel', 'incremental-tags-parallel', 'users-parallel', 'user-tags-parallel'
+        ],
         required=True,
-        help='执行模式: health(健康检查), full(全量), incremental(增量), tags(指定标签)'
+        help='''执行模式:
+        health - 系统健康检查
+        full - 全量计算（全量用户，全量标签）
+        incremental - 增量计算（新增用户，全量标签）
+        tags - 指定标签计算（全量用户，指定标签）
+        users - 指定用户计算（指定用户，全量标签）
+        user-tags - 指定用户指定标签计算（指定用户，指定标签）
+        incremental-tags - 增量指定标签计算（新增用户，指定标签）
+        
+        --- 并行优化版本 ---
+        full-parallel - 全量用户打全量标签（并行优化版，内存合并，不与MySQL合并）
+        tags-parallel - 全量用户打指定标签（并行优化版，内存合并，与MySQL合并）
+        incremental-parallel - 增量用户打全量标签（并行优化版，内存合并，不与MySQL合并）
+        incremental-tags-parallel - 增量用户打指定标签（并行优化版，内存合并，不与MySQL合并）
+        users-parallel - 指定用户打全量标签（并行优化版，内存合并，不与MySQL合并）
+        user-tags-parallel - 指定用户打指定标签（并行优化版，内存合并，与MySQL合并）'''
     )
     
     # 增量计算参数
@@ -61,7 +79,14 @@ def parse_arguments():
     parser.add_argument(
         '--tag-ids',
         type=str,
-        help='指定标签ID列表，逗号分隔 (例如: 1,2,3)'
+        help='指定标签ID列表，逗号分隔 (例如: 1,2,3) - 用于tags、user-tags、incremental-tags模式'
+    )
+    
+    # 指定用户参数
+    parser.add_argument(
+        '--user-ids',
+        type=str,
+        help='指定用户ID列表，逗号分隔 (例如: user_000001,user_000002) - 用于users和user-tags模式'
     )
     
     # 并行控制参数
@@ -98,8 +123,37 @@ def validate_arguments(args) -> bool:
         print("❌ 错误: --mode tags 需要提供 --tag-ids 参数")
         return False
     
-    if args.mode == 'incremental' and args.days <= 0:
+    if args.mode == 'users' and not args.user_ids:
+        print("❌ 错误: --mode users 需要提供 --user-ids 参数")
+        return False
+    
+    if args.mode == 'user-tags' and (not args.user_ids or not args.tag_ids):
+        print("❌ 错误: --mode user-tags 需要同时提供 --user-ids 和 --tag-ids 参数")
+        return False
+    
+    if args.mode == 'incremental-tags' and not args.tag_ids:
+        print("❌ 错误: --mode incremental-tags 需要提供 --tag-ids 参数")
+        return False
+    
+    if args.mode in ['incremental', 'incremental-parallel'] and args.days <= 0:
         print("❌ 错误: --days 必须大于0")
+        return False
+    
+    # 并行优化版本验证
+    if args.mode == 'tags-parallel' and not args.tag_ids:
+        print("❌ 错误: --mode tags-parallel 需要提供 --tag-ids 参数")
+        return False
+    
+    if args.mode == 'incremental-tags-parallel' and not args.tag_ids:
+        print("❌ 错误: --mode incremental-tags-parallel 需要提供 --tag-ids 参数")
+        return False
+    
+    if args.mode == 'users-parallel' and not args.user_ids:
+        print("❌ 错误: --mode users-parallel 需要提供 --user-ids 参数")
+        return False
+    
+    if args.mode == 'user-tags-parallel' and (not args.user_ids or not args.tag_ids):
+        print("❌ 错误: --mode user-tags-parallel 需要同时提供 --user-ids 和 --tag-ids 参数")
         return False
     
     return True
@@ -161,10 +215,94 @@ def main():
         elif args.mode == 'tags':
             try:
                 tag_ids = [int(x.strip()) for x in args.tag_ids.split(',')]
-                logger.info(f"🎯 执行指定标签计算: {tag_ids}")
+                logger.info(f"🎯 执行指定标签计算（全量用户）: {tag_ids}")
                 success = scheduler.run_specific_tags(tag_ids)
             except ValueError:
                 logger.error("❌ 标签ID格式错误，应为逗号分隔的数字")
+                sys.exit(1)
+        
+        elif args.mode == 'users':
+            try:
+                user_ids = [x.strip() for x in args.user_ids.split(',')]
+                logger.info(f"🎯 执行指定用户计算（全量标签）: {user_ids}")
+                success = scheduler.run_specific_users(user_ids)
+            except Exception as e:
+                logger.error(f"❌ 用户ID格式错误: {e}")
+                sys.exit(1)
+        
+        elif args.mode == 'user-tags':
+            try:
+                tag_ids = [int(x.strip()) for x in args.tag_ids.split(',')]
+                user_ids = [x.strip() for x in args.user_ids.split(',')]
+                logger.info(f"🎯 执行指定用户指定标签计算: 用户{user_ids}, 标签{tag_ids}")
+                success = scheduler.run_specific_user_tags(user_ids, tag_ids)
+            except ValueError:
+                logger.error("❌ 标签ID格式错误，应为逗号分隔的数字")
+                sys.exit(1)
+            except Exception as e:
+                logger.error(f"❌ 参数格式错误: {e}")
+                sys.exit(1)
+        
+        elif args.mode == 'incremental-tags':
+            try:
+                tag_ids = [int(x.strip()) for x in args.tag_ids.split(',')]
+                logger.info(f"🎯 执行增量指定标签计算，回溯{args.days}天: 标签{tag_ids}")
+                success = scheduler.run_incremental_specific_tags(args.days, tag_ids)
+            except ValueError:
+                logger.error("❌ 标签ID格式错误，应为逗号分隔的数字")
+                sys.exit(1)
+            except Exception as e:
+                logger.error(f"❌ 参数格式错误: {e}")
+                sys.exit(1)
+        
+        # ==================== 并行优化版本 ====================
+        
+        elif args.mode == 'full-parallel':
+            logger.info("🎯 执行全量用户打全量标签（并行优化版）")
+            success = scheduler.run_scenario_1_full_users_full_tags()
+            
+        elif args.mode == 'tags-parallel':
+            try:
+                tag_ids = [int(x.strip()) for x in args.tag_ids.split(',')]
+                logger.info(f"🎯 执行全量用户打指定标签（并行优化版）: {tag_ids}")
+                success = scheduler.run_scenario_2_full_users_specific_tags(tag_ids)
+            except ValueError:
+                logger.error("❌ 标签ID格式错误，应为逗号分隔的数字")
+                sys.exit(1)
+        
+        elif args.mode == 'incremental-parallel':
+            logger.info(f"🎯 执行增量用户打全量标签（并行优化版），回溯{args.days}天")
+            success = scheduler.run_scenario_3_incremental_users_full_tags(args.days)
+            
+        elif args.mode == 'incremental-tags-parallel':
+            try:
+                tag_ids = [int(x.strip()) for x in args.tag_ids.split(',')]
+                logger.info(f"🎯 执行增量用户打指定标签（并行优化版），回溯{args.days}天: {tag_ids}")
+                success = scheduler.run_scenario_4_incremental_users_specific_tags(args.days, tag_ids)
+            except ValueError:
+                logger.error("❌ 标签ID格式错误，应为逗号分隔的数字")
+                sys.exit(1)
+        
+        elif args.mode == 'users-parallel':
+            try:
+                user_ids = [x.strip() for x in args.user_ids.split(',')]
+                logger.info(f"🎯 执行指定用户打全量标签（并行优化版）: {user_ids}")
+                success = scheduler.run_scenario_5_specific_users_full_tags(user_ids)
+            except Exception as e:
+                logger.error(f"❌ 用户ID格式错误: {e}")
+                sys.exit(1)
+        
+        elif args.mode == 'user-tags-parallel':
+            try:
+                tag_ids = [int(x.strip()) for x in args.tag_ids.split(',')]
+                user_ids = [x.strip() for x in args.user_ids.split(',')]
+                logger.info(f"🎯 执行指定用户打指定标签（并行优化版）: 用户{user_ids}, 标签{tag_ids}")
+                success = scheduler.run_scenario_6_specific_users_specific_tags(user_ids, tag_ids)
+            except ValueError:
+                logger.error("❌ 标签ID格式错误，应为逗号分隔的数字")
+                sys.exit(1)
+            except Exception as e:
+                logger.error(f"❌ 参数格式错误: {e}")
                 sys.exit(1)
         
         # 输出结果

@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS user_tags (
     computed_date DATE NOT NULL COMMENT '计算日期',
     INDEX idx_user_id (user_id),
     INDEX idx_computed_date (computed_date),
-    UNIQUE KEY uk_user_date (user_id, computed_date)
+    UNIQUE KEY uk_user_id (user_id)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '用户标签结果表（一个用户一条记录，包含标签ID数组）';
 
 -- 插入初始测试数据

@@ -28,14 +28,15 @@ python main.py --env local --mode health
 
 ### 2. 测试标签计算
 ```bash
-# 全量标签计算
-python main.py --env local --mode full
+# 基础模式
+python main.py --env local --mode full                    # 全量计算（全量用户，全量标签）
+python main.py --env local --mode incremental --days 7    # 增量计算（新增用户，全量标签）
 
-# 增量标签计算（最近7天新用户）
-python main.py --env local --mode incremental --days 7
-
-# 指定标签计算
-python main.py --env local --mode tags --tag-ids 1,2,3
+# 精细化控制模式
+python main.py --env local --mode tags --tag-ids 1,2,3    # 指定标签打全量用户
+python main.py --env local --mode users --user-ids user_000001,user_000002    # 指定用户打全量标签
+python main.py --env local --mode user-tags --user-ids user_000001,user_000002 --tag-ids 1,2,3    # 指定用户指定标签
+python main.py --env local --mode incremental-tags --days 7 --tag-ids 1,2,3    # 增量用户指定标签
 ```
 
 ## 📦 环境部署详解
@@ -431,15 +432,58 @@ Unsupported character encoding 'utf8mb4'
 
 ### 验证标签计算
 ```bash
-# 验证全量计算
-python main.py --env local --mode full
+# 基础模式验证
+python main.py --env local --mode full                    # 全量计算
+python main.py --env local --mode incremental --days 7    # 增量计算
 
-# 验证增量计算
-python main.py --env local --mode incremental --days 7
+# 精细化控制验证
+python main.py --env local --mode tags --tag-ids 1,2,3    # 指定标签打全量用户
+python main.py --env local --mode users --user-ids user_000001,user_000002    # 指定用户打全量标签
+python main.py --env local --mode user-tags --user-ids user_000001,user_000002 --tag-ids 1,2,3    # 指定用户指定标签
+python main.py --env local --mode incremental-tags --days 7 --tag-ids 1,2,3    # 增量用户指定标签
 
 # 查看结果
 mysql -h 127.0.0.1 -P 3307 -u root -proot123 --default-character-set=utf8mb4 tag_system \
   -e "SELECT user_id, tag_ids, computed_date FROM user_tags LIMIT 10;"
+```
+
+## 📋 操作模式详解
+
+### 7种计算模式说明
+
+| 模式 | 命令 | 用户范围 | 标签范围 | 适用场景 |
+|------|------|----------|----------|----------|
+| **health** | `--mode health` | - | - | 系统健康检查 |
+| **full** | `--mode full` | 全量用户 | 全量标签 | 完整重新计算 |
+| **incremental** | `--mode incremental --days N` | 新增用户 | 全量标签 | 日常增量更新 |
+| **tags** | `--mode tags --tag-ids 1,2,3` | 全量用户 | 指定标签 | 特定标签重算 |
+| **users** | `--mode users --user-ids user1,user2` | 指定用户 | 全量标签 | 特定用户重算 |
+| **user-tags** | `--mode user-tags --user-ids user1,user2 --tag-ids 1,2,3` | 指定用户 | 指定标签 | 精确重算 |
+| **incremental-tags** | `--mode incremental-tags --days N --tag-ids 1,2,3` | 新增用户 | 指定标签 | 新标签增量计算 |
+
+### 使用场景举例
+
+```bash
+# 场景1: 系统上线后首次运行
+python main.py --env local --mode full
+
+# 场景2: 日常增量更新（每日运行）
+python main.py --env local --mode incremental --days 1
+
+# 场景3: 新增了标签规则，需要重算特定标签
+python main.py --env local --mode tags --tag-ids 6,7,8
+
+# 场景4: 用户投诉标签错误，需要重算特定用户
+python main.py --env local --mode users --user-ids user_000123,user_000456
+
+# 场景5: 修复了特定标签的规则，需要重算特定用户的特定标签
+python main.py --env local --mode user-tags --user-ids user_000123 --tag-ids 1,3,5
+
+# 场景6: 新增了标签规则，只需要对新用户计算这些新标签
+python main.py --env local --mode incremental-tags --days 7 --tag-ids 6,7,8
+
+# 场景7: 检查系统各组件是否正常
+python main.py --env local --mode health
 ```
 
 ## 💡 最佳实践
@@ -479,3 +523,46 @@ mysql -h 127.0.0.1 -P 3307 -u root -proot123 --default-character-set=utf8mb4 tag
 6. ✅ **完整部署流程**: 提供详细的重新部署和故障排除指南
 
 现在系统稳定运行，支持全量、增量和指定标签计算模式！
+
+## 📚 快速参考命令表
+
+### 环境管理
+```bash
+cd environments/local
+./setup.sh                 # 启动服务
+./init_data.sh             # 初始化数据
+./setup.sh stop            # 停止服务
+./setup.sh clean           # 清理环境
+./init_data.sh reset       # 重置数据
+```
+
+### 标签计算
+```bash
+cd ../../  # 回到项目根目录
+
+# 基础模式
+python main.py --env local --mode health                 # 健康检查
+python main.py --env local --mode full                   # 全量计算
+python main.py --env local --mode incremental --days 7   # 增量计算
+
+# 精细化控制
+python main.py --env local --mode tags --tag-ids 1,2,3   # 指定标签
+python main.py --env local --mode users --user-ids user_000001,user_000002   # 指定用户
+python main.py --env local --mode user-tags --user-ids user_000001 --tag-ids 1,2,3   # 指定用户指定标签
+python main.py --env local --mode incremental-tags --days 7 --tag-ids 1,2,3   # 增量用户指定标签
+```
+
+### 数据查看
+```bash
+# 查看标签规则
+mysql -h 127.0.0.1 -P 3307 -u root -proot123 --default-character-set=utf8mb4 tag_system \
+  -e "SELECT tag_id, tag_name, tag_category FROM tag_definition;"
+
+# 查看用户标签结果
+mysql -h 127.0.0.1 -P 3307 -u root -proot123 --default-character-set=utf8mb4 tag_system \
+  -e "SELECT user_id, tag_ids, computed_date FROM user_tags LIMIT 10;"
+
+# 查看特定用户的标签
+mysql -h 127.0.0.1 -P 3307 -u root -proot123 --default-character-set=utf8mb4 tag_system \
+  -e "SELECT user_id, tag_ids FROM user_tags WHERE user_id = 'user_000001';"
+```
