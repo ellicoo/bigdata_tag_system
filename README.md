@@ -4,18 +4,31 @@
 
 ## 🎯 系统功能
 
+### 核心功能
 - ✅ 从S3读取Hive表数据
 - ✅ 从MySQL读取标签规则配置
 - ✅ 基于规则引擎计算用户标签
-- ✅ **多标签并行计算**：支持多个标签同时计算，大幅提升性能
-- ✅ **智能标签合并**：内存合并 + MySQL现有标签合并，确保标签一致性
-- ✅ **UPSERT写入策略**：避免数据覆盖，支持增量更新
-- ✅ **6种计算场景**：全量/增量用户 × 全量/指定标签 × 指定用户组合
 - ✅ 支持标签合并和去重
 - ✅ 将标签结果写入MySQL
-- ✅ 支持全量和增量计算
-- ✅ 支持指定标签计算
 - ✅ 完整的错误处理和重试机制
+
+### 🚀 性能优化特性
+- ✅ **多标签并行计算**：支持多个标签同时计算，大幅提升性能
+- ✅ **智能缓存策略**：预缓存MySQL标签数据，使用 `persist(StorageLevel.MEMORY_AND_DISK)` 
+- ✅ **分区优化写入**：根据数据量动态调整分区数，避免小文件问题
+
+### 🔄 数据一致性保障
+- ✅ **智能标签合并**：内存合并 + MySQL现有标签合并，确保标签一致性
+- ✅ **UPSERT写入策略**：`INSERT ON DUPLICATE KEY UPDATE`，避免数据覆盖
+- ✅ **时间戳管理**：自动维护 `created_time` 和 `updated_time`，不重复更新创建时间
+
+### 📊 6种计算场景
+- ✅ **场景1**: 全量用户打全量标签（`full-parallel`）
+- ✅ **场景2**: 全量用户打指定标签（`tags-parallel`）- 支持标签合并
+- ✅ **场景3**: 增量用户打全量标签（`incremental-parallel`）
+- ✅ **场景4**: 增量用户打指定标签（`incremental-tags-parallel`）
+- ✅ **场景5**: 指定用户打全量标签（`users-parallel`）
+- ✅ **场景6**: 指定用户打指定标签（`user-tags-parallel`）- 支持标签合并
 
 ## 🏗️ 系统架构
 
@@ -213,15 +226,18 @@ CREATE TABLE tag_rules (
     FOREIGN KEY (tag_id) REFERENCES tag_definition(id)
 );
 
--- 用户标签结果表
+-- 用户标签结果表（重构后的一个用户一条记录设计）
 CREATE TABLE user_tags (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    user_id VARCHAR(50) NOT NULL UNIQUE,
-    tag_ids JSON,  -- 或 TEXT (兼容老版本MySQL)
-    tag_details JSON,  -- 或 TEXT
-    updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_user_id (user_id)
+    user_id VARCHAR(100) NOT NULL COMMENT '用户ID',
+    tag_ids JSON NOT NULL COMMENT '用户的所有标签ID数组 [1,2,3,5]',
+    tag_details JSON COMMENT '标签详细信息 {"1": {"tag_name": "高净值用户"}}',
+    created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_user_id (user_id),
+    INDEX idx_created_time (created_time),
+    INDEX idx_updated_time (updated_time),
+    UNIQUE KEY uk_user_id (user_id)
 );
 ```
 
@@ -296,36 +312,58 @@ user_activity_summary:
 
 ## 📝 使用示例
 
-### 示例1：高净值用户标签
+### 示例1：高净值用户标签（全量用户计算）
 
-```python
-# 插入标签规则
-INSERT INTO tag_rules (tag_id, rule_name, rule_conditions, target_table, target_fields) VALUES (
-    1,
-    '高净值用户规则',
-    '{"logic": "AND", "conditions": [{"field": "total_asset_value", "operator": ">=", "value": 100000, "type": "number"}]}',
-    'user_asset_summary',
-    'user_id,total_asset_value'
-);
+```bash
+# 运行场景2：全量用户打指定标签（支持与现有标签合并）
+python main.py --env local --mode tags-parallel --tag-ids 1
 
-# 运行计算
-python main.py --mode tags --tag-ids 1
+# 查看结果
+mysql -h 127.0.0.1 -P 3307 -u root -proot123 -e "
+USE tag_system;
+SELECT user_id, tag_ids, created_time, updated_time 
+FROM user_tags 
+WHERE JSON_CONTAINS(tag_ids, '1') 
+LIMIT 5;"
 ```
 
-### 示例2：活跃用户标签
+### 示例2：活跃用户标签（增量用户计算）
 
-```python
-# 插入标签规则
-INSERT INTO tag_rules (tag_id, rule_name, rule_conditions, target_table, target_fields) VALUES (
-    2,
-    '活跃用户规则',
-    '{"logic": "AND", "conditions": [{"field": "login_count_7d", "operator": ">=", "value": 5, "type": "number"}]}',
-    'user_activity_summary', 
-    'user_id,login_count_7d,last_login_time'
-);
+```bash
+# 运行场景4：增量用户打指定标签
+python main.py --env local --mode incremental-tags-parallel --days 7 --tag-ids 2
 
-# 运行计算
-python main.py --mode tags --tag-ids 2
+# 查看结果：活跃用户标签
+mysql -h 127.0.0.1 -P 3307 -u root -proot123 -e "
+USE tag_system;
+SELECT user_id, 
+       tag_ids, 
+       JSON_EXTRACT(tag_details, '$.\"2\".tag_name') as tag_name,
+       created_time, 
+       updated_time 
+FROM user_tags 
+WHERE JSON_CONTAINS(tag_ids, '2') 
+ORDER BY updated_time DESC 
+LIMIT 5;"
+```
+
+### 示例3：指定用户多标签计算
+
+```bash
+# 运行场景6：指定用户打指定标签（支持与现有标签合并）  
+python main.py --env local --mode user-tags-parallel --user-ids user_000001,user_000002 --tag-ids 1,2,3
+
+# 查看特定用户的标签变化
+mysql -h 127.0.0.1 -P 3307 -u root -proot123 -e "
+USE tag_system;
+SELECT user_id, 
+       tag_ids,
+       JSON_LENGTH(tag_ids) as tag_count,
+       created_time,
+       updated_time,
+       TIMESTAMPDIFF(SECOND, created_time, updated_time) as seconds_since_creation
+FROM user_tags 
+WHERE user_id IN ('user_000001', 'user_000002');"
 ```
 
 ## 🧪 测试

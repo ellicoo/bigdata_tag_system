@@ -162,13 +162,13 @@ python main.py --env local --mode users --user-ids user_000001,user_000002    # 
 python main.py --env local --mode user-tags --user-ids user_000001,user_000002 --tag-ids 1,3,5    # 指定用户指定标签
 python main.py --env local --mode incremental-tags --days 7 --tag-ids 1,3,5    # 增量用户指定标签
 
-# 🎯 并行优化版本（推荐使用）
-python main.py --env local --mode full-parallel                      # 全量用户打全量标签（并行优化版）
-python main.py --env local --mode tags-parallel --tag-ids 1,2,3      # 全量用户打指定标签（并行优化版）
-python main.py --env local --mode incremental-parallel --days 7      # 增量用户打全量标签（并行优化版）
-python main.py --env local --mode incremental-tags-parallel --days 7 --tag-ids 2,4    # 增量用户打指定标签（并行优化版）
-python main.py --env local --mode users-parallel --user-ids user_000001,user_000002    # 指定用户打全量标签（并行优化版）
-python main.py --env local --mode user-tags-parallel --user-ids user_000001,user_000002 --tag-ids 1,3,5    # 指定用户打指定标签（并行优化版）
+# 🎯 6种并行计算场景（推荐使用）
+python main.py --env local --mode full-parallel                      # 场景1: 全量用户打全量标签
+python main.py --env local --mode tags-parallel --tag-ids 1,2,3      # 场景2: 全量用户打指定标签（支持标签合并）
+python main.py --env local --mode incremental-parallel --days 7      # 场景3: 增量用户打全量标签  
+python main.py --env local --mode incremental-tags-parallel --days 7 --tag-ids 2,4    # 场景4: 增量用户打指定标签
+python main.py --env local --mode users-parallel --user-ids user_000001,user_000002    # 场景5: 指定用户打全量标签
+python main.py --env local --mode user-tags-parallel --user-ids user_000001,user_000002 --tag-ids 1,3,5    # 场景6: 指定用户打指定标签（支持标签合并）
 
 # Glue开发环境
 python main.py --env glue-dev --mode full
@@ -276,9 +276,12 @@ PROD_GLUE_ROLE_ARN=arn:aws:iam::xxx:role/GlueServiceRole-prod
 
 ### 输出结果（重构后的数据模型）
 - **MySQL user_tags表**: 采用**一个用户一条记录**的设计
+  - `user_id`: 用户ID（唯一键约束）
   - `tag_ids`: JSON数组，存储用户的所有标签ID `[1,2,3,5]`
   - `tag_details`: JSON对象，存储标签详细信息
-  - **核心优势**: 真正的标签合并逻辑，支持复杂查询，符合业务需求
+  - `created_time`: 创建时间（首次插入时设置，后续更新不变）
+  - `updated_time`: 更新时间（每次UPSERT时自动更新）
+  - **核心优势**: 真正的标签合并逻辑，支持复杂查询，符合业务需求，时间戳追踪
 
 ### 标签合并机制
 系统实现了真正的标签合并逻辑：
@@ -345,6 +348,21 @@ PROD_GLUE_ROLE_ARN=arn:aws:iam::xxx:role/GlueServiceRole-prod
 2. 对新用户计算所有现有标签规则
 3. 直接追加到数据库，无需与现有标签合并
 4. 避免了复杂的标签合并逻辑，提高性能
+
+#### 数据库表结构优化
+**问题**: 原表设计缺少时间戳字段，无法追踪标签更新时间
+**解决方案**: 
+1. 移除 `computed_date` 字段，简化设计
+2. 添加 `created_time` 和 `updated_time` 时间戳字段
+3. UPSERT策略：`INSERT ON DUPLICATE KEY UPDATE`，自动管理时间戳
+4. 只对 `user_id` 设置唯一键约束，保持一个用户一条记录的设计
+
+#### 并行计算与缓存优化
+**核心改进**: 
+1. **预缓存策略**: 使用 `persist(StorageLevel.MEMORY_AND_DISK)` 预缓存MySQL现有标签
+2. **多标签并行**: 同时计算多个标签，大幅提升性能
+3. **智能标签合并**: 场景2和场景6支持与MySQL现有标签智能合并
+4. **分区优化**: 根据数据量动态调整分区数，提升写入性能
 
 ### 测试数据生成
 本地环境支持生产级模拟数据生成，确保标签规则能够正确匹配：

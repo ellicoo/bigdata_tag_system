@@ -43,14 +43,19 @@ CREATE TABLE IF NOT EXISTS tag_rules (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '标签规则表';
 
 -- 4. 用户标签结果表（修正版：一个用户一条记录，包含所有标签ID数组）
-CREATE TABLE IF NOT EXISTS user_tags (
+-- created_time: 第一次插入时设置，永远不变
+-- updated_time: 只有通过UPSERT逻辑显式更新时才变化（不使用ON UPDATE CURRENT_TIMESTAMP）
+DROP TABLE IF EXISTS user_tags;
+CREATE TABLE user_tags (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id VARCHAR(100) NOT NULL COMMENT '用户ID',
     tag_ids JSON NOT NULL COMMENT '用户的所有标签ID数组',
     tag_details JSON COMMENT '标签详细信息（key-value形式）',
-    computed_date DATE NOT NULL COMMENT '计算日期',
+    created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间（永远不变）',
+    updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间（由UPSERT逻辑控制）',
     INDEX idx_user_id (user_id),
-    INDEX idx_computed_date (computed_date),
+    INDEX idx_created_time (created_time),
+    INDEX idx_updated_time (updated_time),
     UNIQUE KEY uk_user_id (user_id)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '用户标签结果表（一个用户一条记录，包含标签ID数组）';
 

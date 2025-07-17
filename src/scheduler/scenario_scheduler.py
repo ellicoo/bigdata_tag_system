@@ -100,7 +100,8 @@ class ScenarioScheduler:
                 "user_id",
                 from_json(col("tag_ids"), ArrayType(IntegerType())).alias("tag_ids"),
                 "tag_details",
-                "computed_date"
+                "created_time",
+                "updated_time"
             ).persist(StorageLevel.MEMORY_AND_DISK)
             
             # 触发缓存

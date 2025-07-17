@@ -22,7 +22,7 @@ class AdvancedTagMerger:
         与MySQL中现有标签合并
         
         Args:
-            new_tags_df: 新计算的标签DataFrame (user_id, tag_ids, tag_details, computed_date)
+            new_tags_df: 新计算的标签DataFrame (user_id, tag_ids, tag_details)
             
         Returns:
             合并后的DataFrame
@@ -55,15 +55,14 @@ class AdvancedTagMerger:
                 "left"
             )
             
-            # 4. 合并标签数组 - 修复列引用问题
+            # 4. 合并标签数组 - 修复列引用问题，移除computed_date
             final_merged = merged_df.select(
                 col("user_id"),
                 self._merge_tag_arrays(
                     col("existing.tag_ids"), 
                     col("new.tag_ids")
                 ).alias("tag_ids"),
-                col("new.tag_details"),
-                col("new.computed_date")
+                col("new.tag_details")
             )
             
             # 5. 调试信息：显示合并前后的数据
@@ -106,11 +105,13 @@ class AdvancedTagMerger:
                 logger.info("MySQL中没有现有标签数据")
                 return None
             
-            # 将JSON字符串转换为数组类型
+            # 将JSON字符串转换为数组类型，保留时间字段用于调试
             processed_df = existing_df.select(
                 "user_id",
                 from_json(col("tag_ids"), ArrayType(IntegerType())).alias("tag_ids"),
-                "tag_details"
+                "tag_details",
+                "created_time",
+                "updated_time"
             )
             
             # 持久化到内存和磁盘
@@ -293,8 +294,7 @@ class UnifiedTagMerger:
         return user_tags_df.select(
             col("user_id"),
             col("tag_ids"),
-            build_tag_details(col("tag_info_list")).alias("tag_details"),
-            lit(date.today()).alias("computed_date")
+            build_tag_details(col("tag_info_list")).alias("tag_details")
         )
     
     def cleanup(self):

@@ -150,8 +150,9 @@ show_completion_info() {
     echo ""
     echo "🎯 现在可以运行:"
     echo "  cd ../../"
-    echo "  python main.py --env local --mode health    # 健康检查"
-    echo "  python main.py --env local --mode full      # 全量计算"
+    echo "  python main.py --env local --mode health           # 健康检查"
+    echo "  python main.py --env local --mode full-parallel   # 全量并行计算"
+    echo "  python main.py --env local --mode tags-parallel --tag-ids 1,2,3  # 指定标签并行计算"
     echo ""
 }
 

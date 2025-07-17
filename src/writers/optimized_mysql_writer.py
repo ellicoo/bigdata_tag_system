@@ -51,13 +51,12 @@ class OptimizedMySQLWriter:
     def _prepare_for_mysql(self, result_df: DataFrame) -> DataFrame:
         """准备MySQL写入格式"""
         try:
-            # 转换tag_ids为JSON字符串
+            # 转换tag_ids为JSON字符串，移除computed_date字段
             mysql_ready_df = result_df.select(
                 col("user_id"),
                 when(col("tag_ids").isNotNull(), to_json(col("tag_ids")))
                 .otherwise("[]").alias("tag_ids"),
-                col("tag_details"),
-                col("computed_date")
+                col("tag_details")
             )
             
             # 数据预览
@@ -106,14 +105,20 @@ class OptimizedMySQLWriter:
                 
                 cursor = connection.cursor()
                 
-                # UPSERT SQL - 利用唯一键约束
+                # UPSERT SQL - 只有当标签数据真正变化时才更新updated_time
+                # created_time永远不变，保持第一次插入的时间
+                # 修复执行顺序问题：先比较后更新，确保比较的是旧值和新值
                 upsert_sql = """
-                INSERT INTO user_tags (user_id, tag_ids, tag_details, computed_date) 
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO user_tags (user_id, tag_ids, tag_details) 
+                VALUES (%s, %s, %s)
                 ON DUPLICATE KEY UPDATE
+                    updated_time = CASE 
+                        WHEN JSON_EXTRACT(tag_ids, '$') <> JSON_EXTRACT(VALUES(tag_ids), '$')
+                        THEN CURRENT_TIMESTAMP 
+                        ELSE updated_time 
+                    END,
                     tag_ids = VALUES(tag_ids),
-                    tag_details = VALUES(tag_details),
-                    computed_date = VALUES(computed_date)
+                    tag_details = VALUES(tag_details)
                 """
                 
                 # 批量处理
@@ -126,8 +131,7 @@ class OptimizedMySQLWriter:
                         batch_data.append((
                             str(row.user_id),
                             str(row.tag_ids) if row.tag_ids else '[]',
-                            str(row.tag_details) if row.tag_details else '{}',
-                            row.computed_date
+                            str(row.tag_details) if row.tag_details else '{}'
                         ))
                     
                     cursor.executemany(upsert_sql, batch_data)

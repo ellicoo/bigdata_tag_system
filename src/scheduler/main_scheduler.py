@@ -8,7 +8,7 @@ from src.config.base import BaseConfig
 from src.readers.hive_reader import HiveDataReader
 from src.readers.rule_reader import RuleReader
 from src.engine.tag_computer import TagComputeEngine
-from src.writers.mysql_writer import MySQLTagWriter
+from src.writers.optimized_mysql_writer import OptimizedMySQLWriter
 from src.merger.tag_merger import TagMerger
 from src.scheduler.scenario_scheduler import ScenarioScheduler
 
@@ -47,7 +47,7 @@ class TagComputeScheduler:
             self.rule_reader = RuleReader(self.spark, self.config.mysql)
             self.hive_reader = HiveDataReader(self.spark, self.config.s3)
             self.tag_engine = TagComputeEngine(self.spark, self.max_workers)
-            self.mysql_writer = MySQLTagWriter(self.spark, self.config.mysql)
+            self.mysql_writer = OptimizedMySQLWriter(self.spark, self.config.mysql)
             self.tag_merger = TagMerger(self.spark, self.config.mysql)
             
             # 初始化场景调度器
