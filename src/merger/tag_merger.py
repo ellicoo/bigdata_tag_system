@@ -1,9 +1,8 @@
 import logging
-from typing import List, Optional
+from typing import Optional, Dict, Any
 from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.functions import col, collect_list, array_distinct, array_union, to_json, struct, map_from_arrays, lit, when, expr, size
+from pyspark.sql.functions import col, from_json, array_union, array_distinct, when, lit
 from pyspark.sql.types import ArrayType, IntegerType
-from functools import reduce
 from datetime import date
 
 from src.config.base import MySQLConfig
@@ -11,71 +10,91 @@ from src.config.base import MySQLConfig
 logger = logging.getLogger(__name__)
 
 
-class TagMerger:
-    """标签合并器 - 处理用户标签的合并和去重（正确实现：一个用户一条记录，包含标签ID数组）"""
+class AdvancedTagMerger:
+    """高级标签合并器 - 支持内存合并和数据库合并的公共组件"""
     
     def __init__(self, spark: SparkSession, mysql_config: MySQLConfig):
         self.spark = spark
         self.mysql_config = mysql_config
     
-    def merge_user_tags(self, new_tag_results: List[DataFrame]) -> Optional[DataFrame]:
-        """合并多个标签计算结果到统一的用户标签表结构（一个用户一条记录，包含标签ID数组）"""
+    def merge_with_existing_tags(self, new_tags_df: DataFrame, cached_existing_tags: DataFrame = None) -> Optional[DataFrame]:
+        """
+        与MySQL中现有标签合并
+        
+        Args:
+            new_tags_df: 新计算的标签DataFrame (user_id, tag_ids, tag_details)
+            
+        Returns:
+            合并后的DataFrame
+        """
         try:
-            if not new_tag_results:
-                logger.warning("没有标签结果需要合并")
-                return None
+            logger.info("开始与MySQL中现有标签合并...")
             
-            logger.info(f"开始合并 {len(new_tag_results)} 个标签计算结果...")
+            # 1. 使用预缓存的现有标签数据
+            if cached_existing_tags is not None:
+                existing_tags = cached_existing_tags
+                logger.info("使用预缓存的现有标签数据")
+            else:
+                # 兜底：读取现有标签并使用内存+磁盘持久化
+                existing_tags = self._read_existing_user_tags()
+                if existing_tags is not None:
+                    from pyspark import StorageLevel
+                    existing_tags = existing_tags.persist(StorageLevel.MEMORY_AND_DISK)
             
-            # 1. 合并所有新计算的标签结果
-            all_new_tags = reduce(lambda df1, df2: df1.union(df2), new_tag_results)
+            if existing_tags is None or existing_tags.count() == 0:
+                logger.info("数据库中没有现有标签，直接返回新标签")
+                return new_tags_df
             
-            if all_new_tags.count() == 0:
-                logger.warning("合并后没有标签数据")
-                return None
+            existing_count = existing_tags.count()
+            logger.info(f"现有标签数据: {existing_count} 条用户标签")
             
-            # 2. 首先从规则中获取标签名称和分类信息
-            enriched_tags = self._enrich_with_tag_info(all_new_tags)
-            
-            # 3. 先去重，再按用户聚合（关键修复：避免标签重复）
-            # 先去除每个用户的重复标签
-            deduplicated_tags = enriched_tags.dropDuplicates(["user_id", "tag_id"])
-            
-            # 然后聚合成数组
-            user_new_tags = deduplicated_tags.groupBy("user_id").agg(
-                collect_list("tag_id").alias("new_tag_ids_raw"),
-                collect_list(struct("tag_id", "tag_name", "tag_category")).alias("tag_info_list")
-            )
-            
-            # 对标签ID数组进行去重
-            from pyspark.sql.functions import array_distinct
-            user_new_tags = user_new_tags.select(
+            # 3. 左连接合并 - 修复列名冲突问题
+            merged_df = new_tags_df.alias("new").join(
+                existing_tags.select("user_id", "tag_ids").alias("existing"),
                 "user_id",
-                array_distinct("new_tag_ids_raw").alias("new_tag_ids"),
-                "tag_info_list"
+                "left"
             )
             
-            # 4. 读取现有用户标签（如果存在）
-            existing_tags = self._read_existing_user_tags()
+            # 4. 合并标签数组 - 修复列引用问题，移除computed_date
+            final_merged = merged_df.select(
+                col("user_id"),
+                self._merge_tag_arrays(
+                    col("existing.tag_ids"), 
+                    col("new.tag_ids")
+                ).alias("tag_ids"),
+                col("new.tag_details")
+            )
             
-            # 5. 合并新老标签
-            merged_result = self._merge_new_and_existing_tags(user_new_tags, existing_tags)
+            # 5. 调试信息：显示合并前后的数据
+            logger.info("合并前新标签样例:")
+            new_tags_df.show(3, truncate=False)
             
-            logger.info(f"✅ 标签合并完成，影响 {merged_result.count()} 个用户")
+            logger.info("合并前现有标签样例:")
+            existing_tags.show(3, truncate=False)
             
-            # 调试：检查tag_merger输出的最终结果是否有重复
-            logger.info("🔍 检查tag_merger输出结果是否有重复...")
-            merged_result.select("user_id", "tag_ids").show(5, truncate=False)
+            logger.info("合并后标签样例:")
+            final_merged.show(3, truncate=False)
             
-            return merged_result
+            # 注意：不在这里清理预缓存数据，由场景调度器统一管理
+            if cached_existing_tags is None and existing_tags is not None:
+                # 只有非预缓存数据才需要在这里清理
+                existing_tags.unpersist()
+            
+            merge_count = final_merged.count()
+            logger.info(f"✅ 与现有标签合并完成，影响 {merge_count} 个用户")
+            
+            return final_merged
             
         except Exception as e:
-            logger.error(f"标签合并失败: {str(e)}")
-            return None
+            logger.error(f"与现有标签合并失败: {str(e)}")
+            # 失败时返回原始数据
+            return new_tags_df
     
     def _read_existing_user_tags(self) -> Optional[DataFrame]:
-        """读取现有的用户标签数据"""
+        """从MySQL读取现有用户标签并缓存到内存/磁盘"""
         try:
+            logger.info("📖 从MySQL读取现有用户标签...")
+            
             existing_df = self.spark.read.jdbc(
                 url=self.mysql_config.jdbc_url,
                 table="user_tags",
@@ -83,122 +102,31 @@ class TagMerger:
             )
             
             if existing_df.count() == 0:
-                logger.info("当前没有存储的用户标签")
+                logger.info("MySQL中没有现有标签数据")
                 return None
             
-            # 将JSON字符串转换回数组，以便在Spark中进行数组操作
-            from pyspark.sql.functions import from_json
-            from pyspark.sql.types import ArrayType, IntegerType
-            
+            # 将JSON字符串转换为数组类型，保留时间字段用于调试
             processed_df = existing_df.select(
                 "user_id",
                 from_json(col("tag_ids"), ArrayType(IntegerType())).alias("tag_ids"),
-                "tag_details"
+                "tag_details",
+                "created_time",
+                "updated_time"
             )
             
-            logger.info(f"读取到 {existing_df.count()} 条现有用户标签记录")
+            # 持久化到内存和磁盘
+            processed_df = processed_df.persist()
+            
+            logger.info(f"成功读取并缓存现有标签数据")
             return processed_df
             
         except Exception as e:
             logger.info(f"读取现有标签失败（可能是首次运行）: {str(e)}")
             return None
     
-    def _merge_new_and_existing_tags(self, new_tags_df: DataFrame, existing_tags_df: Optional[DataFrame]) -> DataFrame:
-        """合并新标签和已有标签"""
-        try:
-            if existing_tags_df is None:
-                # 首次运行，直接使用新标签
-                logger.info("首次运行，直接使用新计算的标签")
-                return self._format_final_output(new_tags_df)
-            
-            # 合并新老标签
-            logger.info("合并新标签和已有标签...")
-            
-            # 左连接：以新标签为主，关联已有标签
-            merged_df = new_tags_df.join(
-                existing_tags_df, 
-                "user_id", 
-                "left"
-            )
-            
-            # 合并标签ID数组（去重）
-            final_df = merged_df.select(
-                col("user_id"),
-                # 合并标签ID：新标签 + 现有标签，然后去重
-                # 合并标签ID数组并去重
-                self._merge_tag_arrays(col("tag_ids"), col("new_tag_ids")).alias("merged_tag_ids"),
-                col("tag_info_list")
-            )
-            
-            return self._format_final_output_with_merged_ids(final_df)
-            
-        except Exception as e:
-            logger.error(f"合并新老标签失败: {str(e)}")
-            raise
-    
-    def _format_final_output(self, user_tags_df: DataFrame) -> DataFrame:
-        """格式化最终输出（首次运行）"""
-        from pyspark.sql.functions import udf
-        from pyspark.sql.types import StringType
-        import json
-        
-        # 使用UDF简化处理
-        @udf(returnType=StringType())
-        def build_tag_details(tag_info_list):
-            if not tag_info_list:
-                return "{}"
-            
-            tag_details = {}
-            for tag_info in tag_info_list:
-                tag_id = str(tag_info['tag_id'])
-                tag_details[tag_id] = {
-                    'tag_name': tag_info['tag_name'],
-                    'tag_category': tag_info['tag_category']
-                }
-            return json.dumps(tag_details, ensure_ascii=False)
-        
-        formatted_df = user_tags_df.select(
-            col("user_id"),
-            col("new_tag_ids").alias("tag_ids"),
-            build_tag_details(col("tag_info_list")).alias("tag_details"),
-            lit(date.today()).alias("computed_date")
-        )
-        
-        return formatted_df
-    
-    def _format_final_output_with_merged_ids(self, merged_df: DataFrame) -> DataFrame:
-        """格式化最终输出（包含合并的标签ID）"""
-        from pyspark.sql.functions import udf
-        from pyspark.sql.types import StringType
-        import json
-        
-        # 使用UDF简化处理
-        @udf(returnType=StringType())
-        def build_tag_details(tag_info_list):
-            if not tag_info_list:
-                return "{}"
-            
-            tag_details = {}
-            for tag_info in tag_info_list:
-                tag_id = str(tag_info['tag_id'])
-                tag_details[tag_id] = {
-                    'tag_name': tag_info['tag_name'],
-                    'tag_category': tag_info['tag_category']
-                }
-            return json.dumps(tag_details, ensure_ascii=False)
-        
-        formatted_df = merged_df.select(
-            col("user_id"),
-            col("merged_tag_ids").alias("tag_ids"),
-            build_tag_details(col("tag_info_list")).alias("tag_details"),
-            lit(date.today()).alias("computed_date")
-        )
-        
-        return formatted_df
-    
     def _merge_tag_arrays(self, existing_tags_col, new_tags_col):
         """合并两个标签数组并去重"""
-        from pyspark.sql.functions import udf, array, flatten, array_distinct
+        from pyspark.sql.functions import udf
         from pyspark.sql.types import ArrayType, IntegerType
         
         @udf(returnType=ArrayType(IntegerType()))
@@ -208,130 +136,167 @@ class TagMerger:
             if new_tags is None:
                 new_tags = []
             
-            # 合并并去重
+            # 合并并去重，保持排序
             merged = list(set(existing_tags + new_tags))
             return sorted(merged)
         
         return merge_arrays(existing_tags_col, new_tags_col)
     
-    def _enrich_with_tag_info(self, tags_df: DataFrame) -> DataFrame:
-        """用标签定义信息丰富标签数据"""
+    def cleanup_cache(self):
+        """清理缓存资源"""
         try:
-            # 读取标签定义
+            self.spark.catalog.clearCache()
+            logger.info("✅ 清理标签合并缓存完成")
+        except Exception as e:
+            logger.warning(f"清理缓存失败: {str(e)}")
+
+
+class TagMergeStrategy:
+    """标签合并策略枚举"""
+    
+    # 不与现有标签合并，直接内存合并结果
+    MEMORY_ONLY = "memory_only"
+    
+    # 与现有标签合并，内存合并后再与MySQL标签合并
+    MEMORY_THEN_DATABASE = "memory_then_database"
+
+
+class UnifiedTagMerger:
+    """统一标签合并器 - 根据场景选择合并策略"""
+    
+    def __init__(self, spark: SparkSession, mysql_config: MySQLConfig):
+        self.spark = spark
+        self.mysql_config = mysql_config
+        self.advanced_merger = AdvancedTagMerger(spark, mysql_config)
+    
+    def merge_tags(self, tag_results: list, strategy: str) -> Optional[DataFrame]:
+        """
+        根据策略合并标签
+        
+        Args:
+            tag_results: 标签计算结果列表
+            strategy: 合并策略 (MEMORY_ONLY | MEMORY_THEN_DATABASE)
+            
+        Returns:
+            合并后的DataFrame
+        """
+        try:
+            if not tag_results:
+                logger.warning("没有标签结果需要合并")
+                return None
+            
+            logger.info(f"使用策略 {strategy} 合并标签")
+            
+            # 第一步：内存合并（所有策略都需要）
+            memory_merged = self._memory_merge(tag_results)
+            if memory_merged is None:
+                return None
+            
+            # 第二步：根据策略决定是否与数据库合并
+            if strategy == TagMergeStrategy.MEMORY_ONLY:
+                logger.info("仅内存合并，不与数据库现有标签合并")
+                return memory_merged
+            
+            elif strategy == TagMergeStrategy.MEMORY_THEN_DATABASE:
+                logger.info("内存合并后，再与数据库现有标签合并")
+                return self.advanced_merger.merge_with_existing_tags(memory_merged)
+            
+            else:
+                logger.error(f"未知的合并策略: {strategy}")
+                return memory_merged
+                
+        except Exception as e:
+            logger.error(f"标签合并失败: {str(e)}")
+            return None
+    
+    def _memory_merge(self, tag_results: list) -> Optional[DataFrame]:
+        """内存合并：将同一用户的多个标签合并"""
+        try:
+            from functools import reduce
+            from pyspark.sql.functions import collect_list, array_distinct, struct
+            
+            # 合并所有标签结果
+            all_tags = reduce(lambda df1, df2: df1.union(df2), tag_results)
+            
+            if all_tags.count() == 0:
+                return None
+            
+            # 去重
+            deduplicated = all_tags.dropDuplicates(["user_id", "tag_id"])
+            
+            # 丰富标签信息
+            enriched = self._enrich_with_tag_info(deduplicated)
+            
+            # 按用户聚合
+            aggregated = enriched.groupBy("user_id").agg(
+                collect_list("tag_id").alias("tag_ids_raw"),
+                collect_list(struct("tag_id", "tag_name", "tag_category")).alias("tag_info_list")
+            )
+            
+            # 去重并格式化
+            final_result = aggregated.select(
+                "user_id",
+                array_distinct("tag_ids_raw").alias("tag_ids"),
+                "tag_info_list"
+            )
+            
+            return self._format_output(final_result)
+            
+        except Exception as e:
+            logger.error(f"内存合并失败: {str(e)}")
+            return None
+    
+    def _enrich_with_tag_info(self, tags_df: DataFrame) -> DataFrame:
+        """丰富标签信息"""
+        try:
             tag_definitions = self.spark.read.jdbc(
                 url=self.mysql_config.jdbc_url,
                 table="tag_definition",
                 properties=self.mysql_config.connection_properties
             ).select("tag_id", "tag_name", "tag_category")
             
-            # 关联标签定义信息
-            enriched_df = tags_df.join(
-                tag_definitions,
-                "tag_id",
-                "left"
+            return tags_df.join(
+                tag_definitions, "tag_id", "left"
             ).select(
-                "user_id",
-                "tag_id", 
-                col("tag_name").alias("tag_name"),
-                col("tag_category").alias("tag_category"),
-                "tag_detail"
+                "user_id", "tag_id", 
+                col("tag_name"), col("tag_category"), "tag_detail"
             )
-            
-            return enriched_df
             
         except Exception as e:
             logger.error(f"丰富标签信息失败: {str(e)}")
-            # 降级处理：使用默认值
             return tags_df.select(
-                "user_id",
-                "tag_id",
+                "user_id", "tag_id",
                 lit("unknown").alias("tag_name"),
                 lit("unknown").alias("tag_category"),
                 "tag_detail"
             )
     
-    def validate_merge_result(self, merged_df: DataFrame) -> bool:
-        """验证合并结果的有效性"""
-        try:
-            if merged_df.count() == 0:
-                logger.error("合并结果为空")
-                return False
+    def _format_output(self, user_tags_df: DataFrame) -> DataFrame:
+        """格式化输出"""
+        from pyspark.sql.functions import udf
+        from pyspark.sql.types import StringType
+        import json
+        
+        @udf(returnType=StringType())
+        def build_tag_details(tag_info_list):
+            if not tag_info_list:
+                return "{}"
             
-            # 检查必要字段
-            required_fields = ["user_id", "tag_ids", "computed_date"]
-            missing_fields = [field for field in required_fields if field not in merged_df.columns]
-            
-            if missing_fields:
-                logger.error(f"合并结果缺少必要字段: {missing_fields}")
-                return False
-            
-            # 检查用户ID不为空
-            null_user_count = merged_df.filter(col("user_id").isNull()).count()
-            if null_user_count > 0:
-                logger.error(f"存在 {null_user_count} 个空的用户ID")
-                return False
-            
-            # 检查标签数组不为空
-            empty_tags_count = merged_df.filter(
-                col("tag_ids").isNull() | (expr("size(tag_ids)") == 0)
-            ).count()
-            
-            if empty_tags_count > 0:
-                logger.warning(f"存在 {empty_tags_count} 个用户没有标签")
-            
-            logger.info("✅ 合并结果验证通过")
-            return True
-            
-        except Exception as e:
-            logger.error(f"合并结果验证失败: {str(e)}")
-            return False
-    
-    def get_merge_statistics(self, merged_df: DataFrame) -> dict:
-        """获取合并统计信息（适配新的数据模型）"""
-        try:
-            total_users = merged_df.count()
-            
-            if total_users == 0:
-                return {
-                    "total_users": 0,
-                    "total_tag_assignments": 0,
-                    "avg_tags_per_user": 0,
-                    "max_tags_per_user": 0,
-                    "min_tags_per_user": 0
+            tag_details = {}
+            for tag_info in tag_info_list:
+                tag_id = str(tag_info['tag_id'])
+                tag_details[tag_id] = {
+                    'tag_name': tag_info['tag_name'],
+                    'tag_category': tag_info['tag_category']
                 }
-            
-            # 统计每个用户的标签数
-            stats_df = merged_df.select(
-                col("user_id"),
-                size(col("tag_ids")).alias("tag_count")
-            )
-            
-            tag_counts = stats_df.select("tag_count").collect()
-            tag_count_values = [row['tag_count'] for row in tag_counts]
-            
-            total_assignments = sum(tag_count_values)
-            
-            stats = {
-                "total_users": total_users,
-                "total_tag_assignments": total_assignments,
-                "avg_tags_per_user": round(total_assignments / total_users, 2) if total_users > 0 else 0,
-                "max_tags_per_user": max(tag_count_values) if tag_count_values else 0,
-                "min_tags_per_user": min(tag_count_values) if tag_count_values else 0
-            }
-            
-            return stats
-            
-        except Exception as e:
-            logger.error(f"获取合并统计失败: {str(e)}")
-            return {}
+            return json.dumps(tag_details, ensure_ascii=False)
+        
+        return user_tags_df.select(
+            col("user_id"),
+            col("tag_ids"),
+            build_tag_details(col("tag_info_list")).alias("tag_details")
+        )
     
-    def optimize_merge_performance(self, df: DataFrame) -> DataFrame:
-        """优化合并性能"""
-        # 缓存中间结果
-        df = df.cache()
-        
-        # 重分区优化
-        if df.rdd.getNumPartitions() > 50:
-            df = df.coalesce(50)
-        
-        return df
+    def cleanup(self):
+        """清理资源"""
+        self.advanced_merger.cleanup_cache()

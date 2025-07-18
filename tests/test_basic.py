@@ -15,7 +15,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.config.base import SparkConfig, S3Config, MySQLConfig, BaseConfig
 from src.config.manager import ConfigManager
 from src.engine.rule_parser import RuleConditionParser
-from src.engine.tag_computer import TagComputeEngine
+from src.engine.parallel_tag_engine import ParallelTagEngine
 
 
 class TestRuleParser(unittest.TestCase):
@@ -114,7 +114,7 @@ class TestTagCompute(unittest.TestCase):
             .getOrCreate()
         cls.spark.sparkContext.setLogLevel("WARN")
         
-        cls.tag_engine = TagComputeEngine(cls.spark)
+        cls.tag_engine = ParallelTagEngine(cls.spark)
     
     @classmethod
     def tearDownClass(cls):
@@ -157,7 +157,7 @@ class TestTagCompute(unittest.TestCase):
             }
         }
         
-        result_df = self.tag_engine.compute_single_tag(self.test_df, rule)
+        result_df = self.tag_engine._compute_single_tag(self.test_df, rule)
         
         self.assertIsNotNone(result_df)
         
@@ -194,7 +194,7 @@ class TestTagCompute(unittest.TestCase):
             }
         }
         
-        result_df = self.tag_engine.compute_single_tag(self.test_df, rule)
+        result_df = self.tag_engine._compute_single_tag(self.test_df, rule)
         
         self.assertIsNotNone(result_df)
         
@@ -237,7 +237,7 @@ class TestTagCompute(unittest.TestCase):
             }
         ]
         
-        results = self.tag_engine.compute_batch_tags(self.test_df, rules)
+        results = self.tag_engine._compute_tags_parallel(self.test_df, rules)
         
         self.assertEqual(len(results), 2)
         
@@ -277,7 +277,8 @@ class TestConfig(unittest.TestCase):
             password="test_pass"
         )
         
-        self.assertEqual(config.jdbc_url, "jdbc:mysql://localhost:3306/test_db?useSSL=false&allowPublicKeyRetrieval=true")
+        expected_url = "jdbc:mysql://localhost:3306/test_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&useUnicode=true&connectionCollation=utf8mb4_unicode_ci"
+        self.assertEqual(config.jdbc_url, expected_url)
         
         props = config.connection_properties
         self.assertEqual(props["user"], "test_user")

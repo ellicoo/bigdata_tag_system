@@ -15,7 +15,7 @@ import os
 sys.path.append('/opt/ml/code')  # Glue作业代码路径
 
 from src.config.manager import ConfigManager
-from src.scheduler.main_scheduler import TagComputeScheduler
+from src.scheduler.tag_scheduler import TagScheduler
 
 
 def setup_glue_logging(log_level="INFO"):
@@ -56,7 +56,7 @@ def main():
         logger.info("✅ 配置加载完成")
         
         # 创建调度器
-        scheduler = TagComputeScheduler(config)
+        scheduler = TagScheduler(config)
         
         # 初始化系统
         logger.info("📋 初始化标签计算系统...")

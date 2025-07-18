@@ -12,7 +12,7 @@ from pyspark.sql.types import StructType, StructField, StringType, IntegerType, 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from src.config.manager import ConfigManager
-from src.scheduler.main_scheduler import TagComputeScheduler
+from src.scheduler.tag_scheduler import TagScheduler
 
 
 class TestEndToEndIntegration(unittest.TestCase):
@@ -154,7 +154,7 @@ class TestEndToEndIntegration(unittest.TestCase):
         mock_write_tags.return_value = True
         
         # 创建调度器
-        scheduler = TagComputeScheduler(self.config)
+        scheduler = TagScheduler(self.config)
         scheduler.spark = self.spark  # 使用测试的Spark会话
         
         # 执行完整标签计算
@@ -185,7 +185,7 @@ class TestEndToEndIntegration(unittest.TestCase):
         mock_write_tags.return_value = True
         
         # 创建调度器
-        scheduler = TagComputeScheduler(self.config)
+        scheduler = TagScheduler(self.config)
         scheduler.spark = self.spark
         
         # 执行指定标签计算
@@ -211,7 +211,7 @@ class TestEndToEndIntegration(unittest.TestCase):
         mock_write_tags.return_value = True
         
         # 创建调度器
-        scheduler = TagComputeScheduler(self.config)
+        scheduler = TagScheduler(self.config)
         scheduler.spark = self.spark
         
         # 执行增量计算
@@ -235,7 +235,7 @@ class TestEndToEndIntegration(unittest.TestCase):
         mock_writer_check.return_value = True
         
         # 创建调度器
-        scheduler = TagComputeScheduler(self.config)
+        scheduler = TagScheduler(self.config)
         
         # 执行健康检查
         result = scheduler.health_check()
@@ -256,7 +256,7 @@ class TestEndToEndIntegration(unittest.TestCase):
         mock_rule_check.return_value = False
         
         # 创建调度器
-        scheduler = TagComputeScheduler(self.config)
+        scheduler = TagScheduler(self.config)
         
         # 执行健康检查
         result = scheduler.health_check()

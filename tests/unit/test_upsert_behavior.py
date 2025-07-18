@@ -9,7 +9,7 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from src.config.manager import ConfigManager
-from src.scheduler.scenario_scheduler import ScenarioScheduler
+from src.scheduler.tag_scheduler import TagScheduler
 import time
 import pymysql
 
@@ -49,7 +49,7 @@ def test_upsert_behavior():
     print("=== UPSERT行为测试 ===")
     
     config = ConfigManager.load_config('local')
-    scheduler = ScenarioScheduler(config, max_workers=2)
+    scheduler = TagScheduler(config, max_workers=2)
     
     try:
         scheduler.initialize()

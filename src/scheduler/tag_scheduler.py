@@ -8,14 +8,14 @@ from src.config.base import BaseConfig
 from src.readers.hive_reader import HiveDataReader
 from src.readers.rule_reader import RuleReader
 from src.engine.parallel_tag_engine import ParallelTagEngine
-from src.merger.advanced_tag_merger import UnifiedTagMerger, TagMergeStrategy
+from src.merger.tag_merger import UnifiedTagMerger, TagMergeStrategy
 from src.writers.optimized_mysql_writer import OptimizedMySQLWriter
 
 logger = logging.getLogger(__name__)
 
 
-class ScenarioScheduler:
-    """场景调度器 - 实现6个功能场景的具体逻辑"""
+class TagScheduler:
+    """标签调度器 - 实现6个功能场景的具体逻辑"""
     
     def __init__(self, config: BaseConfig, max_workers: int = 4):
         self.config = config
@@ -32,7 +32,7 @@ class ScenarioScheduler:
     def initialize(self):
         """初始化组件"""
         try:
-            logger.info("🚀 初始化场景调度器...")
+            logger.info("🚀 初始化标签调度器...")
             
             # 初始化Spark
             self.spark = self._create_spark_session()
@@ -53,10 +53,10 @@ class ScenarioScheduler:
             # 预缓存现有标签数据
             self._preload_existing_tags()
             
-            logger.info("✅ 场景调度器初始化完成")
+            logger.info("✅ 标签调度器初始化完成")
             
         except Exception as e:
-            logger.error(f"❌ 场景调度器初始化失败: {str(e)}")
+            logger.error(f"❌ 标签调度器初始化失败: {str(e)}")
             raise
     
     def _create_spark_session(self) -> SparkSession:
