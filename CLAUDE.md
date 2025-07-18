@@ -349,6 +349,31 @@ PROD_GLUE_ROLE_ARN=arn:aws:iam::xxx:role/GlueServiceRole-prod
 3. 直接追加到数据库，无需与现有标签合并
 4. 避免了复杂的标签合并逻辑，提高性能
 
+#### UPSERT时间戳机制完善 ⭐
+**问题**: 原UPSERT逻辑存在时间戳管理问题，相同数据会触发不必要的时间戳更新
+**根本原因**: MySQL执行顺序导致在比较时已经更新了字段值，比较总是失败
+**解决方案**: 
+1. **修复SQL执行顺序**: 将时间戳比较逻辑放在字段更新之前
+2. **移除自动更新约束**: 从数据库表定义中移除 `ON UPDATE CURRENT_TIMESTAMP`
+3. **精确时间戳控制**: 通过UPSERT逻辑精确控制何时更新时间戳
+
+**核心实现** (`src/writers/optimized_mysql_writer.py:115-122`):
+```sql
+ON DUPLICATE KEY UPDATE
+    updated_time = CASE 
+        WHEN JSON_EXTRACT(tag_ids, '$') <> JSON_EXTRACT(VALUES(tag_ids), '$')
+        THEN CURRENT_TIMESTAMP 
+        ELSE updated_time 
+    END,
+    tag_ids = VALUES(tag_ids),
+    tag_details = VALUES(tag_details)
+```
+
+**时间戳行为**:
+- `created_time`: 永远不变，记录首次插入时间
+- `updated_time`: 只有标签内容真正变化时才更新
+- **幂等性**: 相同操作不会触发不必要的时间戳更新
+
 #### 数据库表结构优化
 **问题**: 原表设计缺少时间戳字段，无法追踪标签更新时间
 **解决方案**: 
@@ -412,10 +437,9 @@ PROD_GLUE_ROLE_ARN=arn:aws:iam::xxx:role/GlueServiceRole-prod
       user_id VARCHAR(100) NOT NULL,
       tag_ids JSON NOT NULL COMMENT '用户的所有标签ID数组 [1,2,3,5]',
       tag_details JSON COMMENT '标签详细信息 {"1": {"tag_name": "高净值用户"}}',
-      computed_date DATE NOT NULL,
-      created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      UNIQUE KEY uk_user_date (user_id, computed_date)
+      created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间（永远不变）',
+      updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间（由UPSERT逻辑控制）',
+      UNIQUE KEY uk_user_id (user_id)
   );
   ```
 

@@ -1,31 +1,38 @@
 # 大数据标签系统依赖包
+# 支持三环境部署：本地Docker + AWS Glue开发/生产环境
 
-# 核心依赖
-pyspark==3.4.0
-py4j==0.10.9.7  # PySpark Java桥接
-pymysql==1.1.1
-boto3==1.26.137
-botocore==1.29.137
+# 🔧 核心依赖
+pyspark==3.4.0          # Spark分布式计算引擎
+py4j==0.10.9.7          # PySpark Java桥接
+pymysql==1.1.1          # MySQL数据库连接器
+boto3==1.26.137         # AWS SDK
+botocore==1.29.137      # AWS核心库
 
-# 数据处理
-pandas==2.0.3
-pyarrow==14.0.1
+# 📊 数据处理
+pandas==2.0.3           # 数据分析库
+pyarrow==14.0.1         # 高性能数据交换格式
 
-# 配置和工具
-python-dotenv==1.0.0
+# ⚙️ 配置和工具
+python-dotenv==1.0.0    # 环境变量管理
 
-# 测试依赖
-pytest==7.4.0
-pytest-cov==4.1.0
+# 🧪 测试依赖
+pytest==7.4.0           # 测试框架
+pytest-cov==4.1.0       # 测试覆盖率
 
-# AWS Glue依赖 (仅在Glue环境中需要)
-# awsglue-libs (由Glue环境提供)
+# ☁️ AWS Glue依赖 (仅在Glue环境中需要)
+# awsglue-libs (由AWS Glue环境自动提供)
 
-# 开发依赖
-black==23.7.0
-flake8==6.0.0
-mypy==1.5.1
+# 🛠️ 开发依赖
+black==23.7.0           # 代码格式化
+flake8==6.0.0           # 代码检查
+mypy==1.5.1             # 类型检查
 
-# 文档依赖
-mkdocs==1.5.0
-mkdocs-material==9.1.21
+# 📚 文档依赖
+mkdocs==1.5.0           # 文档生成
+mkdocs-material==9.1.21 # 文档主题
+
+# 🎯 系统功能说明
+# - 支持6种并行计算场景
+# - 智能标签合并和UPSERT时间戳机制
+# - 三环境配置管理（local/glue-dev/glue-prod）
+# - 完整的测试框架和文档

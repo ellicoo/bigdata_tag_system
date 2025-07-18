@@ -20,7 +20,8 @@
 ### 🔄 数据一致性保障
 - ✅ **智能标签合并**：内存合并 + MySQL现有标签合并，确保标签一致性
 - ✅ **UPSERT写入策略**：`INSERT ON DUPLICATE KEY UPDATE`，避免数据覆盖
-- ✅ **时间戳管理**：自动维护 `created_time` 和 `updated_time`，不重复更新创建时间
+- ✅ **UPSERT时间戳机制**：`created_time` 永远不变，`updated_time` 只在标签内容实际变化时更新
+- ✅ **幂等性保证**：相同操作重复执行不会触发不必要的时间戳更新
 
 ### 📊 6种计算场景
 - ✅ **场景1**: 全量用户打全量标签（`full-parallel`）
@@ -232,8 +233,8 @@ CREATE TABLE user_tags (
     user_id VARCHAR(100) NOT NULL COMMENT '用户ID',
     tag_ids JSON NOT NULL COMMENT '用户的所有标签ID数组 [1,2,3,5]',
     tag_details JSON COMMENT '标签详细信息 {"1": {"tag_name": "高净值用户"}}',
-    created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间（首次插入时设置，后续更新不变）',
+    updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间（每次UPSERT时根据内容变化自动更新）',
     INDEX idx_user_id (user_id),
     INDEX idx_created_time (created_time),
     INDEX idx_updated_time (updated_time),
