@@ -1,13 +1,13 @@
 import logging
 import time
 from typing import List, Dict, Any, Optional
-from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import col
 
 from src.config.base import BaseConfig
 from src.readers.hive_reader import HiveDataReader
 from src.readers.rule_reader import RuleReader
-from src.engine.parallel_tag_engine import ParallelTagEngine
+from src.engine.task_parallel_engine import TaskBasedParallelEngine
 from src.merger.tag_merger import UnifiedTagMerger, TagMergeStrategy
 from src.writers.optimized_mysql_writer import OptimizedMySQLWriter
 
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class TagScheduler:
-    """标签调度器 - 实现6个功能场景的具体逻辑"""
+    """标签调度器 - 基于任务化架构的标签计算调度"""
     
     def __init__(self, config: BaseConfig, max_workers: int = 4):
         self.config = config
@@ -25,7 +25,7 @@ class TagScheduler:
         # 组件初始化
         self.rule_reader = None
         self.hive_reader = None
-        self.parallel_engine = None
+        self.task_engine = None
         self.unified_merger = None
         self.mysql_writer = None
     
@@ -40,15 +40,17 @@ class TagScheduler:
             # 初始化组件
             self.rule_reader = RuleReader(self.spark, self.config.mysql)
             self.hive_reader = HiveDataReader(self.spark, self.config.s3)
-            self.parallel_engine = ParallelTagEngine(self.spark, self.max_workers, self.config.mysql)
+            
+            # 初始化规则数据
+            self.rule_reader.initialize()
+            
+            # 初始化任务引擎，传入已初始化的rule_reader
+            self.task_engine = TaskBasedParallelEngine(self.spark, self.config, self.max_workers, self.rule_reader)
             self.unified_merger = UnifiedTagMerger(self.spark, self.config.mysql)
             self.mysql_writer = OptimizedMySQLWriter(self.spark, self.config.mysql)
             
             # 初始化时预缓存MySQL现有标签数据
             self.cached_existing_tags = None
-            
-            # 初始化规则数据
-            self.rule_reader.initialize()
             
             # 预缓存现有标签数据
             self._preload_existing_tags()
@@ -70,7 +72,15 @@ class TagScheduler:
             builder = builder.config(key, value)
         
         spark = builder.getOrCreate()
-        spark.sparkContext.setLogLevel("WARN")
+        spark.sparkContext.setLogLevel("ERROR")  # 更严格的日志级别，只显示错误
+        
+        # 关闭Spark的详细日志
+        spark.sparkContext._jvm.org.apache.log4j.Logger.getLogger("org").setLevel(
+            spark.sparkContext._jvm.org.apache.log4j.Level.ERROR
+        )
+        spark.sparkContext._jvm.org.apache.log4j.Logger.getLogger("akka").setLevel(
+            spark.sparkContext._jvm.org.apache.log4j.Level.ERROR
+        )
         
         logger.info(f"Spark会话创建成功: {spark.sparkContext.applicationId}")
         return spark
@@ -78,7 +88,7 @@ class TagScheduler:
     def _preload_existing_tags(self):
         """预缓存MySQL中的现有标签数据"""
         try:
-            logger.info("🔄 预缓存MySQL现有标签数据...")
+            logger.info("🔄 预缓存MySQL现有用户标签数据-persist(内存&磁盘)...")
             
             existing_df = self.spark.read.jdbc(
                 url=self.config.mysql.jdbc_url,
@@ -87,150 +97,116 @@ class TagScheduler:
             )
             
             if existing_df.count() == 0:
-                logger.info("MySQL中没有现有标签数据")
+                logger.info("MySQL中暂无现有用户标签数据")
                 self.cached_existing_tags = None
-                return
-            
-            # 将JSON字符串转换为数组类型并缓存到内存+磁盘
-            from pyspark.sql.functions import from_json
-            from pyspark.sql.types import ArrayType, IntegerType
-            from pyspark import StorageLevel
-            
-            processed_df = existing_df.select(
-                "user_id",
-                from_json(col("tag_ids"), ArrayType(IntegerType())).alias("tag_ids"),
-                "tag_details",
-                "created_time",
-                "updated_time"
-            ).persist(StorageLevel.MEMORY_AND_DISK)
-            
-            # 触发缓存
-            existing_count = processed_df.count()
-            self.cached_existing_tags = processed_df
-            
-            logger.info(f"✅ 成功预缓存 {existing_count} 条现有用户标签（内存+磁盘模式）")
+            else:
+                # 预缓存现有标签数据，进行JSON转换
+                from pyspark import StorageLevel
+                from pyspark.sql.functions import from_json
+                from pyspark.sql.types import ArrayType, IntegerType
+                
+                # JSON转换：将tag_ids从字符串转为数组
+                processed_df = existing_df.select(
+                    "user_id",
+                    from_json(col("tag_ids"), ArrayType(IntegerType())).alias("tag_ids"),
+                    "tag_details",
+                    "created_time", 
+                    "updated_time"
+                )
+                
+                self.cached_existing_tags = processed_df.persist(StorageLevel.MEMORY_AND_DISK)
+                # 触发缓存
+                cached_count = self.cached_existing_tags.count()
+                logger.info(f"✅ 预缓存MySQL现有用户标签数据完成（含JSON转换），共 {cached_count} 条记录")
             
         except Exception as e:
-            logger.warning(f"预缓存现有标签失败: {str(e)}")
+            logger.warning(f"⚠️ 预缓存MySQL现有用户标签数据失败: {str(e)}")
             self.cached_existing_tags = None
     
-    # ==================== 6个功能场景实现 ====================
-    
-    def scenario_1_full_users_full_tags(self) -> bool:
-        """
-        场景1: 全量用户打全量标签
-        - 多标签并行计算
-        - 内存合并同用户多标签结果
-        - 不与MySQL现有标签合并
-        - 直接插入MySQL（利用唯一键约束）
-        """
+    def health_check(self) -> bool:
+        """系统健康检查"""
         try:
-            logger.info("🎯 场景1: 全量用户打全量标签")
-            start_time = time.time()
+            logger.info("🏥 执行系统健康检查...")
             
-            # 1. 读取全量标签规则
-            all_rules = self.rule_reader.read_active_rules()
-            if not all_rules:
-                logger.warning("没有活跃的标签规则")
+            # 1. 检查Spark连接
+            if not self.spark:
+                logger.error("❌ Spark会话未初始化")
                 return False
             
-            logger.info(f"加载了 {len(all_rules)} 个标签规则")
-            
-            # 2. 读取全量用户数据
-            user_data = self._get_full_user_data()
-            user_count = user_data.count()
-            logger.info(f"📊 生成用户数据: {user_count} 个用户")
-            
-            if user_count == 0:
-                logger.warning("没有用户数据")
-                return False
-                
-            # 显示数据样例
-            logger.info("用户数据样例:")
-            user_data.show(3, truncate=False)
-            
-            # 3. 多标签并行计算 + 内存合并
-            merged_result = self.parallel_engine.compute_tags_with_memory_merge(user_data, all_rules)
-            if merged_result is None:
-                logger.error("标签计算和内存合并失败")
+            # 2. 检查规则读取器
+            if not self.rule_reader:
+                logger.error("❌ 规则读取器未初始化")
                 return False
             
-            # 显示计算结果
-            result_count = merged_result.count()
-            logger.info(f"📊 标签计算结果: {result_count} 个用户有标签")
+            # 3. 检查任务引擎
+            if not self.task_engine:
+                logger.error("❌ 任务引擎未初始化")
+                return False
             
-            if result_count > 0:
-                logger.info("标签计算结果样例:")
-                merged_result.show(3, truncate=False)
+            # 4. 检查数据库连接
+            try:
+                test_df = self.spark.read.jdbc(
+                    url=self.config.mysql.jdbc_url,
+                    table="(SELECT 1 as test_connection) as test",
+                    properties=self.config.mysql.connection_properties
+                )
+                test_df.count()
+                logger.info("✅ MySQL连接正常")
+            except Exception as e:
+                logger.error(f"❌ MySQL连接失败: {str(e)}")
+                return False
             
-            # 4. 直接写入MySQL（不与现有标签合并）
-            success = self.mysql_writer.write_tag_results(merged_result)
+            # 5. 检查任务注册状态
+            available_tasks = self.get_available_tasks()
+            logger.info(f"✅ 已注册任务: {len(available_tasks)} 个")
             
-            # 5. 统计输出
-            end_time = time.time()
-            stats = self.mysql_writer.get_write_statistics()
-            
-            logger.info(f"""
-🎉 场景1完成！
-⏱️  执行时间: {end_time - start_time:.2f}秒
-📊 统计信息: {stats}
-            """)
-            
-            return success
+            logger.info("🎉 系统健康检查通过")
+            return True
             
         except Exception as e:
-            logger.error(f"场景1执行失败: {str(e)}")
+            logger.error(f"❌ 系统健康检查失败: {str(e)}")
             return False
     
-    def scenario_2_full_users_specific_tags(self, tag_ids: List[int]) -> bool:
-        """
-        场景2: 全量用户打指定标签
-        - 多标签并行计算
-        - 内存合并同用户多标签结果
-        - 与MySQL现有标签合并
-        - 插入MySQL（利用唯一键约束）
-        """
+    # ==================== 任务化架构方法 ====================
+    
+    def scenario_task_all_users_all_tags(self, user_filter: Optional[List[str]] = None) -> bool:
+        """任务化场景：全量用户全量标签计算"""
         try:
-            logger.info(f"🎯 场景2: 全量用户打指定标签 {tag_ids}")
             start_time = time.time()
+            logger.info(f"🎯 开始任务化全量用户全量标签计算")
+            logger.info(f"👥 用户过滤: {user_filter if user_filter else '全量用户'}")
             
-            # 1. 读取指定标签规则
-            all_rules = self.rule_reader.read_active_rules()
-            target_rules = [rule for rule in all_rules if rule['tag_id'] in tag_ids]
+            # 1. 使用任务引擎执行所有任务
+            task_results = self.task_engine.execute_all_tasks(user_filter)
             
-            if not target_rules:
-                logger.warning(f"没有找到指定标签的规则: {tag_ids}")
-                return False
+            if task_results is None or task_results.count() == 0:
+                logger.info("📊 全量标签任务执行完成 - 无用户符合任何标签条件 (这是正常情况)")
+                return True
             
-            logger.info(f"加载了 {len(target_rules)} 个指定标签规则")
-            
-            # 2. 读取全量用户数据
-            user_data = self._get_full_user_data()
-            
-            # 3. 多标签并行计算 + 内存合并
-            memory_merged = self.parallel_engine.compute_tags_with_memory_merge(user_data, target_rules)
-            if memory_merged is None:
-                logger.error("标签计算和内存合并失败")
-                return False
-            
-            # 4. 与MySQL现有标签合并（关键差异）- 使用预缓存数据
+            # 2. 与MySQL已存在标签合并（所有场景都需要合并）
+            logger.info("🔄 开始与MySQL已存在标签合并...")
             final_merged = self.unified_merger.advanced_merger.merge_with_existing_tags(
-                memory_merged, 
+                task_results, 
                 self.cached_existing_tags
             )
             if final_merged is None:
-                logger.error("与现有标签合并失败")
+                logger.error("❌ 与MySQL已存在标签合并失败")
                 return False
             
-            # 5. 写入MySQL
+            logger.info(f"✅ 与MySQL已存在标签合并完成，最终影响用户数: {final_merged.count()}")
+            
+            # 3. 写入MySQL
+            logger.info("📝 写入合并后的标签结果到MySQL...")
             success = self.mysql_writer.write_tag_results(final_merged)
             
-            # 6. 统计输出
+            # 4. 统计输出
             end_time = time.time()
             stats = self.mysql_writer.get_write_statistics()
             
             logger.info(f"""
-🎉 场景2完成！
+🎉 任务化全量用户全量标签计算完成（含MySQL标签合并）！
+🏷️  执行了所有已注册的任务类
+👥 影响用户数: {final_merged.count()}
 ⏱️  执行时间: {end_time - start_time:.2f}秒
 📊 统计信息: {stats}
             """)
@@ -238,462 +214,287 @@ class TagScheduler:
             return success
             
         except Exception as e:
-            logger.error(f"场景2执行失败: {str(e)}")
+            logger.error(f"❌ 任务化全量标签计算失败: {str(e)}")
             return False
+        finally:
+            # 清理任务引擎缓存
+            if self.task_engine:
+                self.task_engine.cleanup_cache()
     
-    def scenario_3_incremental_users_full_tags(self, days_back: int = 1) -> bool:
-        """
-        场景3: 增量用户打全量标签
-        - 识别新增用户
-        - 多标签并行计算
-        - 内存合并同用户多标签结果
-        - 不与MySQL现有标签合并（新用户）
-        - 直接插入MySQL
-        """
-        try:
-            logger.info(f"🎯 场景3: 增量用户打全量标签（回溯{days_back}天）")
-            start_time = time.time()
-            
-            # 1. 读取全量标签规则
-            all_rules = self.rule_reader.read_active_rules()
-            if not all_rules:
-                logger.warning("没有活跃的标签规则")
-                return False
-            
-            # 2. 识别真正的新增用户
-            new_users = self._identify_truly_new_users(days_back)
-            new_user_count = new_users.count()
-            
-            if new_user_count == 0:
-                logger.info("没有发现新增用户")
-                return True
-            
-            logger.info(f"发现 {new_user_count} 个新增用户")
-            
-            # 3. 多标签并行计算 + 内存合并
-            merged_result = self.parallel_engine.compute_tags_with_memory_merge(new_users, all_rules)
-            if merged_result is None:
-                logger.warning("新增用户没有命中任何标签")
-                return True
-            
-            # 4. 直接写入MySQL（新用户不需要与现有标签合并）
-            success = self.mysql_writer.write_tag_results(merged_result)
-            
-            # 5. 统计输出
-            end_time = time.time()
-            stats = self.mysql_writer.get_write_statistics()
-            
-            logger.info(f"""
-🎉 场景3完成！
-⏱️  执行时间: {end_time - start_time:.2f}秒
-📊 统计信息: {stats}
-            """)
-            
-            return success
-            
-        except Exception as e:
-            logger.error(f"场景3执行失败: {str(e)}")
-            return False
+    def get_available_tasks(self) -> Dict[int, str]:
+        """获取所有可用的标签任务"""
+        from src.tasks.task_factory import TagTaskFactory
+        return TagTaskFactory.get_all_available_tasks()
     
-    def scenario_4_incremental_users_specific_tags(self, days_back: int, tag_ids: List[int]) -> bool:
-        """
-        场景4: 增量用户打指定标签
-        - 识别新增用户
-        - 多标签并行计算
-        - 内存合并同用户多标签结果
-        - 不与MySQL现有标签合并（新用户）
-        - 直接插入MySQL
-        """
-        try:
-            logger.info(f"🎯 场景4: 增量用户打指定标签（回溯{days_back}天，标签{tag_ids}）")
-            start_time = time.time()
-            
-            # 1. 读取指定标签规则
-            all_rules = self.rule_reader.read_active_rules()
-            target_rules = [rule for rule in all_rules if rule['tag_id'] in tag_ids]
-            
-            if not target_rules:
-                logger.warning(f"没有找到指定标签的规则: {tag_ids}")
-                return False
-            
-            # 2. 识别新增用户
-            new_users = self._identify_truly_new_users(days_back)
-            new_user_count = new_users.count()
-            
-            if new_user_count == 0:
-                logger.info("没有发现新增用户")
-                return True
-            
-            logger.info(f"发现 {new_user_count} 个新增用户")
-            
-            # 3. 多标签并行计算 + 内存合并
-            merged_result = self.parallel_engine.compute_tags_with_memory_merge(new_users, target_rules)
-            if merged_result is None:
-                logger.warning("新增用户没有命中指定标签")
-                return True
-            
-            # 4. 直接写入MySQL（新用户不需要与现有标签合并）
-            success = self.mysql_writer.write_tag_results(merged_result)
-            
-            # 5. 统计输出
-            end_time = time.time()
-            stats = self.mysql_writer.get_write_statistics()
-            
-            logger.info(f"""
-🎉 场景4完成！
-⏱️  执行时间: {end_time - start_time:.2f}秒
-📊 统计信息: {stats}
-            """)
-            
-            return success
-            
-        except Exception as e:
-            logger.error(f"场景4执行失败: {str(e)}")
-            return False
+    def get_task_summary(self) -> Dict[int, Dict[str, Any]]:
+        """获取任务摘要信息"""
+        from src.tasks.task_registry import get_task_summary
+        return get_task_summary()
     
-    def scenario_5_specific_users_full_tags(self, user_ids: List[str]) -> bool:
+    def scenario_task_all_users_specific_tags(self, tag_ids: List[int]) -> Optional[DataFrame]:
         """
-        场景5: 指定用户打全量标签
-        - 过滤指定用户
-        - 多标签并行计算
-        - 内存合并同用户多标签结果
-        - 不与MySQL现有标签合并
-        - 直接插入MySQL
-        """
-        try:
-            logger.info(f"🎯 场景5: 指定用户打全量标签 {user_ids}")
-            start_time = time.time()
-            
-            # 1. 读取全量标签规则
-            all_rules = self.rule_reader.read_active_rules()
-            if not all_rules:
-                logger.warning("没有活跃的标签规则")
-                return False
-            
-            # 2. 获取指定用户数据
-            user_data = self._get_specific_user_data(user_ids)
-            filtered_count = user_data.count()
-            
-            if filtered_count == 0:
-                logger.warning(f"没有找到指定用户: {user_ids}")
-                return False
-            
-            logger.info(f"找到 {filtered_count} 个指定用户")
-            
-            # 3. 多标签并行计算 + 内存合并
-            merged_result = self.parallel_engine.compute_tags_with_memory_merge(user_data, all_rules)
-            if merged_result is None:
-                logger.warning("指定用户没有命中任何标签")
-                return True
-            
-            # 4. 直接写入MySQL（指定用户场景不与现有标签合并）
-            success = self.mysql_writer.write_tag_results(merged_result)
-            
-            # 5. 统计输出
-            end_time = time.time()
-            stats = self.mysql_writer.get_write_statistics()
-            
-            logger.info(f"""
-🎉 场景5完成！
-⏱️  执行时间: {end_time - start_time:.2f}秒
-📊 统计信息: {stats}
-            """)
-            
-            return success
-            
-        except Exception as e:
-            logger.error(f"场景5执行失败: {str(e)}")
-            return False
-    
-    def scenario_6_specific_users_specific_tags(self, user_ids: List[str], tag_ids: List[int]) -> bool:
-        """
-        场景6: 指定用户打指定标签
-        - 过滤指定用户
-        - 多标签并行计算
-        - 内存合并同用户多标签结果
+        任务化场景: 全量用户跑指定标签任务
+        - 执行指定标签ID对应的任务类
+        - 并行计算指定标签
         - 与MySQL现有标签合并
         - 插入MySQL
         """
         try:
-            logger.info(f"🎯 场景6: 指定用户打指定标签（用户{user_ids}，标签{tag_ids}）")
+            logger.info(f"🎯 任务化场景: 全量用户跑指定标签任务 (标签ID: {tag_ids})")
             start_time = time.time()
             
-            # 1. 读取指定标签规则
-            all_rules = self.rule_reader.read_active_rules()
-            target_rules = [rule for rule in all_rules if rule['tag_id'] in tag_ids]
+            # 使用任务引擎执行指定标签任务
+            result = self.task_engine.execute_specific_tag_tasks(tag_ids)
             
-            if not target_rules:
-                logger.warning(f"没有找到指定标签的规则: {tag_ids}")
-                return False
+            if result is None:
+                logger.warning(f"指定标签任务没有产生结果: {tag_ids}")
+                return None
             
-            # 2. 获取指定用户数据
-            user_data = self._get_specific_user_data(user_ids)
-            filtered_count = user_data.count()
-            
-            if filtered_count == 0:
-                logger.warning(f"没有找到指定用户: {user_ids}")
-                return False
-            
-            logger.info(f"找到 {filtered_count} 个指定用户")
-            
-            # 3. 多标签并行计算 + 内存合并
-            memory_merged = self.parallel_engine.compute_tags_with_memory_merge(user_data, target_rules)
-            if memory_merged is None:
-                logger.warning("指定用户没有命中指定标签")
-                return True
-            
-            # 4. 与MySQL现有标签合并（关键差异）- 使用预缓存数据
-            final_merged = self.unified_merger.advanced_merger.merge_with_existing_tags(
-                memory_merged, 
+            # 与MySQL现有标签合并
+            merged_result = self.unified_merger.advanced_merger.merge_with_existing_tags(
+                result, 
                 self.cached_existing_tags
             )
-            if final_merged is None:
-                logger.error("与现有标签合并失败")
-                return False
             
-            # 5. 写入MySQL
-            success = self.mysql_writer.write_tag_results(final_merged)
+            # 写入MySQL
+            success = self.mysql_writer.write_tag_results(merged_result)
             
-            # 6. 统计输出
+            # 统计输出
             end_time = time.time()
             stats = self.mysql_writer.get_write_statistics()
             
             logger.info(f"""
-🎉 场景6完成！
+🎉 任务化场景完成！
 ⏱️  执行时间: {end_time - start_time:.2f}秒
 📊 统计信息: {stats}
             """)
             
-            return success
+            return merged_result if success else None
             
         except Exception as e:
-            logger.error(f"场景6执行失败: {str(e)}")
-            return False
+            logger.error(f"任务化场景执行失败: {str(e)}")
+            return None
     
-    # ==================== 辅助方法 ====================
-    
-    def _get_full_user_data(self):
-        """获取全量用户数据"""
-        if self.config.environment == 'local':
-            return self._generate_production_like_data()
-        else:
-            # 生产环境从Hive读取
-            return self.hive_reader.read_all_user_data()
-    
-    def _get_specific_user_data(self, user_ids: List[str]):
-        """获取指定用户数据"""
-        full_data = self._get_full_user_data()
-        return full_data.filter(col("user_id").isin(user_ids))
-    
-    def _identify_truly_new_users(self, days_back: int):
-        """识别真正的新增用户"""
+    def scenario_task_specific_users_specific_tags(self, user_ids: List[str], tag_ids: List[int]) -> Optional[DataFrame]:
+        """
+        任务化场景: 指定用户跑指定标签任务
+        - 执行指定标签ID对应的任务类
+        - 过滤指定用户
+        - 并行计算指定标签
+        - 与MySQL现有标签合并
+        - 插入MySQL
+        """
         try:
-            logger.info(f"🔍 识别最近 {days_back} 天的新增用户...")
+            logger.info(f"🎯 任务化场景: 指定用户跑指定标签任务 (用户: {user_ids}, 标签ID: {tag_ids})")
+            start_time = time.time()
             
-            # 1. 获取包含新增用户的全量数据
-            hive_all_users = self._generate_hive_data_with_new_users(days_back)
+            # 使用任务引擎执行指定标签任务，传入用户过滤
+            result = self.task_engine.execute_specific_tag_tasks(tag_ids, user_ids)
             
-            # 2. 读取MySQL中已有用户
-            mysql_existing_users = self._read_existing_users_from_mysql()
+            if result is None:
+                logger.warning(f"指定用户指定标签任务没有产生结果: 用户{user_ids}, 标签{tag_ids}")
+                return None
             
-            # 3. 找出新增用户（left_anti join）
-            new_users = hive_all_users.join(
-                mysql_existing_users,
-                "user_id",
-                "left_anti"
+            # 与MySQL现有标签合并
+            merged_result = self.unified_merger.advanced_merger.merge_with_existing_tags(
+                result, 
+                self.cached_existing_tags
             )
             
-            new_user_count = new_users.count()
-            logger.info(f"✅ 识别出 {new_user_count} 个新增用户")
+            # 写入MySQL
+            success = self.mysql_writer.write_tag_results(merged_result)
             
-            return new_users
+            # 统计输出
+            end_time = time.time()
+            stats = self.mysql_writer.get_write_statistics()
+            
+            logger.info(f"""
+🎉 任务化场景完成！
+⏱️  执行时间: {end_time - start_time:.2f}秒
+📊 统计信息: {stats}
+            """)
+            
+            return merged_result if success else None
             
         except Exception as e:
-            logger.error(f"识别新增用户失败: {str(e)}")
-            raise
-    
-    def _read_existing_users_from_mysql(self):
-        """从MySQL读取已有用户列表"""
-        try:
-            existing_users_df = self.spark.read.jdbc(
-                url=self.config.mysql.jdbc_url,
-                table="user_tags",
-                properties=self.config.mysql.connection_properties
-            ).select("user_id").distinct()
-            
-            logger.info(f"MySQL中已有 {existing_users_df.count()} 个用户")
-            return existing_users_df
-            
-        except Exception as e:
-            logger.warning(f"读取已有用户失败（可能是首次运行）: {str(e)}")
-            # 返回空DataFrame
-            from pyspark.sql.types import StructType, StructField, StringType
-            empty_schema = StructType([StructField("user_id", StringType(), True)])
-            return self.spark.createDataFrame([], empty_schema)
-    
-    def _generate_production_like_data(self):
-        """生成生产级模拟数据（复用原有逻辑）"""
-        from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType, DateType
-        from pyspark.sql import Row
-        from datetime import date, timedelta
-        import random
-        
-        schema = StructType([
-            StructField("user_id", StringType(), True),
-            StructField("age", IntegerType(), True),
-            StructField("total_asset_value", DoubleType(), True),
-            StructField("trade_count_30d", IntegerType(), True),
-            StructField("risk_score", DoubleType(), True),
-            StructField("registration_date", DateType(), True),
-            StructField("user_level", StringType(), True),
-            StructField("kyc_status", StringType(), True),
-            StructField("cash_balance", DoubleType(), True),
-            StructField("last_login_date", DateType(), True)
-        ])
-        
-        test_users = []
-        for i in range(100):
-            # 确保有足够的高净值用户
-            if i < 50:
-                total_asset = random.uniform(150000, 500000)
-                cash_balance = random.uniform(60000, 150000)
-            else:
-                total_asset = random.uniform(1000, 80000)
-                cash_balance = random.uniform(1000, 40000)
-            
-            # 确保有VIP用户
-            if i < 20:
-                user_level = random.choice(["VIP2", "VIP3"])
-                kyc_status = "verified"
-            else:
-                user_level = random.choice(["BRONZE", "SILVER", "GOLD", "VIP1"])
-                kyc_status = random.choice(["verified", "pending", "rejected"])
-            
-            # 年龄分布
-            if i < 30:
-                age = random.randint(18, 30)
-            else:
-                age = random.randint(31, 65)
-            
-            # 交易活跃度
-            if i < 80:
-                trade_count = random.randint(15, 50)
-            else:
-                trade_count = random.randint(0, 8)
-            
-            # 风险评分
-            if i < 25:
-                risk_score = random.uniform(10, 28)
-            else:
-                risk_score = random.uniform(35, 80)
-            
-            # 注册和登录时间
-            if i < 15:
-                registration_date = date.today() - timedelta(days=random.randint(1, 25))
-                last_login_date = date.today() - timedelta(days=random.randint(0, 5))
-            else:
-                registration_date = date.today() - timedelta(days=random.randint(40, 300))
-                last_login_date = date.today() - timedelta(days=random.randint(10, 25))
-                
-            user_data = Row(
-                user_id=f"user_{i+1:06d}",
-                age=age,
-                total_asset_value=total_asset,
-                trade_count_30d=trade_count,
-                risk_score=risk_score,
-                registration_date=registration_date,
-                user_level=user_level,
-                kyc_status=kyc_status,
-                cash_balance=cash_balance,
-                last_login_date=last_login_date
-            )
-            test_users.append(user_data)
-        
-        test_df = self.spark.createDataFrame(test_users, schema)
-        logger.info(f"生成了 {test_df.count()} 条生产级模拟数据")
-        return test_df
-    
-    def _generate_hive_data_with_new_users(self, days_back: int):
-        """生成包含新增用户的Hive模拟数据"""
-        from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType, DateType
-        from pyspark.sql import Row
-        from datetime import date, timedelta
-        import random
-        
-        schema = StructType([
-            StructField("user_id", StringType(), True),
-            StructField("age", IntegerType(), True),
-            StructField("total_asset_value", DoubleType(), True),
-            StructField("trade_count_30d", IntegerType(), True),
-            StructField("risk_score", DoubleType(), True),
-            StructField("registration_date", DateType(), True),
-            StructField("user_level", StringType(), True),
-            StructField("kyc_status", StringType(), True),
-            StructField("cash_balance", DoubleType(), True),
-            StructField("last_login_date", DateType(), True)
-        ])
-        
-        all_users = []
-        
-        # 1. 添加现有用户（与MySQL重复）
-        for i in range(1, 6):
-            user_data = Row(
-                user_id=f"user_{i:06d}",
-                age=random.randint(25, 50),
-                total_asset_value=random.uniform(50000, 300000),
-                trade_count_30d=random.randint(10, 30),
-                risk_score=random.uniform(20, 70),
-                registration_date=date.today() - timedelta(days=random.randint(30, 365)),
-                user_level=random.choice(["SILVER", "GOLD", "VIP1"]),
-                kyc_status="verified",
-                cash_balance=random.uniform(10000, 100000),
-                last_login_date=date.today() - timedelta(days=random.randint(0, 7))
-            )
-            all_users.append(user_data)
-        
-        # 2. 添加新增用户
-        for i in range(10):
-            reg_date = date.today() - timedelta(days=random.randint(1, days_back))
-            
-            user_data = Row(
-                user_id=f"new_user_{i+1:04d}",
-                age=random.randint(18, 45),
-                total_asset_value=random.uniform(10000, 200000),
-                trade_count_30d=random.randint(5, 25),
-                risk_score=random.uniform(15, 60),
-                registration_date=reg_date,
-                user_level=random.choice(["BRONZE", "SILVER", "GOLD", "VIP1"]),
-                kyc_status=random.choice(["verified", "pending"]),
-                cash_balance=random.uniform(5000, 80000),
-                last_login_date=date.today() - timedelta(days=random.randint(0, 3))
-            )
-            all_users.append(user_data)
-        
-        hive_df = self.spark.createDataFrame(all_users, schema)
-        logger.info(f"生成了 {hive_df.count()} 条Hive模拟数据（包含新老用户）")
-        return hive_df
+            logger.error(f"任务化场景执行失败: {str(e)}")
+            return None
     
     def cleanup(self):
         """清理资源"""
         try:
-            logger.info("🧹 清理场景调度器资源...")
+            # 清理任务引擎缓存
+            if self.task_engine:
+                self.task_engine.cleanup_cache()
             
             # 清理预缓存的标签数据
-            if self.cached_existing_tags is not None:
+            if self.cached_existing_tags:
                 self.cached_existing_tags.unpersist()
-                logger.info("✅ 清理预缓存标签数据完成")
             
-            if self.unified_merger:
-                self.unified_merger.cleanup()
-            
-            if self.rule_reader:
-                self.rule_reader.cleanup()
-            
+            # 停止Spark会话
             if self.spark:
-                self.spark.catalog.clearCache()
                 self.spark.stop()
             
-            logger.info("✅ 场景调度器资源清理完成")
+            logger.info("✅ 资源清理完成")
             
         except Exception as e:
-            logger.warning(f"资源清理失败: {str(e)}")
+            logger.warning(f"⚠️ 资源清理异常: {str(e)}")    
+    def _generate_production_like_data(self, source_name: str = None) -> DataFrame:
+        """生成生产环境模拟的测试数据"""
+        try:
+            logger.info("📊 生成生产环境模拟测试数据...")
+            
+            import random
+            from datetime import datetime, timedelta
+            from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType, DateType
+            from pyspark.sql.functions import lit
+            import json
+            
+            # 生成基础用户数据
+            num_users = 300
+            
+            # 生成用户基础信息
+            user_basic_data = []
+            for i in range(num_users):
+                user_id = f"user_{i:06d}"
+                
+                # 生成不同类型的用户数据
+                if i < 50:  # 高净值用户
+                    total_asset = random.uniform(150000, 500000)
+                    cash_balance = random.uniform(60000, 150000)
+                    user_level = random.choice(["VIP1", "VIP2", "VIP3"])
+                    kyc_status = "verified"
+                    risk_score = random.uniform(20, 50)
+                    age = random.randint(30, 55)
+                    trade_count = random.randint(15, 40)
+                elif i < 70:  # VIP用户
+                    total_asset = random.uniform(80000, 200000)
+                    cash_balance = random.uniform(30000, 80000)
+                    user_level = random.choice(["VIP2", "VIP3"])
+                    kyc_status = "verified"
+                    risk_score = random.uniform(15, 35)
+                    age = random.randint(25, 50)
+                    trade_count = random.randint(10, 25)
+                elif i < 100:  # 年轻用户
+                    total_asset = random.uniform(5000, 50000)
+                    cash_balance = random.uniform(1000, 20000)
+                    user_level = random.choice(["Regular", "VIP1"])
+                    kyc_status = random.choice(["verified", "pending"])
+                    risk_score = random.uniform(25, 60)
+                    age = random.randint(18, 30)
+                    trade_count = random.randint(5, 20)
+                elif i < 180:  # 活跃交易者
+                    total_asset = random.uniform(20000, 100000)
+                    cash_balance = random.uniform(5000, 40000)
+                    user_level = random.choice(["Regular", "VIP1", "VIP2"])
+                    kyc_status = "verified"
+                    risk_score = random.uniform(30, 70)
+                    age = random.randint(25, 45)
+                    trade_count = random.randint(16, 50)
+                elif i < 205:  # 低风险用户
+                    total_asset = random.uniform(30000, 120000)
+                    cash_balance = random.uniform(10000, 50000)
+                    user_level = random.choice(["Regular", "VIP1"])
+                    kyc_status = "verified"
+                    risk_score = random.uniform(10, 30)
+                    age = random.randint(28, 50)
+                    trade_count = random.randint(5, 15)
+                elif i < 220:  # 新注册用户
+                    total_asset = random.uniform(1000, 20000)
+                    cash_balance = random.uniform(500, 10000)
+                    user_level = "Regular"
+                    kyc_status = random.choice(["pending", "verified"])
+                    risk_score = random.uniform(40, 80)
+                    age = random.randint(20, 40)
+                    trade_count = random.randint(1, 8)
+                elif i < 235:  # 最近活跃用户
+                    total_asset = random.uniform(15000, 80000)
+                    cash_balance = random.uniform(5000, 30000)
+                    user_level = random.choice(["Regular", "VIP1"])
+                    kyc_status = "verified"
+                    risk_score = random.uniform(25, 55)
+                    age = random.randint(22, 45)
+                    trade_count = random.randint(8, 25)
+                else:  # 普通用户
+                    total_asset = random.uniform(2000, 40000)
+                    cash_balance = random.uniform(500, 15000)
+                    user_level = "Regular"
+                    kyc_status = random.choice(["verified", "pending"])
+                    risk_score = random.uniform(30, 90)
+                    age = random.randint(20, 65)
+                    trade_count = random.randint(1, 12)
+                
+                # 设置时间数据
+                base_date = datetime.now().date()
+                
+                # 新注册用户的注册时间在最近30天内
+                if i < 220 and i >= 205:
+                    registration_date = base_date - timedelta(days=random.randint(1, 30))
+                else:
+                    registration_date = base_date - timedelta(days=random.randint(30, 365))
+                
+                # 最近活跃用户的最后登录时间在最近7天内
+                if i < 235 and i >= 220:
+                    last_login_date = base_date - timedelta(days=random.randint(1, 7))
+                else:
+                    last_login_date = base_date - timedelta(days=random.randint(7, 90))
+                
+                user_basic_data.append({
+                    "user_id": user_id,
+                    "age": age,
+                    "user_level": user_level,
+                    "kyc_status": kyc_status,
+                    "registration_date": registration_date,
+                    "risk_score": risk_score,
+                    "total_asset_value": total_asset,
+                    "cash_balance": cash_balance,
+                    "trade_count_30d": trade_count,
+                    "last_login_date": last_login_date
+                })
+            
+            # 转换为 DataFrame
+            basic_schema = StructType([
+                StructField("user_id", StringType(), True),
+                StructField("age", IntegerType(), True),
+                StructField("user_level", StringType(), True),
+                StructField("kyc_status", StringType(), True),
+                StructField("registration_date", DateType(), True),
+                StructField("risk_score", DoubleType(), True),
+                StructField("total_asset_value", DoubleType(), True),
+                StructField("cash_balance", DoubleType(), True),
+                StructField("trade_count_30d", IntegerType(), True),
+                StructField("last_login_date", DateType(), True)
+            ])
+            
+            all_data_df = self.spark.createDataFrame(user_basic_data, basic_schema)
+            
+            # 分别创建三个数据表
+            user_basic_info = all_data_df.select(
+                "user_id", "age", "user_level", "kyc_status", 
+                "registration_date", "risk_score"
+            )
+            
+            user_asset_summary = all_data_df.select(
+                "user_id", "total_asset_value", "cash_balance"
+            )
+            
+            user_activity_summary = all_data_df.select(
+                "user_id", "trade_count_30d", "last_login_date"
+            )
+            
+            logger.info(f"✅ 生成测试数据完成: {num_users} 个用户")
+            
+            # 根据source_name返回对应的DataFrame
+            if source_name == 'user_basic_info':
+                return user_basic_info
+            elif source_name == 'user_asset_summary':
+                return user_asset_summary
+            elif source_name == 'user_activity_summary':
+                return user_activity_summary
+            else:
+                # 如果没有指定source_name，返回合并的完整数据
+                return all_data_df
+            
+        except Exception as e:
+            logger.error(f"❌ 生成测试数据失败: {str(e)}")
+            return None

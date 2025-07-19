@@ -1,9 +1,8 @@
 import logging
-from typing import Optional, Dict, Any
+from typing import Optional
 from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.functions import col, from_json, array_union, array_distinct, when, lit
+from pyspark.sql.functions import col, from_json, lit
 from pyspark.sql.types import ArrayType, IntegerType
-from datetime import date
 
 from src.config.base import MySQLConfig
 
@@ -55,7 +54,7 @@ class AdvancedTagMerger:
                 "left"
             )
             
-            # 4. 合并标签数组 - 修复列引用问题，移除computed_date
+            # 4. 合并标签数组
             final_merged = merged_df.select(
                 col("user_id"),
                 self._merge_tag_arrays(
@@ -65,15 +64,55 @@ class AdvancedTagMerger:
                 col("new.tag_details")
             )
             
-            # 5. 调试信息：显示合并前后的数据
-            logger.info("合并前新标签样例:")
-            new_tags_df.show(3, truncate=False)
+            # 5. 详细的标签合并过程追踪日志
+            logger.info("📊 标签合并完整过程追踪（展示有标签的用户前3个）:")
             
-            logger.info("合并前现有标签样例:")
-            existing_tags.show(3, truncate=False)
+            # 获取有合并结果的用户（而不是随机前3个用户）
+            sample_users = final_merged.limit(3).collect()
+            sample_user_ids = [row.user_id for row in sample_users]
             
-            logger.info("合并后标签样例:")
-            final_merged.show(3, truncate=False)
+            # 注意：这里的new_tags_df实际上是经过内存合并后的结果，不是单个任务的原始结果
+            # 需要展示完整的合并链路
+            for user_id in sample_user_ids:
+                logger.info(f"   👤 用户 {user_id} 标签合并全过程:")
+                
+                # 1. 多任务内存合并后的标签（这是传入的new_tags_df）
+                memory_merged_tags = new_tags_df.filter(col("user_id") == user_id).collect()
+                memory_merged_tag_ids = memory_merged_tags[0].tag_ids if memory_merged_tags else []
+                
+                # 2. MySQL现有标签
+                mysql_existing_tags = existing_tags.filter(col("user_id") == user_id).collect()
+                mysql_existing_tag_ids = mysql_existing_tags[0].tag_ids if mysql_existing_tags else []
+                
+                # 3. 最终合并后标签
+                final_merged_tags = final_merged.filter(col("user_id") == user_id).collect()
+                final_merged_tag_ids = final_merged_tags[0].tag_ids if final_merged_tags else []
+                
+                logger.info(f"      📝 多任务内存合并后标签: {memory_merged_tag_ids}")
+                logger.info(f"      🗄️  MySQL现有标签: {mysql_existing_tag_ids}")
+                logger.info(f"      ✅ 最终合并后标签: {final_merged_tag_ids}")
+                
+                # 4. 分析合并变化
+                if mysql_existing_tag_ids:
+                    # 有现有标签的情况
+                    added_from_memory = [tag for tag in final_merged_tag_ids if tag not in mysql_existing_tag_ids]
+                    if added_from_memory:
+                        logger.info(f"      ➕ 从内存合并新增: {added_from_memory}")
+                    else:
+                        logger.info(f"      ➕ 从内存合并新增: 无 (标签重复或无变化)")
+                else:
+                    # 首次标签的情况
+                    logger.info(f"      ➕ 首次标签合并: {final_merged_tag_ids}")
+                
+                # 5. 合并逻辑验证
+                expected_merged = sorted(list(set(memory_merged_tag_ids + mysql_existing_tag_ids)))
+                actual_merged = sorted(final_merged_tag_ids)
+                if expected_merged == actual_merged:
+                    logger.info(f"      ✅ 合并逻辑正确")
+                else:
+                    logger.info(f"      ❌ 合并逻辑异常 - 期望: {expected_merged}, 实际: {actual_merged}")
+                
+                logger.info(f"      ─" * 60)
             
             # 注意：不在这里清理预缓存数据，由场景调度器统一管理
             if cached_existing_tags is None and existing_tags is not None:
@@ -131,9 +170,16 @@ class AdvancedTagMerger:
         
         @udf(returnType=ArrayType(IntegerType()))
         def merge_arrays(existing_tags, new_tags):
+            # 确保输入都是列表类型
             if existing_tags is None:
                 existing_tags = []
             if new_tags is None:
+                new_tags = []
+                
+            # 如果输入不是列表，转换为列表
+            if not isinstance(existing_tags, list):
+                existing_tags = []
+            if not isinstance(new_tags, list):
                 new_tags = []
             
             # 合并并去重，保持排序

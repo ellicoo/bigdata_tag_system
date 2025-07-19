@@ -182,7 +182,7 @@ class OptimizedMySQLWriter:
             return False
     
     def _validate_write_result(self, original_df: DataFrame) -> bool:
-        """验证写入结果"""
+        """验证写入结果 - 只验证任务类打到标签的用户是否成功写入"""
         try:
             # 获取应该写入的用户
             original_users = original_df.select("user_id").distinct().collect()
@@ -193,30 +193,27 @@ class OptimizedMySQLWriter:
                 logger.info("✅ 无数据写入，验证通过")
                 return True
             
-            # 检查数据库中的记录
+            # 只检查当前任务类打到标签的用户是否成功写入
             written_df = self.spark.read.jdbc(
                 url=self.mysql_config.jdbc_url,
                 table="user_tags",
                 properties=self.mysql_config.connection_properties
             )
             
-            written_count = written_df.count()
-            logger.info(f"📊 数据库中实际记录数: {written_count}")
-            
-            if written_count == 0:
+            if written_df.count() == 0:
                 logger.error(f"❌ 数据库中没有记录，但期望写入 {expected_count} 个用户")
                 return False
             
             written_users = written_df.select("user_id").distinct().collect()
             written_user_set = {row["user_id"] for row in written_users}
             
-            # 检查是否所有用户都已写入
+            # 检查当前任务类打到标签的用户是否都已写入
             missing_users = original_user_set - written_user_set
             if missing_users:
-                logger.error(f"❌ 缺失用户: {list(missing_users)[:5]}...")
+                logger.error(f"❌ 任务类打到标签的用户未成功写入: {list(missing_users)[:5]}...")
                 return False
             
-            logger.info(f"✅ 写入验证通过：{expected_count} 个用户")
+            logger.info(f"✅ 任务类打到标签的用户写入验证通过：{expected_count} 个用户成功写入")
             return True
             
         except Exception as e:

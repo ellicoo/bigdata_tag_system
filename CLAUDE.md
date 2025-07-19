@@ -221,6 +221,58 @@ python -m pytest tests/integration/test_end_to_end.py::TestEndToEndIntegration::
 python test_scenarios.py                                  # 测试所有6个并行优化场景
 ```
 
+### API接口服务
+
+系统提供了RESTful API接口，支持后端系统触发标签任务：
+
+#### 启动API服务器
+```bash
+# 启动本地环境API服务器
+python api_server.py --env local
+
+# 启动开发环境API服务器  
+python api_server.py --env glue-dev --host 0.0.0.0 --port 5000
+
+# 启动生产环境API服务器
+python api_server.py --env glue-prod --host 0.0.0.0 --port 8080 --log-level INFO
+```
+
+#### API接口概览
+- **POST** `/api/v1/tags/trigger` - 触发标签任务（支持指定标签ID列表）
+- **GET** `/api/v1/tasks/{task_id}/status` - 查询任务状态
+- **GET** `/api/v1/tasks` - 列出所有任务
+- **GET** `/api/v1/tags/available` - 获取可用标签列表
+- **GET** `/health` - 健康检查
+
+#### 触发标签任务示例
+```bash
+# 触发指定标签任务
+curl -X POST http://localhost:5000/api/v1/tags/trigger \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tag_ids": [1, 2, 3],
+    "mode": "full"
+  }'
+
+# 指定用户指定标签
+curl -X POST http://localhost:5000/api/v1/tags/trigger \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tag_ids": [1, 3],
+    "user_ids": ["user_000001", "user_000002"],
+    "mode": "full"
+  }'
+```
+
+#### API特性
+- **异步处理**: 任务提交后立即返回，不会阻塞调用方
+- **任务状态跟踪**: 支持查询任务执行状态和结果
+- **错误处理**: 完善的错误信息和HTTP状态码
+- **并发控制**: 支持多个任务并发执行（线程池管理）
+- **标签合并**: 所有任务都会与MySQL现有标签进行合并
+
+详细的API使用文档请参考：`docs/API_USAGE.md`
+
 ## 配置管理
 
 系统采用统一的三环境配置管理，支持以下环境：
@@ -388,6 +440,27 @@ ON DUPLICATE KEY UPDATE
 2. **多标签并行**: 同时计算多个标签，大幅提升性能
 3. **智能标签合并**: 场景2和场景6支持与MySQL现有标签智能合并
 4. **分区优化**: 根据数据量动态调整分区数，提升写入性能
+
+#### 标签合并日志追踪增强 ⭐
+**问题**: 原有日志缺乏合并过程的详细追踪，难以调试标签合并问题
+**解决方案**: 
+1. **任务引擎级别追踪**: 在 `task_parallel_engine.py` 中记录每个任务的原始标签结果
+2. **内存合并过程追踪**: 显示用户在各个任务中的标签及内存合并结果
+3. **MySQL合并过程追踪**: 在 `tag_merger.py` 中显示内存合并后标签、MySQL现有标签、最终合并后标签
+4. **合并逻辑验证**: 自动验证每个阶段的合并逻辑是否正确
+5. **用户级别细化**: 选择有标签的用户进行详细追踪，而非随机用户
+6. **去除重复日志**: 优化日志输出，避免相似信息重复显示
+
+**日志追踪链路**:
+```
+任务1结果 → 任务2结果 → ... → 内存合并 → MySQL现有标签合并 → 最终结果
+    ↓           ↓                    ↓              ↓                ↓
+详细追踪    详细追踪           用户级别追踪    用户级别追踪      逻辑验证
+```
+
+**核心实现位置**:
+- `src/engine/task_parallel_engine.py:536-619` - 内存合并过程追踪
+- `src/merger/tag_merger.py:67-115` - MySQL合并过程追踪
 
 ### 测试数据生成
 本地环境支持生产级模拟数据生成，确保标签规则能够正确匹配：

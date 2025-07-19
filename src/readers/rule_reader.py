@@ -14,9 +14,8 @@ class RuleReader:
     def __init__(self, spark: SparkSession, mysql_config: MySQLConfig):
         self.spark = spark
         self.mysql_config = mysql_config
-        # 使用DataFrame缓存，支持persist机制
-        self._rules_df = None
-        self._tag_definitions_df = None
+        # 使用DataFrame缓存，支持persist机制（JOIN结果已包含完整信息）
+        self._rules_df = None  # 已包含标签定义信息的完整规则DataFrame
         self._initialized = False
     
     def initialize(self):
@@ -25,14 +24,11 @@ class RuleReader:
             logger.info("规则读取器已初始化，使用缓存数据")
             return
         
-        logger.info("🔄 开始一次性加载规则数据...")
+        logger.info("🔄 开始一次性加载完整规则数据（JOIN包含标签定义）...")
         
         try:
-            # 1. 加载标签规则（联表查询，一次搞定）
+            # 加载标签规则（JOIN已包含标签定义，无需单独缓存）
             self._load_rules_df()
-            
-            # 2. 加载标签定义
-            self._load_tag_definitions_df()
             
             self._initialized = True
             logger.info("✅ 规则读取器初始化完成")
@@ -68,20 +64,7 @@ class RuleReader:
         
         # 触发持久化并获取统计
         rule_count = self._rules_df.count()
-        logger.info(f"✅ 标签规则DataFrame加载完成，共 {rule_count} 条")
-    
-    def _load_tag_definitions_df(self):
-        """加载标签定义DataFrame并persist"""
-        logger.info("📖 加载标签定义...")
-        
-        self._tag_definitions_df = self.spark.read.jdbc(
-            url=self.mysql_config.jdbc_url,
-            table="tag_definition",
-            properties=self.mysql_config.connection_properties
-        ).persist(StorageLevel.MEMORY_AND_DISK)
-        
-        tag_def_count = self._tag_definitions_df.count()
-        logger.info(f"✅ 标签定义DataFrame加载完成，共 {tag_def_count} 条")
+        logger.info(f"✅ 完整规则DataFrame已persist(内存&磁盘)，共 {rule_count} 条（包含标签定义）")
     
     def get_active_rules_df(self) -> DataFrame:
         """获取活跃标签规则DataFrame"""
@@ -90,10 +73,11 @@ class RuleReader:
         return self._rules_df
     
     def get_tag_definitions_df(self) -> DataFrame:
-        """获取标签定义DataFrame"""
+        """获取标签定义DataFrame - 直接从完整规则DataFrame提取"""
         if not self._initialized:
             self.initialize()
-        return self._tag_definitions_df
+        # 从完整规则DataFrame中提取标签定义信息
+        return self._rules_df.select("tag_id", "tag_name", "tag_category", "tag_description").distinct()
     
     def read_active_rules(self) -> List[Dict[str, Any]]:
         """读取所有启用的标签规则 - 兼容原接口，内部使用DataFrame缓存"""

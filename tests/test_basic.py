@@ -15,7 +15,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.config.base import SparkConfig, S3Config, MySQLConfig, BaseConfig
 from src.config.manager import ConfigManager
 from src.engine.rule_parser import RuleConditionParser
-from src.engine.parallel_tag_engine import ParallelTagEngine
+# from src.engine.parallel_tag_engine import ParallelTagEngine  # 已弃用
 
 
 class TestRuleParser(unittest.TestCase):
@@ -114,7 +114,7 @@ class TestTagCompute(unittest.TestCase):
             .getOrCreate()
         cls.spark.sparkContext.setLogLevel("WARN")
         
-        cls.tag_engine = ParallelTagEngine(cls.spark)
+        # cls.tag_engine = ParallelTagEngine(cls.spark)  # 已弃用
     
     @classmethod
     def tearDownClass(cls):
