@@ -14,8 +14,8 @@ from pyspark.context import SparkContext
 import os
 sys.path.append('/opt/ml/code')  # Glue作业代码路径
 
-from src.config.manager import ConfigManager
-from src.scheduler.tag_scheduler import TagScheduler
+from src.common.config.manager import ConfigManager
+from src.batch.orchestrator.batch_orchestrator import BatchOrchestrator
 
 
 def setup_glue_logging(log_level="WARN"):
@@ -55,8 +55,8 @@ def main():
         config = ConfigManager.load_config('glue-prod')
         logger.info("✅ 生产环境配置加载完成")
         
-        # 创建调度器
-        scheduler = TagScheduler(config)
+        # 创建批处理编排器
+        scheduler = BatchOrchestrator(config)
         
         # 初始化系统
         logger.info("📋 初始化生产标签计算系统...")
@@ -77,12 +77,13 @@ def main():
         
         if mode == 'full':
             logger.info("🎯 执行生产全量标签计算")
-            success = scheduler.run_full_tag_compute()
+            success = scheduler.execute_full_workflow()
             
         elif mode == 'incremental':
             days_back = int(args.get('days', '1'))
             logger.info(f"🎯 执行生产增量标签计算，回溯{days_back}天")
-            success = scheduler.run_incremental_compute(days_back)
+            logger.warning("⚠️ 增量模式在任务化架构中不适用，使用全量模式")
+            success = scheduler.execute_full_workflow()
             
         elif mode == 'tags':
             tag_ids_str = args.get('tag_ids', '')
@@ -94,7 +95,7 @@ def main():
             try:
                 tag_ids = [int(x.strip()) for x in tag_ids_str.split(',')]
                 logger.info(f"🎯 执行生产指定标签计算: {tag_ids}")
-                success = scheduler.run_specific_tags(tag_ids)
+                success = scheduler.execute_specific_tags_workflow(tag_ids)
             except ValueError:
                 logger.error("❌ 标签ID格式错误，应为逗号分隔的数字")
                 job.commit()

@@ -8,7 +8,7 @@ import os
 # 添加项目根目录到路径
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from src.config.manager import ConfigManager
+from src.common.config.manager import ConfigManager
 
 
 def _upload_parquet_to_s3(s3_client, bucket_name, local_path, s3_prefix):

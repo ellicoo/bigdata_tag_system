@@ -10,7 +10,7 @@
 
 ## 🚀 快速开始
 
-### 1. 一键部署
+### 1. 基础部署（内置测试数据）
 ```bash
 # 进入本地环境目录
 cd environments/local
@@ -26,7 +26,24 @@ cd ../../
 python main.py --env local --mode health
 ```
 
-### 2. 测试标签计算
+### 2. 完整部署（含真实Hive表支持）⭐
+```bash
+# 进入本地环境目录
+cd environments/local
+
+# 完整部署（推荐）
+./deploy_with_hive.sh deploy
+
+# 或者分步部署
+./setup.sh                    # 启动基础服务
+./init_data.sh db-only        # 初始化数据库
+./init_hive_data.sh init      # 初始化Hive表数据
+
+# 验证S3/Hive数据支持
+python test_hive_integration.py
+```
+
+### 3. 测试标签计算
 ```bash
 # 基础模式
 python main.py --env local --mode full                    # 全量计算（全量用户，全量标签）
@@ -65,6 +82,15 @@ cd environments/local
 ./init_data.sh                # 初始化数据库和测试数据
 ./init_data.sh db-only        # 仅初始化数据库表结构
 ./init_data.sh data-only      # 仅生成测试数据
+./init_data.sh hive           # 仅初始化Hive表数据
+./init_data.sh full           # 完整初始化（数据库+Hive表）
+
+# Hive表管理
+./init_hive_data.sh init      # 初始化Hive表和数据
+./init_hive_data.sh reset     # 重置Hive数据
+./init_hive_data.sh clean     # 清理Hive数据
+./init_hive_data.sh stats     # 查看表统计信息
+./init_hive_data.sh verify    # 验证数据质量
 
 # 清理和重置
 ./init_data.sh clean          # 清理所有数据
@@ -416,19 +442,29 @@ Unsupported character encoding 'utf8mb4'
 ## 🧪 测试数据说明
 
 ### 数据规模
-- **总用户数**: 1,000个模拟用户
-- **数据表**: 3个Hive表（用户基础信息、资产汇总、活动汇总）
-- **标签规则**: 8个预定义标签规则
+- **内置数据**: 1,000个模拟用户（简化版）
+- **Hive表数据**: 2,000个模拟用户（完整版）⭐
+- **数据表**: 4个Hive表（用户基础信息、资产汇总、活动汇总、交易明细）
+- **标签规则**: 7个预定义标签规则
 
-### 标签分布（典型情况）
-- **高净值用户**: ~300个用户（30%）
-- **活跃交易者**: ~800个用户（80%）
-- **低风险用户**: ~250个用户（25%）
-- **VIP客户**: ~100个用户（10%）
-- **年轻用户**: ~300个用户（30%）
-- **新注册用户**: ~150个用户（15%）
-- **现金充足用户**: ~200个用户（20%）
-- **最近活跃用户**: ~400个用户（40%）
+### Hive表结构
+- **user_basic_info**: 用户基础信息表（2,000用户）
+  - 支持标签：VIP客户、年轻用户、新用户
+- **user_asset_summary**: 用户资产汇总表
+  - 支持标签：高净值用户、现金富裕用户
+- **user_activity_summary**: 用户活动汇总表
+  - 支持标签：活跃交易者、低风险用户
+- **user_transaction_detail**: 用户交易明细表（可选）
+  - 支持扩展分析和复杂标签计算
+
+### 标签分布（Hive表数据）
+- **高净值用户**: ~300个用户（15%，≥150K资产）
+- **VIP客户**: ~150个用户（7.5%，VIP2/3+已验证）
+- **年轻用户**: ~400个用户（20%，≤30岁）
+- **活跃交易者**: ~300个用户（15%，>15次/月交易）
+- **低风险用户**: ~400个用户（20%，风险评分≤30）
+- **新用户**: ~300个用户（15%，30天内注册）
+- **现金富裕用户**: ~200个用户（10%，≥60K现金）
 
 ### 验证标签计算
 ```bash

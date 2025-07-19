@@ -3,7 +3,7 @@
 """
 
 import os
-from src.config.base import BaseConfig, SparkConfig, S3Config, MySQLConfig
+from src.common.config.base import BaseConfig, SparkConfig, S3Config, MySQLConfig
 
 
 class LocalConfig(BaseConfig):
@@ -14,13 +14,22 @@ class LocalConfig(BaseConfig):
         """创建本地环境配置"""
         
         # Spark配置 - 本地模式
+        jars_dir = os.path.join(os.path.dirname(__file__), "jars")
+        all_jars = [
+            os.path.join(jars_dir, "mysql-connector-j-8.0.33.jar"),
+            os.path.join(jars_dir, "hadoop-aws-3.3.4.jar"),
+            os.path.join(jars_dir, "aws-java-sdk-bundle-1.11.1034.jar")
+        ]
+        # 只包含存在的JAR文件
+        existing_jars = [jar for jar in all_jars if os.path.exists(jar)]
+        
         spark = SparkConfig(
             app_name="TagSystem-Local",
             master="local[*]",
-            executor_memory="1g",
-            driver_memory="512m",
+            executor_memory="2g",  # 增加内存以防止ClassLoader问题
+            driver_memory="1g",    # 增加driver内存
             shuffle_partitions=10,  # 本地环境减少分区数
-            jars=os.path.join(os.path.dirname(__file__), "jars", "mysql-connector-j-8.0.33.jar")
+            jars=",".join(existing_jars) if existing_jars else ""
         )
         
         # S3配置 - MinIO模拟

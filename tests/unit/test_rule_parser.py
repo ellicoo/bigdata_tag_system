@@ -8,7 +8,7 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from src.engine.rule_parser import RuleConditionParser
+from src.batch.core.rule_processor import RuleConditionParser
 
 
 class TestRuleConditionParser(unittest.TestCase):

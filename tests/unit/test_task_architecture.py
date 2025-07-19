@@ -10,8 +10,8 @@ import logging
 # 添加项目路径
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from src.config.manager import ConfigManager
-from src.scheduler.tag_scheduler import TagScheduler
+from src.common.config.manager import ConfigManager
+from src.batch.orchestrator.batch_orchestrator import BatchOrchestrator
 
 
 def setup_logging():

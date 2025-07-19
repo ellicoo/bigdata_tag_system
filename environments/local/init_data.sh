@@ -190,14 +190,29 @@ main() {
             generate_test_data
             echo "✅ 测试数据生成完成"
             ;;
+        "hive")
+            echo "🗄️ 初始化Hive表数据..."
+            ./init_hive_data.sh init
+            ;;
+        "full")
+            check_services
+            wait_for_mysql
+            init_database
+            generate_test_data
+            echo "🗄️ 初始化Hive表数据..."
+            ./init_hive_data.sh init
+            show_completion_info
+            ;;
         *)
-            echo "用法: $0 {init|clean|reset|db-only|data-only}"
+            echo "用法: $0 {init|clean|reset|db-only|data-only|hive|full}"
             echo ""
             echo "  init     - 初始化数据库和测试数据（默认）"
             echo "  clean    - 清理所有数据"
             echo "  reset    - 清理并重新初始化所有数据"
             echo "  db-only  - 仅初始化数据库表结构"
             echo "  data-only- 仅生成测试数据"
+            echo "  hive     - 仅初始化Hive表数据"
+            echo "  full     - 完整初始化（数据库+Hive表）"
             exit 1
             ;;
     esac

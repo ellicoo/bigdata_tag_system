@@ -12,8 +12,8 @@ import logging
 # 添加项目路径
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from src.config.manager import ConfigManager
-from src.scheduler.tag_scheduler import TagScheduler
+from src.common.config.manager import ConfigManager
+from src.batch.orchestrator.batch_orchestrator import BatchOrchestrator
 
 
 def setup_logging(log_level: str = "INFO"):
@@ -149,9 +149,9 @@ def main():
         print(f"❌ 配置加载失败: {e}")
         sys.exit(1)
     
-    # 创建调度器
+    # 创建批处理编排器
     try:
-        scheduler = TagScheduler(
+        scheduler = BatchOrchestrator(
             config=config,
             max_workers=args.max_workers
         )
@@ -171,7 +171,7 @@ def main():
             try:
                 tag_ids = [int(x.strip()) for x in args.tag_ids.split(',')]
                 logger.info(f"🎯 执行任务化全量用户指定标签计算: {tag_ids}")
-                success = scheduler.scenario_task_all_users_specific_tags(tag_ids)
+                success = scheduler.execute_specific_tags_workflow(tag_ids)
             except ValueError:
                 logger.error("❌ 标签ID格式错误，应为逗号分隔的数字")
                 sys.exit(1)
@@ -181,7 +181,7 @@ def main():
                 tag_ids = [int(x.strip()) for x in args.tag_ids.split(',')]
                 user_ids = [x.strip() for x in args.user_ids.split(',')]
                 logger.info(f"🎯 执行任务化指定用户指定标签计算: 用户{user_ids}, 标签{tag_ids}")
-                success = scheduler.scenario_task_specific_users_specific_tags(user_ids, tag_ids)
+                success = scheduler.execute_specific_users_workflow(user_ids, tag_ids)
             except ValueError:
                 logger.error("❌ 标签ID格式错误，应为逗号分隔的数字")
                 sys.exit(1)
@@ -197,7 +197,7 @@ def main():
                     logger.info(f"🎯 执行任务化全量标签计算: 用户{user_filter}")
                 else:
                     logger.info("🎯 执行任务化全量用户全量标签计算")
-                success = scheduler.scenario_task_all_users_all_tags(user_filter)
+                success = scheduler.execute_full_workflow(user_filter)
             except Exception as e:
                 logger.error(f"❌ 参数格式错误: {e}")
                 sys.exit(1)

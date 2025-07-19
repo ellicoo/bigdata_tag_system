@@ -12,10 +12,10 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.config.base import SparkConfig, S3Config, MySQLConfig, BaseConfig
-from src.config.manager import ConfigManager
-from src.engine.rule_parser import RuleConditionParser
-# from src.engine.parallel_tag_engine import ParallelTagEngine  # 已弃用
+from src.common.config.base import SparkConfig, S3Config, MySQLConfig, BaseConfig
+from src.common.config.manager import ConfigManager
+from src.batch.core.rule_processor import RuleConditionParser
+# from src.batch.core.tag_executor import BatchTagExecutor  # 重构后
 
 
 class TestRuleParser(unittest.TestCase):
@@ -114,7 +114,7 @@ class TestTagCompute(unittest.TestCase):
             .getOrCreate()
         cls.spark.sparkContext.setLogLevel("WARN")
         
-        # cls.tag_engine = ParallelTagEngine(cls.spark)  # 已弃用
+        # cls.tag_executor = BatchTagExecutor(cls.spark, config, data_loader)  # 重构后
     
     @classmethod
     def tearDownClass(cls):
@@ -157,7 +157,7 @@ class TestTagCompute(unittest.TestCase):
             }
         }
         
-        result_df = self.tag_engine._compute_single_tag(self.test_df, rule)
+        # result_df = self.tag_executor._compute_single_tag(self.test_df, rule)  # 重构后需更新
         
         self.assertIsNotNone(result_df)
         
@@ -194,7 +194,7 @@ class TestTagCompute(unittest.TestCase):
             }
         }
         
-        result_df = self.tag_engine._compute_single_tag(self.test_df, rule)
+        # result_df = self.tag_executor._compute_single_tag(self.test_df, rule)  # 重构后需更新
         
         self.assertIsNotNone(result_df)
         
@@ -237,7 +237,7 @@ class TestTagCompute(unittest.TestCase):
             }
         ]
         
-        results = self.tag_engine._compute_tags_parallel(self.test_df, rules)
+        # results = self.tag_executor._compute_tags_parallel(self.test_df, rules)  # 重构后需更新
         
         self.assertEqual(len(results), 2)
         

@@ -8,8 +8,8 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from src.config.base import SparkConfig, S3Config, MySQLConfig
-from src.config.manager import ConfigManager
+from src.common.config.base import SparkConfig, S3Config, MySQLConfig
+from src.common.config.manager import ConfigManager
 
 
 class TestSparkConfig(unittest.TestCase):

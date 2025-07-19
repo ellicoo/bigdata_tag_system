@@ -43,9 +43,9 @@ start_environment() {
     docker-compose ps
 }
 
-# 下载JDBC驱动
+# 下载JDBC驱动和S3依赖
 download_jdbc_driver() {
-    echo "📥 下载MySQL JDBC驱动..."
+    echo "📥 下载MySQL JDBC驱动和S3依赖..."
     
     # 创建jars目录
     mkdir -p jars
@@ -59,6 +59,31 @@ download_jdbc_driver() {
     else
         echo "✅ MySQL JDBC驱动已存在"
     fi
+    
+    # 下载AWS SDK和S3A依赖
+    echo "📥 下载S3A相关依赖..."
+    
+    # Hadoop AWS依赖
+    if [ ! -f "jars/hadoop-aws-3.3.4.jar" ]; then
+        echo "正在下载Hadoop AWS..."
+        curl -L -o jars/hadoop-aws-3.3.4.jar \
+            https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar
+        echo "✅ Hadoop AWS下载完成"
+    else
+        echo "✅ Hadoop AWS已存在"
+    fi
+    
+    # AWS SDK Bundle
+    if [ ! -f "jars/aws-java-sdk-bundle-1.12.262.jar" ]; then
+        echo "正在下载AWS SDK Bundle..."
+        curl -L -o jars/aws-java-sdk-bundle-1.12.262.jar \
+            https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.262/aws-java-sdk-bundle-1.12.262.jar
+        echo "✅ AWS SDK Bundle下载完成"
+    else
+        echo "✅ AWS SDK Bundle已存在"
+    fi
+    
+    echo "✅ 所有依赖下载完成"
 }
 
 # 下载依赖和JDBC驱动

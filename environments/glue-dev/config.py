@@ -3,7 +3,7 @@ AWS Glue开发环境配置
 """
 
 import os
-from src.config.base import BaseConfig, SparkConfig, S3Config, MySQLConfig
+from src.common.config.base import BaseConfig, SparkConfig, S3Config, MySQLConfig
 
 
 class GluedevConfig(BaseConfig):

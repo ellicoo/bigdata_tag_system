@@ -6,7 +6,7 @@
 import logging
 import argparse
 import sys
-from src.api.tag_trigger_api import TagTriggerAPI
+from src.batch.api.tag_trigger_api import TagTriggerAPI
 
 def setup_logging(level=logging.INFO):
     """设置日志配置"""
