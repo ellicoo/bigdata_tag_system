@@ -12,8 +12,8 @@ import logging
 # 添加项目路径
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from src.common.config.manager import ConfigManager
-from src.batch.orchestrator.batch_orchestrator import BatchOrchestrator
+from src.batch.config.ConfigManager import ConfigManager
+from src.batch.engine.BatchOrchestrator import BatchOrchestrator
 
 
 def setup_logging(log_level: str = "INFO"):
@@ -134,10 +134,10 @@ def main():
     
     # 加载配置
     try:
-        config = ConfigManager.load_config(args.env)
+        config = ConfigManager.loadConfig(args.env)
         
         # 设置日志级别
-        log_level = args.log_level or config.log_level
+        log_level = args.log_level or config.logLevel
         logger = setup_logging(log_level)
         
         logger.info(f"🚀 启动标签系统")
@@ -151,27 +151,25 @@ def main():
     
     # 创建批处理编排器
     try:
-        scheduler = BatchOrchestrator(
-            config=config,
-            max_workers=args.max_workers
-        )
+        scheduler = BatchOrchestrator(systemConfig=config)
         
         # 初始化系统
         logger.info("📋 初始化标签计算系统...")
-        scheduler.initialize()
+        scheduler.initializeSystem()
         
         # 执行任务
         success = False
         
         if args.mode == 'health':
             logger.info("🏥 执行系统健康检查...")
-            success = scheduler.health_check()
+            health_result = scheduler.performHealthCheck()
+            success = health_result['overall_status'] == 'healthy'
             
         elif args.mode == 'task-tags':
             try:
                 tag_ids = [int(x.strip()) for x in args.tag_ids.split(',')]
                 logger.info(f"🎯 执行任务化全量用户指定标签计算: {tag_ids}")
-                success = scheduler.execute_specific_tags_workflow(tag_ids)
+                success = scheduler.executeSpecificTagsWorkflow(tag_ids)
             except ValueError:
                 logger.error("❌ 标签ID格式错误，应为逗号分隔的数字")
                 sys.exit(1)
@@ -181,7 +179,7 @@ def main():
                 tag_ids = [int(x.strip()) for x in args.tag_ids.split(',')]
                 user_ids = [x.strip() for x in args.user_ids.split(',')]
                 logger.info(f"🎯 执行任务化指定用户指定标签计算: 用户{user_ids}, 标签{tag_ids}")
-                success = scheduler.execute_specific_users_workflow(user_ids, tag_ids)
+                success = scheduler.executeSpecificUsersWorkflow(user_ids, tag_ids)
             except ValueError:
                 logger.error("❌ 标签ID格式错误，应为逗号分隔的数字")
                 sys.exit(1)
@@ -197,7 +195,7 @@ def main():
                     logger.info(f"🎯 执行任务化全量标签计算: 用户{user_filter}")
                 else:
                     logger.info("🎯 执行任务化全量用户全量标签计算")
-                success = scheduler.execute_full_workflow(user_filter)
+                success = scheduler.executeFullWorkflow(user_filter)
             except Exception as e:
                 logger.error(f"❌ 参数格式错误: {e}")
                 sys.exit(1)
@@ -206,7 +204,7 @@ def main():
             logger.info("📋 列出所有可用的标签任务:")
             try:
                 available_tasks = scheduler.get_available_tasks()
-                task_summary = scheduler.get_task_summary()
+                task_summary = scheduler.get_task_summary(available_tasks)
                 
                 logger.info("=" * 80)
                 logger.info("🏷️  标签任务清单:")
@@ -215,12 +213,42 @@ def main():
                 for tag_id, task_class in available_tasks.items():
                     if tag_id in task_summary:
                         summary = task_summary[tag_id]
-                        logger.info(f"""
-🆔 标签ID: {tag_id}
-📝 任务类: {task_class}
-📊 必需字段: {summary['required_fields']}
-🗂️  数据源: {summary['data_sources']}
-{"─" * 60}""")
+                        
+                        # 基础信息
+                        info_lines = [
+                            f"🆔 标签ID: {tag_id}",
+                            f"📝 任务类: {task_class}",
+                            f"📊 必需字段: {summary['required_fields']}",
+                            f"🗂️  数据源: {summary['data_sources']}"
+                        ]
+                        
+                        # 如果有MySQL的标签信息，显示更详细的内容
+                        if summary.get('data_source') == 'mysql':
+                            # 格式化JSON规则条件
+                            rule_conditions = summary.get('rule_conditions', '{}')
+                            try:
+                                import json
+                                parsed_conditions = json.loads(rule_conditions)
+                                formatted_conditions = json.dumps(parsed_conditions, indent=2, ensure_ascii=False)
+                            except:
+                                formatted_conditions = rule_conditions
+                            
+                            info_lines.extend([
+                                f"🏷️  标签名称: {summary.get('tag_name', 'N/A')}",
+                                f"📂 标签分类: {summary.get('tag_category', 'N/A')}",
+                                f"🟢 状态: {summary.get('status', 'N/A')}",
+                                f"💾 数据来源: MySQL",
+                                f"📋 规则条件:",
+                                formatted_conditions
+                            ])
+                        else:
+                            info_lines.extend([
+                                f"📄 描述: {summary.get('description', 'N/A')}",
+                                f"💾 数据来源: 本地配置"
+                            ])
+                        
+                        # 输出格式化的信息
+                        logger.info("\n" + "\n".join(info_lines) + "\n" + "─" * 60)
                     else:
                         logger.info(f"🆔 标签ID: {tag_id} - 任务类: {task_class}")
                 

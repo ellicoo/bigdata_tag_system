@@ -3,7 +3,7 @@
 """
 
 import os
-from src.common.config.base import BaseConfig, SparkConfig, S3Config, MySQLConfig
+from src.batch.config.BaseConfig import BaseConfig, SparkConfig, S3Config, MySQLConfig
 
 
 class LocalConfig(BaseConfig):
@@ -24,19 +24,19 @@ class LocalConfig(BaseConfig):
         existing_jars = [jar for jar in all_jars if os.path.exists(jar)]
         
         spark = SparkConfig(
-            app_name="TagSystem-Local",
+            appName="TagSystem-Local",
             master="local[*]",
-            executor_memory="2g",  # 增加内存以防止ClassLoader问题
-            driver_memory="1g",    # 增加driver内存
-            shuffle_partitions=10,  # 本地环境减少分区数
+            executorMemory="2g",  # 增加内存以防止ClassLoader问题
+            driverMemory="1g",    # 增加driver内存
+            shufflePartitions=10,  # 本地环境减少分区数
             jars=",".join(existing_jars) if existing_jars else ""
         )
         
         # S3配置 - MinIO模拟
         s3 = S3Config(
             bucket=os.getenv("S3_BUCKET", "test-data-lake"),
-            access_key=os.getenv("S3_ACCESS_KEY", "minioadmin"),
-            secret_key=os.getenv("S3_SECRET_KEY", "minioadmin"),
+            accessKey=os.getenv("S3_ACCESS_KEY", "minioadmin"),
+            secretKey=os.getenv("S3_SECRET_KEY", "minioadmin"),
             endpoint=os.getenv("S3_ENDPOINT", "http://localhost:9000"),
             region="us-east-1"
         )
@@ -55,8 +55,8 @@ class LocalConfig(BaseConfig):
             spark=spark,
             s3=s3,
             mysql=mysql,
-            batch_size=1000,  # 本地环境小批次
-            max_retries=2,
-            enable_cache=False,  # 本地关闭缓存便于调试
-            log_level="DEBUG"
+            batchSize=1000,  # 本地环境小批次
+            maxRetries=2,
+            enableCache=False,  # 本地关闭缓存便于调试
+            logLevel="DEBUG"
         )
