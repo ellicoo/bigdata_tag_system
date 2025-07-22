@@ -226,34 +226,583 @@ curl -X GET http://localhost:5000/api/v1/tags/available
 ./init_data.sh data-only      # 仅生成测试数据
 ```
 
-### ☁️ AWS Glue开发环境
+## 🌩️ AWS Glue部署完整指南
+
+### 📋 部署前准备清单
+
+在开始部署之前，请确保满足以下条件：
+
+#### ✅ AWS账户和权限
+- [ ] 拥有AWS账户并配置了访问密钥
+- [ ] 具有创建和管理以下AWS服务的权限：
+  - AWS Glue（作业创建、执行）
+  - S3（读写权限）
+  - RDS MySQL（连接权限）
+  - IAM（创建角色）
+  - CloudWatch（日志查看）
+
+#### ✅ 本地环境准备
+```bash
+# 安装AWS CLI
+pip install awscli
+# 或者使用官方安装包：https://aws.amazon.com/cli/
+
+# 验证安装
+aws --version
+
+# 配置AWS凭证
+aws configure
+# 输入: Access Key ID, Secret Access Key, Default region, Output format
+```
+
+#### ✅ 项目依赖
+```bash
+# 确保项目依赖已安装
+pip install -r requirements.txt
+
+# 验证项目结构完整
+ls -la environments/glue-dev/
+# 应包含: config.py, deploy.py, glue_job.py
+```
+
+### 🏗️ 第一步：创建AWS基础设施
+
+#### 1.1 创建S3存储桶
 
 ```bash
-# 1. 部署到Glue
+# 创建开发环境S3桶（代码存储）
+aws s3 mb s3://tag-system-dev-scripts --region us-east-1
+
+# 创建开发环境S3桶（数据湖）
+aws s3 mb s3://tag-system-dev-data-lake --region us-east-1
+
+# 创建生产环境S3桶（代码存储）
+aws s3 mb s3://tag-system-prod-scripts --region us-east-1
+
+# 创建生产环境S3桶（数据湖）
+aws s3 mb s3://tag-system-prod-data-lake --region us-east-1
+
+# 验证创建结果
+aws s3 ls | grep tag-system
+```
+
+#### 1.2 创建IAM角色
+
+创建Glue服务角色，执行以下命令或在AWS控制台操作：
+
+```bash
+# 创建信任策略文件
+cat > glue-trust-policy.json << 'EOF'
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "glue.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+
+# 创建权限策略文件
+cat > glue-permissions-policy.json << 'EOF'
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::tag-system-*/*",
+        "arn:aws:s3:::tag-system-*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "rds:DescribeDBInstances",
+        "rds-db:connect"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "glue:GetConnection",
+        "glue:GetConnections"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+
+# 创建开发环境IAM角色
+aws iam create-role \
+  --role-name GlueServiceRole-dev \
+  --assume-role-policy-document file://glue-trust-policy.json \
+  --description "AWS Glue服务角色 - 开发环境"
+
+# 创建生产环境IAM角色
+aws iam create-role \
+  --role-name GlueServiceRole-prod \
+  --assume-role-policy-document file://glue-trust-policy.json \
+  --description "AWS Glue服务角色 - 生产环境"
+
+# 创建自定义权限策略
+aws iam create-policy \
+  --policy-name TagSystemGluePolicy \
+  --policy-document file://glue-permissions-policy.json \
+  --description "标签系统Glue权限策略"
+
+# 获取账户ID和策略ARN
+ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+POLICY_ARN="arn:aws:iam::${ACCOUNT_ID}:policy/TagSystemGluePolicy"
+
+# 附加权限策略到角色
+aws iam attach-role-policy \
+  --role-name GlueServiceRole-dev \
+  --policy-arn arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+
+aws iam attach-role-policy \
+  --role-name GlueServiceRole-dev \
+  --policy-arn $POLICY_ARN
+
+aws iam attach-role-policy \
+  --role-name GlueServiceRole-prod \
+  --policy-arn arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+
+aws iam attach-role-policy \
+  --role-name GlueServiceRole-prod \
+  --policy-arn $POLICY_ARN
+
+# 获取角色ARN（后续配置需要）
+aws iam get-role --role-name GlueServiceRole-dev --query Role.Arn --output text
+aws iam get-role --role-name GlueServiceRole-prod --query Role.Arn --output text
+
+# 清理临时文件
+rm glue-trust-policy.json glue-permissions-policy.json
+```
+
+#### 1.3 创建RDS MySQL实例
+
+```bash
+# 创建开发环境RDS实例
+aws rds create-db-instance \
+  --db-instance-identifier tag-system-dev \
+  --db-instance-class db.t3.micro \
+  --engine mysql \
+  --master-username admin \
+  --master-user-password 'YourDevPassword123!' \
+  --allocated-storage 20 \
+  --db-name tag_system_dev \
+  --vpc-security-group-ids sg-your-security-group-id \
+  --publicly-accessible \
+  --backup-retention-period 7 \
+  --storage-encrypted
+
+# 创建生产环境RDS实例
+aws rds create-db-instance \
+  --db-instance-identifier tag-system-prod \
+  --db-instance-class db.t3.small \
+  --engine mysql \
+  --master-username admin \
+  --master-user-password 'YourProdPassword123!' \
+  --allocated-storage 100 \
+  --db-name tag_system \
+  --vpc-security-group-ids sg-your-prod-security-group-id \
+  --publicly-accessible \
+  --backup-retention-period 30 \
+  --storage-encrypted \
+  --multi-az
+
+# 等待实例创建完成
+aws rds wait db-instance-available --db-instance-identifier tag-system-dev
+aws rds wait db-instance-available --db-instance-identifier tag-system-prod
+
+# 获取实例连接信息
+aws rds describe-db-instances --db-instance-identifier tag-system-dev \
+  --query 'DBInstances[0].Endpoint.Address' --output text
+
+aws rds describe-db-instances --db-instance-identifier tag-system-prod \
+  --query 'DBInstances[0].Endpoint.Address' --output text
+```
+
+### 🔧 第二步：配置环境变量
+
+创建环境配置文件：
+
+```bash
+# 创建开发环境配置文件
+cat > .env.dev << 'EOF'
+# AWS Glue开发环境配置
+TAG_SYSTEM_ENV=glue-dev
+
+# AWS基础配置
+AWS_REGION=us-east-1
+
+# S3配置
+DEV_S3_BUCKET=tag-system-dev-scripts
+DEV_DATA_S3_BUCKET=tag-system-dev-data-lake
+
+# IAM角色ARN（替换为实际的角色ARN）
+DEV_GLUE_ROLE_ARN=arn:aws:iam::YOUR_ACCOUNT_ID:role/GlueServiceRole-dev
+
+# MySQL配置（替换为实际的RDS端点）
+DEV_MYSQL_HOST=tag-system-dev.xxxxxxxxx.us-east-1.rds.amazonaws.com
+DEV_MYSQL_PORT=3306
+DEV_MYSQL_DATABASE=tag_system_dev
+DEV_MYSQL_USERNAME=admin
+DEV_MYSQL_PASSWORD=YourDevPassword123!
+EOF
+
+# 创建生产环境配置文件
+cat > .env.prod << 'EOF'
+# AWS Glue生产环境配置
+TAG_SYSTEM_ENV=glue-prod
+
+# AWS基础配置
+AWS_REGION=us-east-1
+
+# S3配置
+PROD_S3_BUCKET=tag-system-prod-scripts
+PROD_DATA_S3_BUCKET=tag-system-prod-data-lake
+
+# IAM角色ARN（替换为实际的角色ARN）
+PROD_GLUE_ROLE_ARN=arn:aws:iam::YOUR_ACCOUNT_ID:role/GlueServiceRole-prod
+
+# MySQL配置（替换为实际的RDS端点）
+PROD_MYSQL_HOST=tag-system-prod.xxxxxxxxx.us-east-1.rds.amazonaws.com
+PROD_MYSQL_PORT=3306
+PROD_MYSQL_DATABASE=tag_system
+PROD_MYSQL_USERNAME=admin
+PROD_MYSQL_PASSWORD=YourProdPassword123!
+EOF
+
+# 加载环境变量
+source .env.dev  # 开发环境
+# 或
+source .env.prod # 生产环境
+```
+
+### 📦 第三步：上传测试数据到S3
+
+如果你的S3数据湖还没有数据，可以先上传测试数据：
+
+```bash
+# 创建测试数据目录结构
+mkdir -p test-data/hive/user_basic_info/
+mkdir -p test-data/hive/user_asset_summary/
+mkdir -p test-data/hive/user_activity_summary/
+
+# 生成测试数据（可以使用项目中的数据生成器）
+python -c "
+from environments.local.test_data_generator import generate_production_like_data
+generate_production_like_data('test-data/hive/')
+print('测试数据生成完成')
+"
+
+# 上传测试数据到S3开发环境
+aws s3 sync test-data/hive/ s3://tag-system-dev-data-lake/hive/ --delete
+
+# 验证上传结果
+aws s3 ls s3://tag-system-dev-data-lake/hive/ --recursive
+```
+
+### 🚀 第四步：部署代码到AWS Glue
+
+#### 4.1 部署到开发环境
+
+```bash
+# 进入开发环境目录
 cd environments/glue-dev
+
+# 确保环境变量已配置
+echo "开发环境配置检查:"
+echo "S3 Bucket: $DEV_S3_BUCKET"
+echo "MySQL Host: $DEV_MYSQL_HOST"
+echo "Glue Role: $DEV_GLUE_ROLE_ARN"
+
+# 执行部署
 python deploy.py
 
-# 2. 运行作业 - 任务化架构
+# 部署成功后会看到类似输出:
+# 📦 打包项目代码...
+# 📤 上传代码包到S3: s3://tag-system-dev-scripts/glue-jobs/tag-compute-dev.zip
+# 🔧 创建/更新Glue作业: tag-compute-dev
+# ✅ 作业 tag-compute-dev 创建成功
+# 🎉 部署完成！
+```
+
+#### 4.2 验证部署结果
+
+```bash
+# 检查Glue作业是否创建成功
+aws glue get-job --job-name tag-compute-dev
+
+# 检查S3上的代码包
+aws s3 ls s3://tag-system-dev-scripts/glue-jobs/
+
+# 验证IAM角色权限
+aws iam list-attached-role-policies --role-name GlueServiceRole-dev
+```
+
+### ▶️ 第五步：运行Glue作业
+
+#### 5.1 健康检查（推荐首次运行）
+
+```bash
+# 运行健康检查
+aws glue start-job-run \
+  --job-name tag-compute-dev \
+  --arguments='--mode=health,--log_level=INFO'
+
+# 获取运行ID并查看状态
+JOB_RUN_ID=$(aws glue get-job-runs --job-name tag-compute-dev \
+  --query 'JobRuns[0].Id' --output text)
+
+echo "作业运行ID: $JOB_RUN_ID"
+
+# 查看运行状态
+aws glue get-job-run --job-name tag-compute-dev --run-id $JOB_RUN_ID \
+  --query 'JobRun.JobRunState' --output text
+```
+
+#### 5.2 任务化架构执行
+
+```bash
+# 1. 列出所有可用任务
+aws glue start-job-run \
+  --job-name tag-compute-dev \
+  --arguments='--mode=list-tasks'
+
+# 2. 执行所有任务（全量用户全量标签）
+aws glue start-job-run \
+  --job-name tag-compute-dev \
+  --arguments='--mode=task-all'
+
+# 3. 执行指定标签任务（全量用户指定标签）
+aws glue start-job-run \
+  --job-name tag-compute-dev \
+  --arguments='--mode=task-tags,--tag_ids=1,3,5'
+
+# 4. 执行指定用户标签任务
+aws glue start-job-run \
+  --job-name tag-compute-dev \
+  --arguments='--mode=task-users,--user_ids=user_000001,user_000002,--tag_ids=1,3,5'
+
+# 5. 增量计算（新增用户）
+aws glue start-job-run \
+  --job-name tag-compute-dev \
+  --arguments='--mode=incremental,--days=7'
+```
+
+#### 5.3 监控作业执行
+
+```bash
+# 实时监控作业状态
+watch -n 10 "aws glue get-job-run --job-name tag-compute-dev --run-id $JOB_RUN_ID --query 'JobRun.JobRunState' --output text"
+
+# 查看作业详细信息
+aws glue get-job-run --job-name tag-compute-dev --run-id $JOB_RUN_ID
+
+# 查看CloudWatch日志
+aws logs describe-log-groups --log-group-name-prefix "/aws-glue/jobs"
+
+# 获取日志流
+aws logs describe-log-streams \
+  --log-group-name "/aws-glue/jobs/logs-v2" \
+  --order-by LastEventTime --descending
+
+# 查看最新日志
+LOG_STREAM=$(aws logs describe-log-streams \
+  --log-group-name "/aws-glue/jobs/logs-v2" \
+  --order-by LastEventTime --descending \
+  --max-items 1 --query 'logStreams[0].logStreamName' --output text)
+
+aws logs get-log-events \
+  --log-group-name "/aws-glue/jobs/logs-v2" \
+  --log-stream-name "$LOG_STREAM" \
+  --start-from-head
+```
+
+### 🏭 第六步：部署到生产环境
+
+⚠️ **重要提醒**: 生产环境部署需要额外谨慎，建议先在开发环境充分测试。
+
+```bash
+# 切换到生产环境配置
+source .env.prod
+
+# 进入生产环境目录
+cd environments/glue-prod
+
+# 生产环境部署（需要确认）
+python deploy.py
+# 部署脚本会要求输入 'yes' 来确认生产部署
+
+# 运行生产环境健康检查
+aws glue start-job-run \
+  --job-name tag-compute-prod \
+  --arguments='--mode=health,--log_level=WARN'
+```
+
+### 📊 第七步：查看计算结果
+
+计算完成后，可以连接到RDS MySQL查看结果：
+
+```bash
+# 连接到开发环境MySQL
+mysql -h tag-system-dev.xxxxxxxxx.us-east-1.rds.amazonaws.com \
+      -u admin -p'YourDevPassword123!' tag_system_dev
+
+# 查看标签计算结果
+mysql> SELECT user_id, tag_ids, created_time, updated_time 
+       FROM user_tags 
+       ORDER BY updated_time DESC 
+       LIMIT 10;
+
+# 查看标签统计
+mysql> SELECT 
+         JSON_EXTRACT(tag_ids, '$[*]') as tag_list,
+         COUNT(*) as user_count
+       FROM user_tags 
+       GROUP BY JSON_EXTRACT(tag_ids, '$[*]')
+       ORDER BY user_count DESC;
+
+# 查看特定标签的用户
+mysql> SELECT user_id, tag_ids 
+       FROM user_tags 
+       WHERE JSON_CONTAINS(tag_ids, '1')  -- 高净值用户标签
+       LIMIT 5;
+```
+
+### 🔍 监控和日志
+
+#### CloudWatch监控
+
+- **作业执行状态**: AWS Glue控制台 → 作业 → tag-compute-dev
+- **执行历史**: 查看所有运行记录和状态
+- **实时日志**: CloudWatch日志组 `/aws-glue/jobs/logs-v2`
+- **错误告警**: 可配置CloudWatch告警监控失败作业
+
+#### 关键指标监控
+
+```bash
+# 创建CloudWatch告警监控作业失败
+aws cloudwatch put-metric-alarm \
+  --alarm-name "GlueJobFailure-dev" \
+  --alarm-description "标签系统开发环境作业失败告警" \
+  --metric-name "glue.driver.aggregate.numFailedTasks" \
+  --namespace "AWS/Glue" \
+  --statistic "Sum" \
+  --period 300 \
+  --threshold 1 \
+  --comparison-operator "GreaterThanOrEqualToThreshold" \
+  --dimensions Name=JobName,Value=tag-compute-dev \
+  --evaluation-periods 1
+```
+
+### 🛠️ 故障排除
+
+#### 常见问题及解决方案
+
+**1. 部署时权限错误**
+```bash
+# 检查IAM角色权限
+aws iam list-attached-role-policies --role-name GlueServiceRole-dev
+
+# 确认S3桶权限
+aws s3api get-bucket-policy --bucket tag-system-dev-scripts
+```
+
+**2. MySQL连接失败**
+```bash
+# 检查RDS实例状态
+aws rds describe-db-instances --db-instance-identifier tag-system-dev
+
+# 检查安全组规则（确保3306端口开放）
+aws ec2 describe-security-groups --group-ids sg-your-security-group-id
+```
+
+**3. 作业执行失败**
+```bash
+# 查看详细错误日志
+aws logs filter-log-events \
+  --log-group-name "/aws-glue/jobs/error" \
+  --start-time $(date -d '1 hour ago' +%s)000
+
+# 检查Spark UI（如果启用）
+# 在CloudWatch日志中查找Spark History Server URL
+```
+
+**4. 数据读取问题**
+```bash
+# 验证S3数据结构
+aws s3 ls s3://tag-system-dev-data-lake/hive/ --recursive
+
+# 检查数据格式
+aws s3 cp s3://tag-system-dev-data-lake/hive/user_basic_info/sample.parquet . 
+python -c "import pandas as pd; print(pd.read_parquet('sample.parquet').head())"
+```
+
+### 📋 部署检查清单
+
+部署完成后，请确认以下项目：
+
+- [ ] S3存储桶创建成功且权限配置正确
+- [ ] IAM角色创建并附加了必要权限
+- [ ] RDS MySQL实例运行正常且可连接
+- [ ] Glue作业创建成功
+- [ ] 健康检查通过
+- [ ] 能够成功执行标签计算任务
+- [ ] 计算结果正确写入MySQL
+- [ ] CloudWatch日志正常记录
+- [ ] 环境变量和配置文件安全存储
+
+### ☁️ AWS Glue开发环境快速命令
+
+```bash
+# 部署到开发环境
+cd environments/glue-dev && python deploy.py
+
+# 常用执行命令
 aws glue start-job-run --job-name tag-compute-dev --arguments='--mode=health'                    # 健康检查
 aws glue start-job-run --job-name tag-compute-dev --arguments='--mode=list-tasks'               # 列出任务
 aws glue start-job-run --job-name tag-compute-dev --arguments='--mode=task-all'                 # 全量任务
-aws glue start-job-run --job-name tag-compute-dev --arguments='--mode=task-tags,--tag-ids=1,3,5'  # 指定任务
-aws glue start-job-run --job-name tag-compute-dev --arguments='--mode=task-users,--user-ids=user_000001,user_000002,--tag-ids=1,3,5'  # 指定用户任务
+aws glue start-job-run --job-name tag-compute-dev --arguments='--mode=task-tags,--tag_ids=1,3,5'  # 指定任务
+aws glue start-job-run --job-name tag-compute-dev --arguments='--mode=task-users,--user_ids=user_000001,user_000002,--tag_ids=1,3,5'  # 指定用户任务
 ```
 
-### 🏭 AWS Glue生产环境
+### 🏭 AWS Glue生产环境快速命令
 
 ```bash
-# 1. 部署到Glue
-cd environments/glue-prod  
-python deploy.py
+# 部署到生产环境（需要确认）
+cd environments/glue-prod && python deploy.py
 
-# 2. 运行作业 - 任务化架构
+# 常用执行命令  
 aws glue start-job-run --job-name tag-compute-prod --arguments='--mode=health'                    # 健康检查
 aws glue start-job-run --job-name tag-compute-prod --arguments='--mode=list-tasks'               # 列出任务
 aws glue start-job-run --job-name tag-compute-prod --arguments='--mode=task-all'                 # 全量任务
-aws glue start-job-run --job-name tag-compute-prod --arguments='--mode=task-tags,--tag-ids=1,3,5'  # 指定任务
-aws glue start-job-run --job-name tag-compute-prod --arguments='--mode=task-users,--user-ids=user_000001,user_000002,--tag-ids=1,3,5'  # 指定用户任务
+aws glue start-job-run --job-name tag-compute-prod --arguments='--mode=task-tags,--tag_ids=1,3,5'  # 指定任务
+aws glue start-job-run --job-name tag-compute-prod --arguments='--mode=task-users,--user_ids=user_000001,user_000002,--tag_ids=1,3,5'  # 指定用户任务
 ```
 
 ## 🎯 任务化架构详解
