@@ -68,7 +68,10 @@ class TagScheduler:
         for key, value in self.config.spark.to_dict().items():
             builder = builder.config(key, value)
         
-        # 启用Hive支持（基于您的方式）
+        # 启用Hive支持（允许Spark连接到Hive Metastore，读取表结构和分区信息）
+        #  支持Hive SQL语法：可以使用 spark.sql() 执行Hive风格的SQL查询
+        # 访问Hive表：通过 spark.table("database.table_name") 直接读取Hive表
+        # 分区感知：自动识别Hive表的分区结构
         builder = builder.enableHiveSupport()
         
         # 移除S3配置，直接读取Hive表

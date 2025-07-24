@@ -776,9 +776,9 @@ def main():
     
     print(f"\n📋 后续步骤:")
     print(f"1. 上传 {zip_path} 到海豚调度器资源中心")
-    print(f"2. 直接在资源中心解压到 /usr/local/installed/dolphinscheduler/default/resources/")
+    print(f"2. 直接在资源中心解压到 /dolphinscheduler/default/resources/")
     print(f"3. 按照 dolphin_gui_deploy/部署说明.md 进行配置")
-    print(f"4. 创建Spark任务，主程序路径：/usr/local/installed/dolphinscheduler/default/resources/main.py")
+    print(f"4. 创建Spark任务，主程序路径：/dolphinscheduler/default/resources/main.py")
 
 if __name__ == "__main__":
     main()
