@@ -99,9 +99,11 @@
 ```
 bigdata_tag_system/
 ├── src/                          # 🔧 核心源码
-│   ├── api/                      # RESTful API接口
-│   │   ├── tag_trigger_api.py    # 标签任务触发API
-│   │   └── task_manager.py       # 异步任务管理器
+│   ├── entry/                    # 🚀 程序入口模块
+│   │   ├── tag_system_api.py     # 函数式API接口
+│   │   ├── glue_entry.py         # Glue专用入口
+│   │   ├── spark_task_executor.py # Spark任务执行器
+│   │   └── glue_job_example.py   # Glue作业示例
 │   ├── config/                   # 配置管理
 │   ├── readers/                  # 数据读取器
 │   ├── engine/                   # 标签计算引擎
@@ -124,11 +126,9 @@ bigdata_tag_system/
 │   └── glue-prod/                # AWS Glue生产环境
 ├── tests/                        # 🧪 测试代码
 ├── docs/                         # 📚 文档
-│   ├── API_USAGE.md              # API使用文档
 │   ├── TASK_ARCHITECTURE.md      # 任务架构设计文档
 │   └── 标准需求文档.md            # 业务需求文档
-├── main.py                       # 📍 统一入口
-├── api_server.py                 # 🌐 API服务器启动脚本
+├── main.py                       # 📍 统一入口 (命令行模式)
 └── CLAUDE.md                     # 🤖 AI助手项目说明
 ```
 
@@ -139,7 +139,6 @@ bigdata_tag_system/
 - Python 3.8+
 - Docker & Docker Compose (本地环境)
 - AWS CLI (Glue环境)
-- Flask (API服务器)
 
 ### 🚀 本地环境
 
@@ -189,26 +188,6 @@ export S3_SECRET_KEY=minioadmin
 export SPARK_MASTER_URL=spark://localhost:7077
 ```
 
-### 🌐 API服务器
-
-```bash
-# 启动API服务器
-python api_server.py --env local --host 0.0.0.0 --port 5000
-
-# 触发标签任务
-curl -X POST http://localhost:5000/api/v1/tags/trigger \
-  -H "Content-Type: application/json" \
-  -d '{
-    "tag_ids": [1, 2, 3],
-    "mode": "full"
-  }'
-
-# 查询任务状态
-curl -X GET http://localhost:5000/api/v1/tasks/{task_id}/status
-
-# 获取可用标签
-curl -X GET http://localhost:5000/api/v1/tags/available
-```
 
 **本地环境管理命令：**
 ```bash
@@ -777,33 +756,134 @@ python -c "import pandas as pd; print(pd.read_parquet('sample.parquet').head())"
 - [ ] CloudWatch日志正常记录
 - [ ] 环境变量和配置文件安全存储
 
-### ☁️ AWS Glue开发环境快速命令
+## 🎯 AWS Glue函数式API（推荐）
+
+系统提供了完整的函数式API接口，**无需命令行参数**，可以直接在Glue作业中调用函数。
+
+### 📦 新增核心文件
+
+- `tag_system_api.py` - 标签系统函数式API核心类
+- `glue_entry.py` - AWS Glue专用入口文件
+- `environments/glue-dev/glue_job_v2.py` - 升级版开发环境作业脚本
+- `environments/glue-prod/glue_job_v2.py` - 升级版生产环境作业脚本
+- `FUNCTION_API_USAGE.md` - 详细函数式API使用文档
+
+### 🚀 函数式调用方式
+
+#### 方式一：使用TagSystemAPI类（推荐）
+
+```python
+from tag_system_api import TagSystemAPI
+
+# 使用上下文管理器（自动清理资源）
+with TagSystemAPI(environment='glue-dev', log_level='INFO') as api:
+    # 健康检查
+    if api.health_check():
+        print("✅ 系统健康")
+        
+        # 执行所有任务
+        success = api.run_task_all_users_all_tags()
+        
+        # 执行指定标签
+        success = api.run_task_specific_tags([1, 3, 5])
+        
+        # 执行指定用户指定标签
+        success = api.run_task_specific_users_specific_tags(
+            user_ids=['user_000001', 'user_000002'],
+            tag_ids=[1, 3, 5]
+        )
+        
+        # 列出可用任务
+        tasks = api.list_available_tasks()
+```
+
+#### 方式二：使用Glue专用函数
+
+```python
+from glue_entry import execute_glue_job
+
+# 在Glue作业中直接调用
+def your_glue_main():
+    # 健康检查
+    success = execute_glue_job('health', 'glue-dev')
+    
+    if success:
+        # 执行指定标签
+        success = execute_glue_job(
+            mode='task-tags',
+            environment='glue-dev',
+            tag_ids=[1, 3, 5]
+        )
+        
+        # 执行指定用户标签
+        success = execute_glue_job(
+            mode='task-users',
+            environment='glue-dev',
+            user_ids=['user_000001', 'user_000002'],
+            tag_ids=[1, 3, 5]
+        )
+    
+    return success
+```
+
+#### 方式三：使用便捷函数
+
+```python
+from tag_system_api import run_health_check, run_specific_tags
+
+# 一行调用
+if run_health_check('glue-dev'):
+    success = run_specific_tags([1, 3, 5], 'glue-dev')
+```
+
+### 🎯 支持的执行模式
+
+| 模式 | 函数调用 | 说明 |
+|------|----------|------|
+| **health** | `api.health_check()` | 系统健康检查 |
+| **task-all** | `api.run_task_all_users_all_tags()` | 执行所有任务 |
+| **task-tags** | `api.run_task_specific_tags([1,3,5])` | 执行指定标签 |
+| **task-users** | `api.run_task_specific_users_specific_tags(users, tags)` | 执行指定用户标签 |
+| **list-tasks** | `api.list_available_tasks()` | 列出可用任务 |
+
+### ☁️ AWS Glue开发环境
 
 ```bash
-# 部署到开发环境
+# 1. 部署到开发环境
 cd environments/glue-dev && python deploy.py
 
-# 常用执行命令
-aws glue start-job-run --job-name tag-compute-dev --arguments='--mode=health'                    # 健康检查
-aws glue start-job-run --job-name tag-compute-dev --arguments='--mode=list-tasks'               # 列出任务
-aws glue start-job-run --job-name tag-compute-dev --arguments='--mode=task-all'                 # 全量任务
-aws glue start-job-run --job-name tag-compute-dev --arguments='--mode=task-tags,--tag_ids=1,3,5'  # 指定任务
-aws glue start-job-run --job-name tag-compute-dev --arguments='--mode=task-users,--user_ids=user_000001,user_000002,--tag_ids=1,3,5'  # 指定用户任务
+# 2. 使用函数式API（推荐）
+# 在你的Glue作业代码中直接调用函数，无需命令行参数
+
+# 3. 或使用传统命令行方式（兼容）
+aws glue start-job-run --job-name tag-compute-dev --arguments='--mode=health'
+aws glue start-job-run --job-name tag-compute-dev --arguments='--mode=task-all'
+aws glue start-job-run --job-name tag-compute-dev --arguments='--mode=task-tags,--tag_ids=1,3,5'
 ```
 
-### 🏭 AWS Glue生产环境快速命令
+### 🏭 AWS Glue生产环境
 
 ```bash
-# 部署到生产环境（需要确认）
+# 1. 部署到生产环境（需要确认）
 cd environments/glue-prod && python deploy.py
 
-# 常用执行命令  
-aws glue start-job-run --job-name tag-compute-prod --arguments='--mode=health'                    # 健康检查
-aws glue start-job-run --job-name tag-compute-prod --arguments='--mode=list-tasks'               # 列出任务
-aws glue start-job-run --job-name tag-compute-prod --arguments='--mode=task-all'                 # 全量任务
-aws glue start-job-run --job-name tag-compute-prod --arguments='--mode=task-tags,--tag_ids=1,3,5'  # 指定任务
-aws glue start-job-run --job-name tag-compute-prod --arguments='--mode=task-users,--user_ids=user_000001,user_000002,--tag_ids=1,3,5'  # 指定用户任务
+# 2. 使用函数式API（推荐）
+# 在你的Glue作业代码中直接调用函数，无需命令行参数
+
+# 3. 或使用传统命令行方式（兼容）
+aws glue start-job-run --job-name tag-compute-prod --arguments='--mode=health'
+aws glue start-job-run --job-name tag-compute-prod --arguments='--mode=task-all'
+aws glue start-job-run --job-name tag-compute-prod --arguments='--mode=task-tags,--tag_ids=1,3,5'
 ```
+
+### 🎉 函数式API优势
+
+✅ **无需命令行参数** - 直接调用函数  
+✅ **更灵活的集成** - 可嵌入到其他Python代码中  
+✅ **更好的错误处理** - 函数返回值明确  
+✅ **资源自动管理** - 支持上下文管理器  
+✅ **向后兼容** - 保留原有的命令行接口  
+✅ **生产环境优化** - 安全的生产日志策略
 
 ## 🎯 任务化架构详解
 
@@ -1018,9 +1098,8 @@ export S3_SECRET_KEY=minioadmin
 # Spark配置
 export SPARK_MASTER_URL=spark://localhost:7077
 
-# API服务器配置
-export API_HOST=0.0.0.0
-export API_PORT=5000
+# 日志配置
+export LOG_LEVEL=INFO
 
 # Glue环境配置
 export DEV_S3_BUCKET=tag-system-dev-data-lake
@@ -1044,7 +1123,93 @@ python main.py --env local --mode task-tags --tag-ids 1,3,5
 python main.py --env local --mode task-users --user-ids user_000001,user_000002 --tag-ids 1,3,5
 ```
 
-### API使用
+### 函数式API使用（推荐）
+
+#### 方式一：使用TagSystemAPI类
+
+```python
+from tag_system_api import TagSystemAPI
+
+# 使用上下文管理器（推荐）
+with TagSystemAPI(environment='local', log_level='INFO') as api:
+    # 健康检查
+    if api.health_check():
+        print("✅ 系统健康")
+        
+        # 执行所有任务
+        success = api.run_task_all_users_all_tags()
+        print(f"所有任务执行: {'成功' if success else '失败'}")
+        
+        # 执行指定标签
+        success = api.run_task_specific_tags([1, 3, 5])
+        print(f"指定标签执行: {'成功' if success else '失败'}")
+        
+        # 执行指定用户指定标签
+        success = api.run_task_specific_users_specific_tags(
+            user_ids=['user_000001', 'user_000002'],
+            tag_ids=[1, 3, 5]
+        )
+        print(f"指定用户标签执行: {'成功' if success else '失败'}")
+        
+        # 列出可用任务
+        tasks = api.list_available_tasks()
+        print(f"可用任务数量: {len(tasks)}")
+```
+
+#### 方式二：使用便捷函数
+
+```python
+from tag_system_api import (
+    run_health_check, run_all_tasks, run_specific_tags, 
+    run_specific_users_tags, get_available_tasks
+)
+
+# 一行调用
+if run_health_check('local'):
+    # 执行指定标签
+    success = run_specific_tags([1, 3, 5], 'local')
+    print(f"标签计算: {'成功' if success else '失败'}")
+    
+    # 执行指定用户标签
+    success = run_specific_users_tags(
+        user_ids=['user_000001', 'user_000002'],
+        tag_ids=[1, 3, 5],
+        environment='local'
+    )
+    print(f"用户标签计算: {'成功' if success else '失败'}")
+```
+
+#### 方式三：在AWS Glue中使用
+
+```python
+from glue_entry import execute_glue_job
+
+def your_glue_job():
+    """Glue作业主函数"""
+    # 健康检查
+    if execute_glue_job('health', 'glue-dev'):
+        print("✅ Glue环境健康")
+        
+        # 执行指定标签
+        success = execute_glue_job(
+            mode='task-tags',
+            environment='glue-dev',
+            tag_ids=[1, 3, 5]
+        )
+        
+        if success:
+            print("🎉 Glue标签计算成功")
+        else:
+            print("❌ Glue标签计算失败")
+    
+    return success
+
+# 在Glue环境中调用
+if __name__ == "__main__":
+    your_glue_job()
+```
+
+### RESTful API使用
 
 ```python
 import requests
@@ -1228,13 +1393,13 @@ docker ps | grep mysql
 ./init_data.sh reset
 ```
 
-**3. API请求失败**
+**3. 系统健康检查失败**
 ```bash
-# 检查API服务器状态
-curl http://localhost:5000/health
+# 检查系统健康状态
+python main.py --env local --mode health
 
-# 启动API服务器
-python api_server.py --env local --host 0.0.0.0 --port 5000
+# 检查任务列表
+python main.py --env local --mode list-tasks
 ```
 
 **4. 任务执行失败**

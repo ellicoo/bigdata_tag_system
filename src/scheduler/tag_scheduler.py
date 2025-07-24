@@ -39,7 +39,7 @@ class TagScheduler:
             
             # 初始化组件
             self.rule_reader = RuleReader(self.spark, self.config.mysql)
-            self.hive_reader = HiveDataReader(self.spark, self.config.s3)
+            self.hive_reader = HiveDataReader(self.spark, self.config)
             
             # 初始化规则数据
             self.rule_reader.initialize()
@@ -68,8 +68,10 @@ class TagScheduler:
         for key, value in self.config.spark.to_dict().items():
             builder = builder.config(key, value)
         
-        for key, value in self.config.s3.to_spark_config().items():
-            builder = builder.config(key, value)
+        # 启用Hive支持（基于您的方式）
+        builder = builder.enableHiveSupport()
+        
+        # 移除S3配置，直接读取Hive表
         
         spark = builder.getOrCreate()
         spark.sparkContext.setLogLevel("ERROR")  # 更严格的日志级别，只显示错误

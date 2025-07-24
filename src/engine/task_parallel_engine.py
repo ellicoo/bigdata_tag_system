@@ -320,11 +320,11 @@ class TaskBasedParallelEngine:
         try:
             # 根据环境配置选择数据读取方式
             if self.config.environment == 'local':
-                # 本地环境：使用内置数据生成器或MinIO
+                # 本地环境：使用内置数据生成器（因为S3AFileSystem依赖问题）
                 return self._load_local_data_source(source_name, required_fields)
             else:
-                # Glue环境：从S3读取
-                return self._load_s3_data_source(source_name, required_fields)
+                # DolphinScheduler/Glue环境：使用直接Hive表读取（基于您的方式）
+                return self._load_hive_data_source(source_name, required_fields)
                 
         except Exception as e:
             logger.error(f"加载数据源失败 {source_name}: {str(e)}")
@@ -345,24 +345,21 @@ class TaskBasedParallelEngine:
             logger.warning(f"未知的本地数据源: {source_name}")
             return None
     
-    def _load_s3_data_source(self, source_name: str, required_fields: List[str]) -> Optional[DataFrame]:
-        """S3环境数据加载"""
+    def _load_hive_data_source(self, source_name: str, required_fields: List[str]) -> Optional[DataFrame]:
+        """Hive表数据加载 - 基于您的直接读表方式"""
         from src.readers.hive_reader import HiveDataReader
         
-        hive_reader = HiveDataReader(self.spark, self.config.s3)
+        hive_reader = HiveDataReader(self.spark, self.config)
         
-        # 根据数据源名称选择对应的S3路径
-        source_mapping = {
-            'user_basic_info': 'user_basic_info/',
-            'user_asset_summary': 'user_asset_summary/',
-            'user_activity_summary': 'user_activity_summary/'
-        }
-        
-        if source_name in source_mapping:
-            s3_path = source_mapping[source_name]
-            return hive_reader.read_hive_table(s3_path, selected_columns=required_fields)
+        # 根据数据源名称映射到对应的读取方法
+        if source_name == 'user_basic_info':
+            return hive_reader.read_user_basic_info()
+        elif source_name == 'user_asset_summary':
+            return hive_reader.read_user_asset_summary()
+        elif source_name == 'user_activity_summary':
+            return hive_reader.read_user_activity_summary()
         else:
-            logger.warning(f"未知的S3数据源: {source_name}")
+            logger.warning(f"未知的数据源: {source_name}")
             return None
     
     def _execute_tasks_parallel(self, tasks: List[BaseTagTask], loaded_data: Dict[str, DataFrame]) -> List[DataFrame]:

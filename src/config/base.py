@@ -40,49 +40,15 @@ class SparkConfig:
         return config
 
 
-@dataclass
-class S3Config:
-    """S3配置"""
-    bucket: str
-    access_key: str = ""
-    secret_key: str = ""
-    endpoint: str = ""
-    region: str = "us-east-1"
-    
-    @property
-    def warehouse_path(self) -> str:
-        """数据仓库路径"""
-        return f"s3a://{self.bucket}/warehouse/"
-    
-    def to_spark_config(self) -> Dict[str, str]:
-        """转换为Spark S3配置"""
-        config = {
-            "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem",
-            "spark.hadoop.fs.s3a.aws.credentials.provider": 
-                "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider"
-        }
-        
-        if self.endpoint:
-            config["spark.hadoop.fs.s3a.endpoint"] = self.endpoint
-            config["spark.hadoop.fs.s3a.path.style.access"] = "true"
-        
-        if self.access_key:
-            config["spark.hadoop.fs.s3a.access.key"] = self.access_key
-        
-        if self.secret_key:
-            config["spark.hadoop.fs.s3a.secret.key"] = self.secret_key
-            
-        return config
-
 
 @dataclass
 class MySQLConfig:
-    """MySQL配置"""
-    host: str
-    port: int = 3306
-    database: str = "tag_system"
-    username: str = "root"
-    password: str = ""
+    """MySQL配置 - 基于您提供的mysql_connect_confg.py"""
+    host: str = 'cex-mysql-test.c5mgk4qm8m2z.ap-southeast-1.rds.amazonaws.com'
+    port: int = 3358
+    database: str = 'biz_statistics'
+    username: str = 'root'
+    password: str = 'ayjUzzH8b7gcQYRh'
     
     @property
     def jdbc_url(self) -> str:
@@ -105,10 +71,9 @@ class MySQLConfig:
 
 @dataclass 
 class BaseConfig(ABC):
-    """基础配置类"""
+    """基础配置类 - 简化版，移除S3Config，直接读取Hive表"""
     environment: str
     spark: SparkConfig
-    s3: S3Config
     mysql: MySQLConfig
     
     # 系统配置
@@ -117,6 +82,10 @@ class BaseConfig(ABC):
     enable_cache: bool = True
     log_level: str = "INFO"
     
+    # Hive表配置（基于您的读表方式）
+    hive_database: str = "tag_test"  # 测试数据库
+    data_date: str = "2025-01-20"    # 数据日期
+    
     @classmethod
     @abstractmethod
     def create(cls) -> 'BaseConfig':
@@ -124,17 +93,29 @@ class BaseConfig(ABC):
         pass
     
     def get_spark_config(self) -> Dict[str, Any]:
-        """获取完整的Spark配置"""
+        """获取Spark配置 - 启用Hive支持"""
         config = self.spark.to_dict()
-        config.update(self.s3.to_spark_config())
+        # 启用Hive支持（基于您的HiveToKafka.py方式）
+        config.update({
+            "spark.sql.catalogImplementation": "hive",
+            "spark.hadoop.hive.metastore.uris": "",  # 使用嵌入式metastore
+        })
         return config
     
     def validate(self) -> bool:
         """验证配置完整性"""
         required_fields = [
             self.spark.app_name,
-            self.s3.bucket,
             self.mysql.host,
-            self.mysql.username
+            self.mysql.username,
+            self.mysql.password
         ]
         return all(field for field in required_fields)
+    
+    def get_hive_table_names(self) -> Dict[str, str]:
+        """获取Hive表名配置"""
+        return {
+            "user_basic_info": f"{self.hive_database}.user_basic_info",
+            "user_asset_summary": f"{self.hive_database}.user_asset_summary", 
+            "user_activity_summary": f"{self.hive_database}.user_activity_summary"
+        }

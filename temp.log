@@ -1,0 +1,278 @@
+[LOG-PATH]: /usr/local/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250724/18418692457824/15/836/3390.log, [HOST]:  Host(ip=172.31.9.77, port=1234)
+[INFO] 2025-07-24 07:42:20.506 +0000 - ***********************************************************************************************
+[INFO] 2025-07-24 07:42:20.508 +0000 - *********************************  Initialize task context  ***********************************
+[INFO] 2025-07-24 07:42:20.508 +0000 - ***********************************************************************************************
+[INFO] 2025-07-24 07:42:20.508 +0000 - Begin to initialize task
+[INFO] 2025-07-24 07:42:20.508 +0000 - Set task startTime: 1753342940508
+[INFO] 2025-07-24 07:42:20.508 +0000 - Set task appId: 836_3390
+[INFO] 2025-07-24 07:42:20.508 +0000 - End initialize task {
+  "taskInstanceId" : 3390,
+  "taskName" : "generate_test_data",
+  "firstSubmitTime" : 1753342940491,
+  "startTime" : 1753342940508,
+  "taskType" : "SPARK",
+  "workflowInstanceHost" : "172.31.9.77:5678",
+  "host" : "172.31.9.77:1234",
+  "logPath" : "/usr/local/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250724/18418692457824/15/836/3390.log",
+  "processId" : 0,
+  "processDefineCode" : 18418692457824,
+  "processDefineVersion" : 15,
+  "processInstanceId" : 836,
+  "scheduleTime" : 0,
+  "executorId" : 1,
+  "cmdTypeIfComplement" : 0,
+  "tenantCode" : "default",
+  "processDefineId" : 0,
+  "projectId" : 0,
+  "projectCode" : 17560371057376,
+  "taskParams" : "{\"localParams\":[],\"rawScript\":\"\",\"resourceList\":[],\"programType\":\"PYTHON\",\"mainClass\":\"\",\"mainJar\":{\"id\":-1,\"resourceName\":\"file:/dolphinscheduler/default/resources/tag_system/main.py\",\"res\":null},\"deployMode\":\"local\",\"appName\":\"generate_test_data\",\"mainArgs\":\"--mode generate-test-data --dt 2025-01-20\",\"others\":\"--jars /dolphinscheduler/default/resources/mysql-connector-j-8.0.33.jar\",\"yarnQueue\":\"\",\"driverCores\":1,\"driverMemory\":\"512M\",\"numExecutors\":2,\"executorMemory\":\"2G\",\"executorCores\":2,\"sqlExecutionType\":\"SCRIPT\"}",
+  "prepareParamsMap" : {
+    "system.task.definition.name" : {
+      "prop" : "system.task.definition.name",
+      "direct" : "IN",
+      "type" : "VARCHAR",
+      "value" : "generate_test_data"
+    },
+    "system.project.name" : {
+      "prop" : "system.project.name",
+      "direct" : "IN",
+      "type" : "VARCHAR",
+      "value" : null
+    },
+    "system.project.code" : {
+      "prop" : "system.project.code",
+      "direct" : "IN",
+      "type" : "VARCHAR",
+      "value" : "17560371057376"
+    },
+    "system.workflow.instance.id" : {
+      "prop" : "system.workflow.instance.id",
+      "direct" : "IN",
+      "type" : "VARCHAR",
+      "value" : "836"
+    },
+    "system.biz.curdate" : {
+      "prop" : "system.biz.curdate",
+      "direct" : "IN",
+      "type" : "VARCHAR",
+      "value" : "20250724"
+    },
+    "system.biz.date" : {
+      "prop" : "system.biz.date",
+      "direct" : "IN",
+      "type" : "VARCHAR",
+      "value" : "20250723"
+    },
+    "system.task.instance.id" : {
+      "prop" : "system.task.instance.id",
+      "direct" : "IN",
+      "type" : "VARCHAR",
+      "value" : "3390"
+    },
+    "system.workflow.definition.name" : {
+      "prop" : "system.workflow.definition.name",
+      "direct" : "IN",
+      "type" : "VARCHAR",
+      "value" : "tag_system_deploy_test"
+    },
+    "system.task.definition.code" : {
+      "prop" : "system.task.definition.code",
+      "direct" : "IN",
+      "type" : "VARCHAR",
+      "value" : "18420794328673"
+    },
+    "system.workflow.definition.code" : {
+      "prop" : "system.workflow.definition.code",
+      "direct" : "IN",
+      "type" : "VARCHAR",
+      "value" : "18418692457824"
+    },
+    "StartNodeList" : {
+      "prop" : "StartNodeList",
+      "direct" : "IN",
+      "type" : "VARCHAR",
+      "value" : "18420794328673"
+    },
+    "system.datetime" : {
+      "prop" : "system.datetime",
+      "direct" : "IN",
+      "type" : "VARCHAR",
+      "value" : "20250724074220"
+    }
+  },
+  "taskAppId" : "836_3390",
+  "taskTimeout" : 2147483647,
+  "workerGroup" : "default",
+  "delayTime" : 0,
+  "currentExecutionStatus" : "SUBMITTED_SUCCESS",
+  "endTime" : 0,
+  "resources" : {
+    "file:/dolphinscheduler/default/resources/tag_system/main.py" : ""
+  },
+  "dryRun" : 0,
+  "paramsMap" : { },
+  "cpuQuota" : -1,
+  "memoryMax" : -1,
+  "testFlag" : 0,
+  "logBufferEnable" : false,
+  "dispatchFailTimes" : 0
+}
+[INFO] 2025-07-24 07:42:20.508 +0000 - ***********************************************************************************************
+[INFO] 2025-07-24 07:42:20.509 +0000 - *********************************  Load task instance plugin  *********************************
+[INFO] 2025-07-24 07:42:20.509 +0000 - ***********************************************************************************************
+[INFO] 2025-07-24 07:42:20.509 +0000 - Send task status RUNNING_EXECUTION master: 172.31.9.77:1234
+[WARN] 2025-07-24 07:42:20.509 +0000 - Current tenant is default tenant, will use root to execute the task
+[INFO] 2025-07-24 07:42:20.509 +0000 - TenantCode: default check successfully
+[INFO] 2025-07-24 07:42:20.509 +0000 - WorkflowInstanceExecDir: /tmp/dolphinscheduler/exec/process/default/17560371057376/18418692457824_15/836/3390 check successfully
+[INFO] 2025-07-24 07:42:20.509 +0000 - get resource file from path:file:/dolphinscheduler/default/resources/tag_system/main.py
+[INFO] 2025-07-24 07:42:20.511 +0000 - Download resources: {file:/dolphinscheduler/default/resources/tag_system/main.py=file:/dolphinscheduler/default/resources/tag_system/main.py} successfully
+[INFO] 2025-07-24 07:42:20.511 +0000 - Download upstream files: [] successfully
+[INFO] 2025-07-24 07:42:20.511 +0000 - Task plugin instance: SPARK create successfully
+[INFO] 2025-07-24 07:42:20.511 +0000 - Initialize spark task params {
+  "localParams" : [ ],
+  "varPool" : null,
+  "mainJar" : {
+    "id" : -1,
+    "resourceName" : "file:/dolphinscheduler/default/resources/tag_system/main.py",
+    "res" : null
+  },
+  "mainClass" : "",
+  "deployMode" : "local",
+  "mainArgs" : "--mode generate-test-data --dt 2025-01-20",
+  "driverCores" : 1,
+  "driverMemory" : "512M",
+  "numExecutors" : 2,
+  "executorCores" : 2,
+  "executorMemory" : "2G",
+  "appName" : "generate_test_data",
+  "yarnQueue" : "",
+  "others" : "--jars /dolphinscheduler/default/resources/mysql-connector-j-8.0.33.jar",
+  "programType" : "PYTHON",
+  "rawScript" : "",
+  "namespace" : null,
+  "resourceList" : [ ],
+  "sqlExecutionType" : "SCRIPT"
+}
+[INFO] 2025-07-24 07:42:20.512 +0000 - Success initialized task plugin instance successfully
+[INFO] 2025-07-24 07:42:20.512 +0000 - Set taskVarPool: null successfully
+[INFO] 2025-07-24 07:42:20.512 +0000 - ***********************************************************************************************
+[INFO] 2025-07-24 07:42:20.512 +0000 - *********************************  Execute task instance  *************************************
+[INFO] 2025-07-24 07:42:20.512 +0000 - ***********************************************************************************************
+[INFO] 2025-07-24 07:42:20.512 +0000 - Final Shell file is :
+#!/bin/bash
+BASEDIR=$(cd `dirname $0`; pwd)
+cd $BASEDIR
+${SPARK_HOME}/bin/spark-submit --master local --conf spark.driver.cores=1 --conf spark.driver.memory=512M --conf spark.executor.instances=2 --conf spark.executor.cores=2 --conf spark.executor.memory=2G --name generate_test_data --jars /dolphinscheduler/default/resources/mysql-connector-j-8.0.33.jar file:/dolphinscheduler/default/resources/tag_system/main.py --mode generate-test-data --dt 2025-01-20
+[INFO] 2025-07-24 07:42:20.513 +0000 - Executing shell command : sudo -u root -i /tmp/dolphinscheduler/exec/process/default/17560371057376/18418692457824_15/836/3390/836_3390.sh
+[INFO] 2025-07-24 07:42:20.516 +0000 - process start, process id is: 656646
+[INFO] 2025-07-24 07:42:22.516 +0000 -  ->
+	25/07/24 07:42:21 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+	🚀 海豚调度器标签系统启动
+	📋 执行模式: generate-test-data
+[INFO] 2025-07-24 07:42:23.517 +0000 -  ->
+	25/07/24 07:42:22 INFO EMRParamSideChannel: Setting FGAC mode to false
+	25/07/24 07:42:22 INFO SparkContext: Running Spark version 3.5.2-amzn-1
+	25/07/24 07:42:22 INFO SparkContext: OS info Linux, 6.8.0-1029-aws, amd64
+	25/07/24 07:42:22 INFO SparkContext: Java version 17.0.15
+	25/07/24 07:42:22 INFO ResourceUtils: ==============================================================
+	25/07/24 07:42:22 INFO ResourceUtils: No custom resources configured for spark.driver.
+	25/07/24 07:42:22 INFO ResourceUtils: ==============================================================
+	25/07/24 07:42:22 INFO SparkContext: Submitted application: BigDataTagSystem-Dolphin
+	25/07/24 07:42:22 INFO ResourceProfile: Default ResourceProfile created, executor resources: Map(executorType -> name: executorType, amount: 1, script: , vendor: , cores -> name: cores, amount: 2, script: , vendor: , memory -> name: memory, amount: 2048, script: , vendor: , offHeap -> name: offHeap, amount: 0, script: , vendor: ), task resources: Map(cpus -> name: cpus, amount: 1.0)
+	25/07/24 07:42:22 INFO ResourceProfile: Limiting resource is cpus at 2 tasks per executor
+	25/07/24 07:42:22 INFO ResourceProfileManager: Added ResourceProfile id: 0
+	25/07/24 07:42:22 INFO ResourceProfile: User executor ResourceProfile created, executor resources: Map(executorType -> name: executorType, amount: 1, script: , vendor: , cores -> name: cores, amount: 2, script: , vendor: , memory -> name: memory, amount: 2048, script: , vendor: , offHeap -> name: offHeap, amount: 0, script: , vendor: ), task resources: Map(cpus -> name: cpus, amount: 1.0)
+	25/07/24 07:42:22 INFO ResourceProfile: Limiting resource is cpus at 2 tasks per executor
+	25/07/24 07:42:22 INFO ResourceProfileManager: Added ResourceProfile id: 1
+	25/07/24 07:42:22 INFO SecurityManager: Changing view acls to: root
+	25/07/24 07:42:22 INFO SecurityManager: Changing modify acls to: root
+	25/07/24 07:42:22 INFO SecurityManager: Changing view acls groups to:
+	25/07/24 07:42:22 INFO SecurityManager: Changing modify acls groups to:
+	25/07/24 07:42:22 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users with view permissions: root; groups with view permissions: EMPTY; users with modify permissions: root; groups with modify permissions: EMPTY
+	25/07/24 07:42:22 INFO Utils: Successfully started service 'sparkDriver' on port 24679.
+	25/07/24 07:42:22 INFO SparkEnv: Registering MapOutputTracker
+	25/07/24 07:42:22 INFO SparkEnv: Registering BlockManagerMaster
+	25/07/24 07:42:22 INFO BlockManagerMasterEndpoint: Using org.apache.spark.storage.DefaultTopologyMapper for getting topology information
+	25/07/24 07:42:22 INFO BlockManagerMasterEndpoint: BlockManagerMasterEndpoint up
+	25/07/24 07:42:22 INFO SparkEnv: Registering BlockManagerMasterHeartbeat
+	25/07/24 07:42:22 INFO DiskBlockManager: Created local directory at /tmp/blockmgr-3cadeb93-79ad-4d51-80a0-d33ef22ff742
+	25/07/24 07:42:22 INFO MemoryStore: MemoryStore started with capacity 127.2 MiB
+	25/07/24 07:42:22 INFO SparkEnv: Registering OutputCommitCoordinator
+	25/07/24 07:42:22 INFO SubResultCacheManager: Sub-result caches are disabled.
+	25/07/24 07:42:23 INFO JettyUtils: Start Jetty 0.0.0.0:4040 for SparkUI
+	25/07/24 07:42:23 INFO Utils: Successfully started service 'SparkUI' on port 4040.
+	25/07/24 07:42:23 INFO SparkContext: Added JAR file:///dolphinscheduler/default/resources/mysql-connector-j-8.0.33.jar at spark://ip-172-31-9-77.ap-southeast-1.compute.internal:24679/jars/mysql-connector-j-8.0.33.jar with timestamp 1753342942677
+	25/07/24 07:42:23 INFO Executor: Starting executor ID driver on host ip-172-31-9-77.ap-southeast-1.compute.internal
+	25/07/24 07:42:23 INFO Executor: OS info Linux, 6.8.0-1029-aws, amd64
+	25/07/24 07:42:23 INFO Executor: Java version 17.0.15
+	25/07/24 07:42:23 INFO Executor: Starting executor with user classpath (userClassPathFirst = false): 'file:/usr/lib/hadoop-lzo/lib/*,file:/usr/lib/hadoop/hadoop-aws.jar,file:/usr/share/aws/aws-java-sdk/*,file:/usr/share/aws/aws-java-sdk-v2/*,file:/usr/share/aws/emr/goodies/lib/emr-spark-goodies.jar,file:/usr/share/aws/emr/security/conf,file:/usr/share/aws/emr/security/lib/*,file:/usr/share/aws/redshift/jdbc/*,file:/usr/share/aws/redshift/spark-redshift/lib/*,file:/usr/share/aws/kinesis/spark-sql-kinesis/lib/*,file:/usr/share/aws/hmclient/lib/aws-glue-datacatalog-spark-client.jar,file:/usr/share/java/Hive-JSON-Serde/hive-openx-serde.jar,file:/usr/share/aws/emr/s3select/lib/emr-s3-select-spark-connector.jar,file:/docker/usr/lib/hadoop-lzo/lib/*,file:/docker/usr/lib/hadoop/hadoop-aws.jar,file:/docker/usr/share/aws/aws-java-sdk/*,file:/docker/usr/share/aws/aws-java-sdk-v2/*,file:/docker/usr/share/aws/emr/goodies/lib/emr-spark-goodies.jar,file:/docker/usr/share/aws/emr/security/conf,file:/docker/usr/share/aws/emr/security/lib/*,file:/docker/usr/share/aws/redshift/jdbc/*,file:/docker/usr/share/aws/redshift/spark-redshift/lib/*,file:/docker/usr/share/aws/kinesis/spark-sql-kinesis/lib/*,file:/docker/usr/share/aws/hmclient/lib/aws-glue-datacatalog-spark-client.jar,file:/docker/usr/share/java/Hive-JSON-Serde/hive-openx-serde.jar,file:/docker/usr/share/aws/emr/s3select/lib/emr-s3-select-spark-connector.jar,file:/tmp/dolphinscheduler/exec/process/default/17560371057376/18418692457824_15/836/3390/conf,file:/tmp/dolphinscheduler/exec/process/default/17560371057376/18418692457824_15/836/3390/hadoop-aws.jar,file:/tmp/dolphinscheduler/exec/process/default/17560371057376/18418692457824_15/836/3390/*,file:/tmp/dolphinscheduler/exec/process/default/17560371057376/18418692457824_15/836/3390/aws-glue-datacatalog-spark-client.jar,file:/tmp/dolphinscheduler/exec/process/default/17560371057376/18418692457824_15/836/3390/emr-s3-select-spark-connector.jar,file:/tmp/dolphinscheduler/exec/process/default/17560371057376/18418692457824_15/836/3390/emr-spark-goodies.jar,file:/tmp/dolphinscheduler/exec/process/default/17560371057376/18418692457824_15/836/3390/hive-openx-serde.jar'
+	25/07/24 07:42:23 INFO Executor: Created or updated repl class loader org.apache.spark.util.MutableURLClassLoader@1bdc1a72 for default.
+	25/07/24 07:42:23 INFO Executor: Fetching spark://ip-172-31-9-77.ap-southeast-1.compute.internal:24679/jars/mysql-connector-j-8.0.33.jar with timestamp 1753342942677
+	25/07/24 07:42:23 INFO TransportClientFactory: Successfully created connection to ip-172-31-9-77.ap-southeast-1.compute.internal/172.31.9.77:24679 after 16 ms (0 ms spent in bootstraps)
+	25/07/24 07:42:23 INFO Utils: Fetching spark://ip-172-31-9-77.ap-southeast-1.compute.internal:24679/jars/mysql-connector-j-8.0.33.jar to /tmp/spark-01ea00d0-1c57-49f9-84da-a12c2206f453/userFiles-14fdbff5-30bb-4f77-a432-8926406a1ba9/fetchFileTemp1407572098624485052.tmp
+	25/07/24 07:42:23 INFO Executor: Adding file:/tmp/spark-01ea00d0-1c57-49f9-84da-a12c2206f453/userFiles-14fdbff5-30bb-4f77-a432-8926406a1ba9/mysql-connector-j-8.0.33.jar to class loader default
+	25/07/24 07:42:23 INFO Utils: Successfully started service 'org.apache.spark.network.netty.NettyBlockTransferService' on port 18667.
+	25/07/24 07:42:23 INFO NettyBlockTransferService: Server created on ip-172-31-9-77.ap-southeast-1.compute.internal:18667
+	25/07/24 07:42:23 INFO BlockManager: Using org.apache.spark.storage.RandomBlockReplicationPolicy for block replication policy
+	25/07/24 07:42:23 INFO BlockManager: external shuffle service port = 7337
+	25/07/24 07:42:23 INFO BlockManagerMaster: Registering BlockManager BlockManagerId(driver, ip-172-31-9-77.ap-southeast-1.compute.internal, 18667, None)
+	25/07/24 07:42:23 INFO BlockManagerMasterEndpoint: Registering block manager ip-172-31-9-77.ap-southeast-1.compute.internal:18667 with 127.2 MiB RAM, BlockManagerId(driver, ip-172-31-9-77.ap-southeast-1.compute.internal, 18667, None)
+	25/07/24 07:42:23 INFO BlockManagerMaster: Registered BlockManager BlockManagerId(driver, ip-172-31-9-77.ap-southeast-1.compute.internal, 18667, None)
+	25/07/24 07:42:23 INFO BlockManager: Initialized BlockManager: BlockManagerId(driver, ip-172-31-9-77.ap-southeast-1.compute.internal, 18667, None)
+[INFO] 2025-07-24 07:42:24.519 +0000 -  ->
+	25/07/24 07:42:23 INFO SingleEventLogFileWriter: Logging events to hdfs:/var/log/spark/apps/local-1753342943164.inprogress
+	🚀 生成测试数据，日期: 2025-01-20
+	25/07/24 07:42:24 INFO SharedState: Setting hive.metastore.warehouse.dir ('null') to the value of spark.sql.warehouse.dir.
+	25/07/24 07:42:24 INFO SharedState: Warehouse path is 'hdfs://ha-nn-uri/user/spark/warehouse'.
+[INFO] 2025-07-24 07:42:25.519 +0000 -  ->
+	25/07/24 07:42:25 INFO HiveConf: Found configuration file file:/etc/spark/conf/hive-site.xml
+	25/07/24 07:42:25 INFO HiveUtils: Initializing HiveMetastoreConnection version 2.3.9-amzn-4 using Spark classes.
+	25/07/24 07:42:25 WARN HiveConf: HiveConf of name hive.server2.thrift.url does not exist
+	25/07/24 07:42:25 INFO HiveClientImpl: Warehouse location for Hive client (version 2.3.9) is hdfs://ha-nn-uri/user/spark/warehouse
+	25/07/24 07:42:25 INFO metastore: Trying to connect to metastore with URI thrift://ip-172-31-9-127.ap-southeast-1.compute.internal:9083
+	25/07/24 07:42:25 INFO metastore: Opened a connection to metastore, current connections: 1
+	25/07/24 07:42:25 INFO metastore: Connected to metastore.
+[INFO] 2025-07-24 07:42:26.519 +0000 -  ->
+	25/07/24 07:42:25 INFO SQLExecution: Skipped SparkListenerSQLExecutionObfuscatedInfo event due to NON_EMPTY_ERROR.
+	❌ 任务执行失败: [SCHEMA_NOT_FOUND] The schema `tag_test` cannot be found. Verify the spelling and correctness of the schema and catalog.
+	If you did not qualify the name with a catalog, verify the current_schema() output, or qualify the name with the correct catalog.
+	To tolerate the error on drop use DROP SCHEMA IF EXISTS.
+	Traceback (most recent call last):
+	  File "/dolphinscheduler/default/resources/tag_system/main.py", line 47, in main
+	    generate_test_data(spark, args.dt)
+	  File "/dolphinscheduler/default/resources/tag_system/generate_test_data.py", line 55, in generate_test_data
+	    .saveAsTable("tag_test.user_basic_info")
+	     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	  File "/mnt/spark/python/lib/pyspark.zip/pyspark/sql/readwriter.py", line 1586, in saveAsTable
+	    self._jwrite.saveAsTable(name)
+	  File "/mnt/spark/python/lib/py4j-0.10.9.7-src.zip/py4j/java_gateway.py", line 1322, in __call__
+	    return_value = get_return_value(
+	                   ^^^^^^^^^^^^^^^^^
+	  File "/mnt/spark/python/lib/pyspark.zip/pyspark/errors/exceptions/captured.py", line 185, in deco
+	    raise converted from None
+	pyspark.errors.exceptions.captured.AnalysisException: [SCHEMA_NOT_FOUND] The schema `tag_test` cannot be found. Verify the spelling and correctness of the schema and catalog.
+	If you did not qualify the name with a catalog, verify the current_schema() output, or qualify the name with the correct catalog.
+	To tolerate the error on drop use DROP SCHEMA IF EXISTS.
+	25/07/24 07:42:25 INFO SparkContext: SparkContext is stopping with exitCode 0.
+	25/07/24 07:42:25 INFO SparkUI: Stopped Spark web UI at http://ip-172-31-9-196.ap-southeast-1.compute.internal:4040
+	25/07/24 07:42:25 INFO MapOutputTrackerMasterEndpoint: MapOutputTrackerMasterEndpoint stopped!
+	25/07/24 07:42:25 INFO MemoryStore: MemoryStore cleared
+	25/07/24 07:42:25 INFO BlockManager: BlockManager stopped
+	25/07/24 07:42:25 INFO BlockManagerMaster: BlockManagerMaster stopped
+	25/07/24 07:42:25 INFO OutputCommitCoordinator$OutputCommitCoordinatorEndpoint: OutputCommitCoordinator stopped!
+	25/07/24 07:42:25 INFO SparkContext: Successfully stopped SparkContext
+	25/07/24 07:42:26 INFO ShutdownHookManager: Shutdown hook called
+	25/07/24 07:42:26 INFO ShutdownHookManager: Deleting directory /tmp/spark-01ea00d0-1c57-49f9-84da-a12c2206f453
+	25/07/24 07:42:26 INFO ShutdownHookManager: Deleting directory /tmp/spark-6492c476-d908-48e0-baf1-695f75f8419f
+	25/07/24 07:42:26 INFO ShutdownHookManager: Deleting directory /tmp/spark-01ea00d0-1c57-49f9-84da-a12c2206f453/pyspark-09a6c3ba-d624-4d72-a18a-79353fd2b58c
+[INFO] 2025-07-24 07:42:26.520 +0000 - process has exited. execute path:/tmp/dolphinscheduler/exec/process/default/17560371057376/18418692457824_15/836/3390, processId:656646 ,exitStatusCode:1 ,processWaitForStatus:true ,processExitValue:1
+[INFO] 2025-07-24 07:42:26.520 +0000 - Start finding appId in /usr/local/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250724/18418692457824/15/836/3390.log, fetch way: log
+[INFO] 2025-07-24 07:42:26.521 +0000 - ***********************************************************************************************
+[INFO] 2025-07-24 07:42:26.521 +0000 - *********************************  Finalize task instance  ************************************
+[INFO] 2025-07-24 07:42:26.521 +0000 - ***********************************************************************************************
+[INFO] 2025-07-24 07:42:26.521 +0000 - Upload output files: [] successfully
+[INFO] 2025-07-24 07:42:26.521 +0000 - Send task execute status: FAILURE to master : 172.31.9.77:1234
+[INFO] 2025-07-24 07:42:26.521 +0000 - Remove the current task execute context from worker cache
+[INFO] 2025-07-24 07:42:26.521 +0000 - The current execute mode isn't develop mode, will clear the task execute file: /tmp/dolphinscheduler/exec/process/default/17560371057376/18418692457824_15/836/3390
+[INFO] 2025-07-24 07:42:26.523 +0000 - Success clear the task execute file: /tmp/dolphinscheduler/exec/process/default/17560371057376/18418692457824_15/836/3390
+[INFO] 2025-07-24 07:42:26.523 +0000 - FINALIZE_SESSION
