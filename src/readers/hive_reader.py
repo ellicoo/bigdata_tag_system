@@ -11,7 +11,7 @@ from pyspark.sql.functions import col
 from src.config.base import BaseConfig
 
 
-class DirectHiveReader:
+class HiveDataReader:
     """直接Hive表读取器 - 基于您的HiveToKafka.py方式"""
     
     def __init__(self, spark: SparkSession, config: BaseConfig):

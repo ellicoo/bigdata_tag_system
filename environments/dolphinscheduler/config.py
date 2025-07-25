@@ -7,7 +7,7 @@ DolphinScheduler环境配置
 from src.config.base import BaseConfig, SparkConfig, MySQLConfig
 
 
-class DolphinSchedulerConfig(BaseConfig):
+class DolphinschedulerConfig(BaseConfig):
     """海豚调度器环境配置"""
     
     def __init__(self):
@@ -18,10 +18,9 @@ class DolphinSchedulerConfig(BaseConfig):
                 master="yarn",  # 海豚调度器通常使用yarn
                 executor_memory="4g",
                 driver_memory="2g",
-                executor_cores=2,
-                driver_cores=2,
-                executor_instances=2
-                # 不需要sql_warehouse_dir配置，集群自动处理Hive表读取
+                max_result_size="2g",
+                shuffle_partitions=400  # 增加分区数以适应大数据处理
+                # 不需要额外配置，集群自动处理Hive表读取
             ),
             mysql=MySQLConfig()  # 使用统一的MySQL配置
         )
