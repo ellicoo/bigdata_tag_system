@@ -40,7 +40,8 @@ class MysqlMeta:
         port = self.mysqlConfig['port']
         database = self.mysqlConfig['database']
         
-        return f"jdbc:mysql://{host}:{port}/{database}?useSSL=false&useUnicode=true&characterEncoding=utf8mb4"
+        # 使用connectionCollation参数支持utf8mb4编码
+        return f"jdbc:mysql://{host}:{port}/{database}?useSSL=false&useUnicode=true&connectionCollation=utf8mb4_unicode_ci&serverTimezone=UTC"
     
     def loadTagRules(self, tagIds: Optional[List[int]] = None) -> DataFrame:
         """加载标签规则DataFrame
