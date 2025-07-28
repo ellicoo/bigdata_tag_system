@@ -2,537 +2,321 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 项目概述
+## Project Overview
 
-这是一个大数据侧标签系统，通过PySpark从S3 Hive表读取用户数据，结合MySQL中的规则进行标签计算，并将结果写回MySQL。系统支持全量、增量和指定标签计算模式。
+This is an enterprise-level big data tag computing system designed for DolphinScheduler deployment. The system uses PySpark DSL and custom UDFs to read user data from S3 Hive tables, combines with JSON format rules in MySQL for distributed tag computation, and writes results back to MySQL.
 
-## 项目架构（重构后）
+## Core Architecture
 
-系统采用三环境架构，项目结构如下：
+### Tech Stack
+- **Computing Engine**: PySpark 3.5+ (Spark SQL + DataFrame API)
+- **Data Source**: S3 Hive Tables (Parquet format)
+- **Rule Storage**: MySQL (JSON format rules)
+- **Scheduler**: DolphinScheduler
+- **Deployment**: YARN Cluster mode
 
+### Project Structure
 ```
-大数据标签系统
-├── src/                    # 核心业务逻辑
-│   ├── config/            # 统一配置管理
-│   │   ├── base.py        # 基础配置类
-│   │   └── manager.py     # 配置管理器
-│   ├── readers/           # 数据读取器
-│   │   ├── hive_reader.py # S3 Hive表读取
-│   │   └── rule_reader.py # MySQL规则读取
-│   ├── engine/            # 标签计算引擎
-│   │   ├── rule_parser.py # JSON规则解析器
-│   │   └── tag_computer.py# 分布式标签计算
-│   ├── merger/            # 标签合并和去重
-│   │   └── tag_merger.py  # 标签结果合并
-│   ├── writers/           # 数据写入器
-│   │   └── mysql_writer.py# MySQL批量写入
-│   └── scheduler/         # 主调度器
-│       └── main_scheduler.py# 工作流编排
-├── environments/          # 三环境配置
-│   ├── local/            # 本地Docker环境
-│   │   ├── config.py     # 本地配置
-│   │   ├── docker-compose.yml# Docker服务
-│   │   └── setup.sh      # 一键环境搭建
-│   ├── glue-dev/         # AWS Glue开发环境
-│   │   ├── config.py     # 开发环境配置
-│   │   ├── glue_job.py   # Glue ETL作业
-│   │   └── deploy.py     # 自动化部署
-│   └── glue-prod/        # AWS Glue生产环境
-│       ├── config.py     # 生产环境配置
-│       ├── glue_job.py   # 生产Glue作业
-│       └── deploy.py     # 生产部署脚本
-├── tests/                # 测试框架
-│   ├── unit/            # 单元测试
-│   ├── integration/     # 集成测试
-│   ├── fixtures/        # 测试数据
-│   └── test_basic.py    # 基础测试
-├── docs/                # 项目文档
-└── main.py             # 统一入口
+src/tag_engine/                    # Core tag engine
+├── main.py                       # Unified command line entry
+├── engine/                       # Tag computing engine
+│   ├── TagEngine.py             # Main orchestration engine
+│   └── TagGroup.py              # Smart grouping based on table dependencies
+├── meta/                        # Data source management
+│   ├── HiveMeta.py             # Hive table operations with smart caching
+│   └── MysqlMeta.py            # MySQL rule and result management
+├── parser/                      # Rule parsing and SQL generation
+│   └── TagRuleParser.py        # JSON rule to SQL condition converter
+└── utils/                       # User defined functions
+    └── TagUdfs.py              # PySpark UDF function collection
+
+dolphin_gui_deploy/               # DolphinScheduler deployment package
+├── main.py                      # Deployment entry (wrapper)
+├── generate_test_data.py        # Test data generator
+├── create_test_tables.sql       # Hive table creation SQL
+└── deployment_guide.md          # Detailed deployment guide
 ```
 
-## 常用命令
+## Core Components
 
-### 本地环境管理详细指南
+### 1. TagEngine.py - Main Orchestration Engine
+**Responsibilities**: Overall orchestration and execution of tag computation workflow
+- Manage Hive and MySQL data source connections
+- Coordinate tag grouping and parallel computation
+- Execute tag merging and result writing
+- Provide health checks and system monitoring
 
-#### 🚀 快速开始
-```bash
-# 进入本地环境目录
-cd environments/local
+**Key Methods**:
+- `computeTags()`: Main method for tag computation
+- `healthCheck()`: System health check
+- `_mergeAllTagResults()`: Tag merging using Spark native functions
 
-# 一键部署所有服务
-./setup.sh
+### 2. TagGroup.py - Smart Parallel Processing
+**Responsibilities**: Smart grouping and concurrent computation based on table dependencies
+- Analyze table dependencies in tag rules
+- Group tags by dependent tables intelligently
+- Execute one JOIN operation per group, compute all tags in group in parallel
+- Maximize resource utilization, reduce duplicate data reading
 
-# 初始化数据库和测试数据
-./init_data.sh
+### 3. TagUdfs.py - Type-Safe UDF Functions
+**Responsibilities**: Provide type-safe tag processing UDFs
+- `mergeUserTags()`: Merge tags for single user, supports multiple input types
+- `mergeWithExistingTags()`: Smart merging of new and existing tags
+- `arrayToJson()` / `jsonToArray()`: Array and JSON mutual conversion
 
-# 测试系统运行
-cd ../../
-python main.py --env local --mode health    # 健康检查
-python main.py --env local --mode full      # 全量标签计算
-python main.py --env local --mode incremental --days 7  # 增量计算
-```
-
-#### 📦 环境部署命令
-```bash
-# 基础服务管理
-cd environments/local
-./setup.sh                    # 启动所有服务（默认）
-./setup.sh start              # 启动服务
-./setup.sh stop               # 停止服务
-./setup.sh clean              # 清理数据卷和网络
-./setup.sh status             # 检查服务状态
-```
-
-#### 🗄️ 数据初始化命令
-```bash
-# 数据库和测试数据管理
-cd environments/local
-./init_data.sh                # 初始化数据库和测试数据（默认）
-./init_data.sh clean          # 清理所有数据
-./init_data.sh reset          # 清理并重新初始化
-./init_data.sh db-only        # 仅初始化数据库表结构
-./init_data.sh data-only      # 仅生成测试数据
-```
-
-#### 🔧 完整重新部署流程
-```bash
-# 完全重新部署（解决服务问题或配置更新）
-cd environments/local
-
-# 1. 停止所有服务
-./setup.sh stop
-
-# 2. 清理数据卷（会清空所有数据）
-./setup.sh clean
-
-# 3. 重新启动服务
-./setup.sh
-
-# 4. 重新初始化数据
-./init_data.sh
-
-# 5. 验证部署
-cd ../../
-python main.py --env local --mode health
-```
-
-#### 🚀 一键重新部署（推荐）
-```bash
-# 自动化重新部署脚本（包含验证）
-cd environments/local
-./redeploy.sh
-
-# 快速验证部署结果
-./verify_deployment.sh
-```
-
-#### 🐛 常见问题解决
-```bash
-# 问题1: MySQL连接超时或锁死
-cd environments/local
-./setup.sh stop
-./setup.sh clean  # 清理数据卷
-./setup.sh        # 重新部署
-
-# 问题2: 中文字符乱码
-# 确保使用正确的字符集初始化
-./init_data.sh reset  # 重置数据库
-
-# 问题3: 服务端口冲突
-docker ps -a  # 检查端口占用
-./setup.sh stop
-./setup.sh clean
-./setup.sh
-
-# 问题4: 数据不一致
-./init_data.sh clean   # 清理数据
-./init_data.sh         # 重新初始化
-```
-
-### 运行系统（三环境支持）
-```bash
-# 本地环境 - 基础模式
-python main.py --env local --mode health                  # 健康检查
-python main.py --env local --mode full                    # 全量计算（全量用户，全量标签）
-python main.py --env local --mode incremental --days 3    # 增量计算（新增用户，全量标签）
-
-# 本地环境 - 精细化控制
-python main.py --env local --mode tags --tag-ids 1,3,5    # 指定标签打全量用户
-python main.py --env local --mode users --user-ids user_000001,user_000002    # 指定用户打全量标签
-python main.py --env local --mode user-tags --user-ids user_000001,user_000002 --tag-ids 1,3,5    # 指定用户指定标签
-python main.py --env local --mode incremental-tags --days 7 --tag-ids 1,3,5    # 增量用户指定标签
-
-# 🎯 6种并行计算场景（推荐使用）
-python main.py --env local --mode full-parallel                      # 场景1: 全量用户打全量标签
-python main.py --env local --mode tags-parallel --tag-ids 1,2,3      # 场景2: 全量用户打指定标签（支持标签合并）
-python main.py --env local --mode incremental-parallel --days 7      # 场景3: 增量用户打全量标签  
-python main.py --env local --mode incremental-tags-parallel --days 7 --tag-ids 2,4    # 场景4: 增量用户打指定标签
-python main.py --env local --mode users-parallel --user-ids user_000001,user_000002    # 场景5: 指定用户打全量标签
-python main.py --env local --mode user-tags-parallel --user-ids user_000001,user_000002 --tag-ids 1,3,5    # 场景6: 指定用户打指定标签（支持标签合并）
-
-# Glue开发环境
-python main.py --env glue-dev --mode full
-python main.py --env glue-dev --mode tags --tag-ids 1,2,3
-python main.py --env glue-dev --mode full-parallel        # 并行优化版本也支持
-
-# Glue生产环境  
-python main.py --env glue-prod --mode full
-python main.py --env glue-prod --mode incremental --days 7
-python main.py --env glue-prod --mode full-parallel       # 并行优化版本也支持
-```
-
-### 部署管理
-```bash
-# 部署到Glue开发环境
-cd environments/glue-dev && python deploy.py
-
-# 部署到Glue生产环境
-cd environments/glue-prod && python deploy.py
-
-# 运行Glue作业（通过AWS CLI）
-aws glue start-job-run --job-name tag-compute-dev --arguments='--mode=health'
-aws glue start-job-run --job-name tag-compute-prod --arguments='--mode=full'
-```
-
-### 测试
-```bash
-# 运行所有测试
-python -m pytest tests/ -v
-
-# 运行单元测试
-python -m pytest tests/unit/ -v
-
-# 运行集成测试
-python -m pytest tests/integration/ -v
-
-# 运行基础测试
-python -m pytest tests/test_basic.py -v
-
-# 测试覆盖率
-python -m pytest tests/ --cov=src --cov-report=html
-
-# 运行特定测试用例
-python -m pytest tests/integration/test_end_to_end.py::TestEndToEndIntegration::test_full_tag_compute_workflow -v     # 全量标签测试
-python -m pytest tests/integration/test_end_to_end.py::TestEndToEndIntegration::test_specific_tags_workflow -v      # 特定标签测试
-python -m pytest tests/integration/test_end_to_end.py::TestEndToEndIntegration::test_incremental_compute_workflow -v # 增量计算测试
-python -m pytest tests/integration/test_end_to_end.py::TestEndToEndIntegration::test_health_check_workflow -v       # 健康检查测试
-
-# 🎯 并行优化版本测试
-python test_scenarios.py                                  # 测试所有6个并行优化场景
-```
-
-### API接口服务
-
-系统提供了RESTful API接口，支持后端系统触发标签任务：
-
-#### 启动API服务器
-```bash
-# 启动本地环境API服务器
-python api_server.py --env local
-
-# 启动开发环境API服务器  
-python api_server.py --env glue-dev --host 0.0.0.0 --port 5000
-
-# 启动生产环境API服务器
-python api_server.py --env glue-prod --host 0.0.0.0 --port 8080 --log-level INFO
-```
-
-#### API接口概览
-- **POST** `/api/v1/tags/trigger` - 触发标签任务（支持指定标签ID列表）
-- **GET** `/api/v1/tasks/{task_id}/status` - 查询任务状态
-- **GET** `/api/v1/tasks` - 列出所有任务
-- **GET** `/api/v1/tags/available` - 获取可用标签列表
-- **GET** `/health` - 健康检查
-
-#### 触发标签任务示例
-```bash
-# 触发指定标签任务
-curl -X POST http://localhost:5000/api/v1/tags/trigger \
-  -H "Content-Type: application/json" \
-  -d '{
-    "tag_ids": [1, 2, 3],
-    "mode": "full"
-  }'
-
-# 指定用户指定标签
-curl -X POST http://localhost:5000/api/v1/tags/trigger \
-  -H "Content-Type: application/json" \
-  -d '{
-    "tag_ids": [1, 3],
-    "user_ids": ["user_000001", "user_000002"],
-    "mode": "full"
-  }'
-```
-
-#### API特性
-- **异步处理**: 任务提交后立即返回，不会阻塞调用方
-- **任务状态跟踪**: 支持查询任务执行状态和结果
-- **错误处理**: 完善的错误信息和HTTP状态码
-- **并发控制**: 支持多个任务并发执行（线程池管理）
-- **标签合并**: 所有任务都会与MySQL现有标签进行合并
-
-详细的API使用文档请参考：`docs/API_USAGE.md`
-
-## 配置管理
-
-系统采用统一的三环境配置管理，支持以下环境：
-
-### 环境类型
-- **local**: 本地Docker环境（开发测试）
-- **glue-dev**: AWS Glue开发环境
-- **glue-prod**: AWS Glue生产环境
-
-### 配置结构
+**Type Safety Features**:
 ```python
-# 基础配置类
-class BaseConfig:
-    environment: str        # 环境标识
-    spark: SparkConfig     # Spark配置
-    s3: S3Config          # S3/MinIO配置  
-    mysql: MySQLConfig    # MySQL配置
-
-# 配置管理器
-ConfigManager.load_config('local')      # 加载本地配置
-ConfigManager.load_config('glue-dev')   # 加载开发配置
-ConfigManager.load_config('glue-prod')  # 加载生产配置
+@udf(returnType=ArrayType(IntegerType()))
+def mergeUserTags(tagList):
+    """Supports List[int], Array[int], nested arrays and other input types"""
+    if not tagList:
+        return []
+    
+    # Handle different input types and nested arrays
+    if isinstance(tagList, list):
+        flatTags = tagList
+    else:
+        flatTags = []
+        for item in tagList:
+            if isinstance(item, (list, tuple)):
+                flatTags.extend(item)
+            else:
+                flatTags.append(item)
+    
+    # Filter None values, deduplicate and sort
+    validTags = [tag for tag in flatTags if tag is not None]
+    uniqueTags = list(set(validTags))
+    uniqueTags.sort()
+    return uniqueTags
 ```
 
-### 环境变量
+### 4. MysqlMeta.py - MySQL Data Management
+**Responsibilities**: Unified MySQL data access layer
+- Load tag rules and existing user tags
+- Batch UPSERT tag results to MySQL
+- Support timestamp management and idempotent operations
+
+**Configuration Usage**:
+- JDBC URL construction: `host:port/database`
+- PySpark reading: Pass username/password via `.option()`
+- PyMySQL writing: Use complete config dict for direct connection
+
+### 5. Main Entry main.py
+**Responsibilities**: Unified command line entry supporting multiple execution modes
+- Environment variable configuration loading
+- MySQL configuration management
+- Test data generator integration
+
+**Supported Execution Modes**:
 ```bash
-# 通用配置
-TAG_SYSTEM_ENV=local              # 环境标识
+# Health check
+python src/tag_engine/main.py --mode health
 
-# 本地环境（MinIO + MySQL容器）
-MYSQL_HOST=localhost
-MYSQL_PORT=3307
-S3_ENDPOINT=http://localhost:9000
+# Full tag computation
+python src/tag_engine/main.py --mode task-all
 
-# Glue开发环境
-DEV_S3_BUCKET=tag-system-dev-data-lake
-DEV_MYSQL_HOST=tag-system-dev.cluster-xxx.rds.amazonaws.com
-DEV_GLUE_ROLE_ARN=arn:aws:iam::xxx:role/GlueServiceRole-dev
+# Specific tag computation
+python src/tag_engine/main.py --mode task-tags --tag-ids 1,2,3
 
-# Glue生产环境
-PROD_S3_BUCKET=tag-system-prod-data-lake
-PROD_MYSQL_HOST=tag-system-prod.cluster-xxx.rds.amazonaws.com
-PROD_GLUE_ROLE_ARN=arn:aws:iam::xxx:role/GlueServiceRole-prod
+# Generate test data
+python src/tag_engine/main.py --mode generate-test-data
+
+# List available tasks
+python src/tag_engine/main.py --mode list-tasks
 ```
 
-配置示例位于 `.env.example`，包含所有环境的变量模板。
+## Smart Tag Merging Mechanism
 
-## 数据架构
+The system uses a **Spark native functions + UDF** hybrid strategy to ensure type safety and high performance:
 
-### 输入数据源
-- **S3 Hive表**: 来自数据湖的用户数据（user_basic_info, user_asset_summary, user_activity_summary）
-- **MySQL规则表**: 以JSON格式存储的标签定义和规则条件
-
-### 输出结果（重构后的数据模型）
-- **MySQL user_tags表**: 采用**一个用户一条记录**的设计
-  - `user_id`: 用户ID（唯一键约束）
-  - `tag_ids`: JSON数组，存储用户的所有标签ID `[1,2,3,5]`
-  - `tag_details`: JSON对象，存储标签详细信息
-  - `created_time`: 创建时间（首次插入时设置，后续更新不变）
-  - `updated_time`: 更新时间（每次UPSERT时自动更新）
-  - **核心优势**: 真正的标签合并逻辑，支持复杂查询，符合业务需求，时间戳追踪
-
-### 标签合并机制
-系统实现了真正的标签合并逻辑：
-- **新计算标签** + **已有标签** → **数组合并去重**
-- 支持增量更新，历史标签自动保留
-- MySQL JSON类型支持高效的标签查询：
-  ```sql
-  -- 查询具有特定标签的用户
-  SELECT user_id FROM user_tags WHERE JSON_CONTAINS(tag_ids, '1');
-  
-  -- 查询具有多个标签的用户
-  SELECT user_id FROM user_tags 
-  WHERE JSON_CONTAINS(tag_ids, '1') AND JSON_CONTAINS(tag_ids, '2');
-  ```
-
-### 规则系统
-规则以JSON格式存储，支持：
-- 逻辑操作符: AND, OR, NOT
-- 比较操作符: =, !=, >, <, >=, <=, in, not_in, in_range, contains, recent_days, is_null, is_not_null
-- 字段类型: string, number, date
-
-## 开发注意事项
-
-### 代码组织
-- 所有业务逻辑位于 `src/` 目录下
-- 使用标准的Python包导入: `from src.config.manager import ConfigManager`
-- 遵循模块化设计，各组件职责清晰分离
-
-### 开发规范
-- 使用PySpark进行分布式处理，支持大数据量计算
-- 统一配置管理，通过 `--env` 参数切换环境
-- 完整的错误处理，包含重试机制和优雅降级
-- 支持中文日志记录，方便问题排查
-- 主入口支持多种执行模式（full/incremental/tags/health）
-
-### 🔧 重要技术修复说明
-
-#### 中文字符编码问题解决
-**问题**: 数据库中中文字符显示为乱码
-**根本原因**: 数据库初始化时MySQL客户端字符集配置不正确
-**解决方案**: 
-1. 修改 `init_data.sh` 中的MySQL命令，添加 `--default-character-set=utf8mb4`
-2. 移除JDBC连接中的 `characterEncoding=utf8mb4` 参数（该参数不被支持）
-3. 保留 `connectionCollation=utf8mb4_unicode_ci` 确保字符集正确
-
-#### 写入验证逻辑优化
-**问题**: 验证逻辑错误地比较数据库总用户数和标签用户数
-**根本原因**: 数据库用户数不等于标签用户数，用户标签匹配会动态变化
-**解决方案**: 
-1. 只验证当前计算出标签的用户是否成功写入数据库
-2. 使用用户ID集合精确匹配，而不是总数比较
-3. 支持空标签用户的正常处理
-
-#### 标签去重机制完善
-**问题**: 用户可能获得重复的标签ID
-**解决方案**: 
-1. 在 `tag_merger.py` 中使用 `dropDuplicates(["user_id", "tag_id"])` 
-2. 在数组聚合时使用 `array_distinct()` 确保标签ID唯一
-3. 多层级去重保证数据一致性
-
-#### 增量模式逻辑改进
-**实现**: 采用方案2 - 独立内存处理
-1. 通过 `left_anti` join 识别真正的新用户（Hive中有但MySQL中没有的用户）
-2. 对新用户计算所有现有标签规则
-3. 直接追加到数据库，无需与现有标签合并
-4. 避免了复杂的标签合并逻辑，提高性能
-
-#### UPSERT时间戳机制完善 ⭐
-**问题**: 原UPSERT逻辑存在时间戳管理问题，相同数据会触发不必要的时间戳更新
-**根本原因**: MySQL执行顺序导致在比较时已经更新了字段值，比较总是失败
-**解决方案**: 
-1. **修复SQL执行顺序**: 将时间戳比较逻辑放在字段更新之前
-2. **移除自动更新约束**: 从数据库表定义中移除 `ON UPDATE CURRENT_TIMESTAMP`
-3. **精确时间戳控制**: 通过UPSERT逻辑精确控制何时更新时间戳
-
-**核心实现** (`src/writers/optimized_mysql_writer.py:115-122`):
-```sql
-ON DUPLICATE KEY UPDATE
-    updated_time = CASE 
-        WHEN JSON_EXTRACT(tag_ids, '$') <> JSON_EXTRACT(VALUES(tag_ids), '$')
-        THEN CURRENT_TIMESTAMP 
-        ELSE updated_time 
-    END,
-    tag_ids = VALUES(tag_ids),
-    tag_details = VALUES(tag_details)
+### In-Memory Tag Merging (Performance Optimization)
+```python
+# Use Spark native functions for tag merging, avoid UDF serialization overhead
+finalDF = mergedDF.groupBy("user_id").agg(
+    array_distinct(
+        array_sort(
+            flatten(collect_list("tag_ids_array"))
+        )
+    ).alias("merged_tag_ids")
+)
 ```
 
-**时间戳行为**:
-- `created_time`: 永远不变，记录首次插入时间
-- `updated_time`: 只有标签内容真正变化时才更新
-- **幂等性**: 相同操作不会触发不必要的时间戳更新
-
-#### 数据库表结构优化
-**问题**: 原表设计缺少时间戳字段，无法追踪标签更新时间
-**解决方案**: 
-1. 移除 `computed_date` 字段，简化设计
-2. 添加 `created_time` 和 `updated_time` 时间戳字段
-3. UPSERT策略：`INSERT ON DUPLICATE KEY UPDATE`，自动管理时间戳
-4. 只对 `user_id` 设置唯一键约束，保持一个用户一条记录的设计
-
-#### 并行计算与缓存优化
-**核心改进**: 
-1. **预缓存策略**: 使用 `persist(StorageLevel.MEMORY_AND_DISK)` 预缓存MySQL现有标签
-2. **多标签并行**: 同时计算多个标签，大幅提升性能
-3. **智能标签合并**: 场景2和场景6支持与MySQL现有标签智能合并
-4. **分区优化**: 根据数据量动态调整分区数，提升写入性能
-
-#### 标签合并日志追踪增强 ⭐
-**问题**: 原有日志缺乏合并过程的详细追踪，难以调试标签合并问题
-**解决方案**: 
-1. **任务引擎级别追踪**: 在 `task_parallel_engine.py` 中记录每个任务的原始标签结果
-2. **内存合并过程追踪**: 显示用户在各个任务中的标签及内存合并结果
-3. **MySQL合并过程追踪**: 在 `tag_merger.py` 中显示内存合并后标签、MySQL现有标签、最终合并后标签
-4. **合并逻辑验证**: 自动验证每个阶段的合并逻辑是否正确
-5. **用户级别细化**: 选择有标签的用户进行详细追踪，而非随机用户
-6. **去除重复日志**: 优化日志输出，避免相似信息重复显示
-
-**日志追踪链路**:
-```
-任务1结果 → 任务2结果 → ... → 内存合并 → MySQL现有标签合并 → 最终结果
-    ↓           ↓                    ↓              ↓                ↓
-详细追踪    详细追踪           用户级别追踪    用户级别追踪      逻辑验证
+### MySQL Tag Merging (Business Logic)
+```python
+# Merge with existing MySQL tags, support historical tag preservation
+finalDF = joinedDF.withColumn(
+    "final_tag_ids",
+    tagUdfs.mergeWithExistingTags(
+        col("new.merged_tag_ids"),
+        col("existing.existing_tag_ids")
+    )
+)
 ```
 
-**核心实现位置**:
-- `src/engine/task_parallel_engine.py:536-619` - 内存合并过程追踪
-- `src/merger/tag_merger.py:67-115` - MySQL合并过程追踪
+## JSON Rule System
 
-### 测试数据生成
-本地环境支持生产级模拟数据生成，确保标签规则能够正确匹配：
+Supports complex business rule definitions, rules stored in JSON format in MySQL:
 
-#### 数据生成策略
-- **高净值用户**: 50个用户，总资产 ≥ 150,000，现金余额 ≥ 60,000
-- **VIP客户**: 20个用户，等级为 VIP2/VIP3，KYC状态已验证
-- **年轻用户**: 30个用户，年龄在 18-30 岁之间
-- **活跃交易者**: 80个用户，30天交易次数 > 15次
-- **低风险用户**: 25个用户，风险评分 ≤ 30
-- **新注册用户**: 15个用户，注册时间在最近30天内
-- **最近活跃用户**: 15个用户，最近7天内有登录
+```json
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "fields": [
+        {
+          "table": "user_basic_info",
+          "field": "age",
+          "operator": ">=", 
+          "value": 30,
+          "type": "number"
+        },
+        {
+          "table": "user_asset_summary", 
+          "field": "total_assets",
+          "operator": ">=",
+          "value": 100000,
+          "type": "number"
+        }
+      ]
+    }
+  ]
+}
+```
 
-#### 测试数据生成位置
-- **完整生成器**: `environments/local/test_data_generator.py`
-- **内置生成器**: `src/scheduler/main_scheduler.py:_generate_production_like_data()`
-- **简化生成器**: `src/scheduler/main_scheduler.py:_generate_test_user_data()`
+## Data Model
 
-#### 本地测试特殊说明
-由于本地环境的S3AFileSystem依赖问题，系统在本地模式下会自动使用内置数据生成器，而非从MinIO读取Parquet文件。这确保了本地测试的稳定性和完整性。
+### Input Data Sources
+- `user_basic_info`: User basic information (age, gender, registration time, etc.)
+- `user_asset_summary`: User asset summary (total assets, cash balance, etc.)  
+- `user_activity_summary`: User activity summary (transaction count, login time, etc.)
 
-### 测试要求
-- 新功能必须包含单元测试
-- 重要流程需要集成测试
-- 使用 `tests/fixtures/` 中的测试数据
-- 运行测试前确保本地环境正常
-
-### 部署流程
-1. **本地开发**: 使用 `environments/local/` 环境
-2. **开发测试**: 部署到 `glue-dev` 环境验证
-3. **生产发布**: 通过 `glue-prod` 环境上线
-
-## 数据库表结构
-
-系统需要特定的MySQL表结构：
-
-### 规则存储表
-- `tag_category`: 标签分类
-- `tag_definition`: 标签定义  
-- `tag_rules`: 标签规则（JSON格式）
-
-### 结果存储表（重构后）
-- `user_tags`: 用户标签结果表，采用**一个用户一条记录**的新设计
+### Output Results
+- `user_tags` table: Uses **one record per user** design
   ```sql
   CREATE TABLE user_tags (
       id BIGINT PRIMARY KEY AUTO_INCREMENT,
       user_id VARCHAR(100) NOT NULL,
-      tag_ids JSON NOT NULL COMMENT '用户的所有标签ID数组 [1,2,3,5]',
-      tag_details JSON COMMENT '标签详细信息 {"1": {"tag_name": "高净值用户"}}',
-      created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间（永远不变）',
-      updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间（由UPSERT逻辑控制）',
+      tag_ids JSON NOT NULL COMMENT 'All tag IDs for user as array [1,2,3,5]',
+      tag_details JSON COMMENT 'Tag detailed information',
+      created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       UNIQUE KEY uk_user_id (user_id)
   );
   ```
 
-### 数据模型重构说明
-**重构前**：一个标签一条记录 → 违背标签合并需求
-**重构后**：一个用户一条记录 → 标签ID存储为JSON数组
+## DolphinScheduler Deployment
 
-**核心改进**：
-1. 真正的标签合并：新老标签数组合并去重
-2. 查询高效：支持 `JSON_CONTAINS(tag_ids, '1')` 查询
-3. 存储紧凑：减少数据冗余，提高性能
-4. 业务友好：符合"用户拥有多个标签"的业务模型
+### Deployment Package Structure
+```
+bigdata_tag_system/              # Deployment directory
+├── main.py                     # Deployment entry (wrapper)
+├── src/                        # Core source code
+├── generate_test_data.py       # Test data generator
+├── create_test_tables.sql      # Table creation SQL
+└── requirements.txt            # Python dependencies
+```
 
-具体表结构和示例数据详见 `docs/` 目录下的相关文档。
+### Standard Deployment Process
+1. **Extract Package** → **Fix File Permissions** → **Install Dependencies** → **Health Check** → **Full Tag Computation** → **Specific Tag Computation**
 
-## 文档索引
+### Spark Task Configuration
+```
+Main Program: /dolphinscheduler/default/resources/bigdata_tag_system/main.py
+Program Arguments: --mode task-all
+Driver Memory: 4g
+Executor Count: 5
+Executor Memory: 8g
+```
 
-项目文档已整理到 `docs/` 目录：
-- **标准需求文档.md**: 业务需求和规范
-- **大数据侧标签系统实施方案.md**: 详细技术实施方案
-- **标签架构演进方案.md**: 架构设计和演进规划
-- **MIGRATION_GUIDE.md**: 系统迁移指南
-- **RESTRUCTURE_PLAN.md**: 架构重构计划
+## Configuration Management
+
+### MySQL Configuration (Environment Variables)
+```bash
+export MYSQL_HOST="cex-mysql-test.c5mgk4qm8m2z.ap-southeast-1.rds.amazonaws.com"
+export MYSQL_PORT="3358"
+export MYSQL_DATABASE="biz_statistics"
+export MYSQL_USER="root"
+export MYSQL_PASSWORD="ayjUzzH8b7gcQYRh"
+```
+
+### Spark Optimization Configuration
+```python
+spark = SparkSession.builder \
+    .appName(app_name) \
+    .enableHiveSupport() \
+    .config("spark.sql.adaptive.enabled", "true") \
+    .config("spark.sql.adaptive.coalescePartitions.enabled", "true") \
+    .config("spark.sql.adaptive.skewJoin.enabled", "true") \
+    .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer") \
+    .getOrCreate()
+```
+
+## Performance Optimization Strategies
+
+### 1. Smart Caching Strategy
+- **Table-level caching**: Use `persist(StorageLevel.MEMORY_AND_DISK)`
+- **Partition optimization**: Dynamically adjust partition count for better parallelism
+- **Column projection**: Load only necessary columns to reduce I/O
+
+### 2. Type Safety and Performance Balance
+- **Spark native functions first**: Use `array_distinct`, `array_sort`, `flatten`
+- **UDF backup strategy**: Use type-safe UDFs for complex logic
+- **Serialization optimization**: Reduce UDF calls, avoid Python-JVM serialization overhead
+
+### 3. Parallel Processing Optimization  
+- **Dependency analysis**: Smart grouping based on table dependencies
+- **Batch computation**: Parallel computation within groups, share table read results
+- **Resource management**: Proper Spark resource configuration and memory management
+
+## Development Guide
+
+### Adding New Tags
+1. **MySQL rule configuration**: Insert JSON format rules in `tag_rules` table
+2. **Test validation**: Use `--mode task-tags --tag-ids NEW_TAG_ID` for testing
+3. **Deployment update**: Use `dolphin_deploy_package.py` to generate new deployment package
+
+### Custom UDF Development
+Add new UDF functions in `TagUdfs.py`, ensure:
+- Type safety and None value handling
+- Support for multiple input types
+- Clear return type definition
+
+### Test Data Generation
+- DolphinScheduler environment: Use `dolphin_gui_deploy/generate_test_data.py`
+- Local development environment: Use `environments/local/test_data_generator.py`
+
+## Troubleshooting
+
+### Common Issues
+1. **Test data generator not found**: Ensure `generate_test_data.py` is in working directory
+2. **MySQL connection failure**: Check environment variable configuration and network connectivity
+3. **Type conversion errors**: Check UDF function input type handling logic
+4. **Tag merging exceptions**: Verify coordination between Spark native functions and UDFs
+
+### Performance Tuning
+- Adjust Executor configuration based on data volume
+- Optimize tag grouping strategy to reduce JOIN operations
+- Use Spark UI to monitor resource usage
+
+## Important Notes
+
+### Code Standards
+- All business logic concentrated in `src/tag_engine/` directory
+- Use standard Python package imports: `from src.tag_engine.engine.TagEngine import TagEngine`
+- Follow modular design with clear component responsibilities
+
+### Deployment Considerations
+- `src/tag_engine/main.py` is the single source of truth, other main.py files are wrappers
+- DolphinScheduler deployment depends on `generate_test_data.py` in deployment package
+- MySQL configuration loaded via environment variables, supports multi-environment deployment
+
+### Architecture Design Principles
+- Type safety first, all UDFs have explicit type definitions
+- Balance performance optimization with functionality completeness
+- Support large-scale data processing and enterprise-level deployment requirements
+
+---
+
+**Let data drive business, let tags create value!**
+
+Enterprise-level tag computing system based on PySpark DSL + UDF, empowering precision marketing and user insights.
