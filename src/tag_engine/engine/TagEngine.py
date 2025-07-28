@@ -4,7 +4,8 @@
 标签计算引擎
 主要负责标签计算流程的编排和执行
 """
-from pyspark.sql import SparkSession
+from typing import List, Optional, Dict
+from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import *
 
 from ..meta.HiveMeta import HiveMeta
@@ -190,9 +191,12 @@ class TagEngine:
                 return self._createEmptyUserTagsResult()
                 
             # 按用户重新聚合所有标签
+            # 使用flatten将嵌套数组展平，然后去重排序
             finalDF = mergedDF.groupBy("user_id").agg(
-                tagUdfs.mergeUserTags(
-                    flatten(collect_list("tag_ids_array"))
+                array_distinct(
+                    array_sort(
+                        flatten(collect_list("tag_ids_array"))
+                    )
                 ).alias("merged_tag_ids")
             )
             

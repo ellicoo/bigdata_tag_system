@@ -83,9 +83,9 @@ def main():
     parser = argparse.ArgumentParser(description="标签计算系统")
     parser.add_argument(
         "--mode", 
-        choices=["health", "full", "specific"],
+        choices=["health", "full", "specific", "task-all", "task-tags", "generate-test-data", "list-tasks"],
         default="health",
-        help="执行模式：health(健康检查)、full(全量计算)、specific(指定标签)"
+        help="执行模式：health(健康检查)、full/task-all(全量计算)、specific/task-tags(指定标签)、generate-test-data(生成测试数据)、list-tasks(列出任务)"
     )
     parser.add_argument(
         "--tag-ids",
@@ -140,18 +140,43 @@ def main():
             print("\n🔍 执行健康检查...")
             success = tag_engine.healthCheck()
             
-        elif args.mode == "full":
+        elif args.mode in ["full", "task-all"]:
             print("\n🚀 执行全量标签计算...")
-            success = tag_engine.computeTags(mode="full")
+            success = tag_engine.computeTags(mode="task-all")
             
-        elif args.mode == "specific":
+        elif args.mode in ["specific", "task-tags"]:
             tag_ids = parse_tag_ids(args.tag_ids)
             if tag_ids is None:
                 print("❌ 指定标签模式需要提供 --tag-ids 参数")
                 sys.exit(1)
             
             print(f"\n🎯 执行指定标签计算: {tag_ids}")
-            success = tag_engine.computeTags(mode="specific", tagIds=tag_ids)
+            success = tag_engine.computeTags(mode="task-tags", tagIds=tag_ids)
+            
+        elif args.mode == "generate-test-data":
+            print("\n🧪 生成测试数据...")
+            # 先创建数据库
+            spark.sql("CREATE DATABASE IF NOT EXISTS tag_test")
+            print("✅ 数据库 tag_test 创建成功")
+            
+            # 这里可以集成测试数据生成逻辑
+            from ..utils.test_data_generator import generate_test_data
+            success = generate_test_data(spark)
+            
+        elif args.mode == "list-tasks":
+            print("\n📋 列出可用标签任务...")
+            from .meta.MysqlMeta import MysqlMeta
+            mysql_meta = MysqlMeta(spark)
+            
+            try:
+                tags = mysql_meta.loadActiveTagRules()
+                print("可用标签任务:")
+                for tag in tags.collect():
+                    print(f"  {tag.tag_id}: {tag.tag_name}")
+                success = True
+            except Exception as e:
+                print(f"❌ 获取标签列表失败: {e}")
+                success = False
         
         # 5. 输出结果
         print("\n" + "=" * 60)
