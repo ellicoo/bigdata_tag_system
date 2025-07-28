@@ -351,52 +351,6 @@ if __name__ == "__main__":
 '''
         return main_content
     
-    def create_optimized_main_entry(self) -> str:
-        """创建优化的主程序入口 - 直接调用src/tag_engine/main.py"""
-        main_content = '''#!/usr/bin/env python3
-"""
-海豚调度器主程序入口 - 统一调用入口
-直接调用src/tag_engine/main.py，避免重复代码
-"""
-
-import sys
-import os
-
-# 添加项目路径
-current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(current_dir)
-
-def main():
-    """主程序入口 - 直接调用核心main.py"""
-    print("🐬 海豚调度器标签系统 - 统一入口")
-    print("📡 调用核心标签引擎...")
-    
-    try:
-        # 直接调用src/tag_engine/main.py
-        from src.tag_engine.main import main as core_main
-        
-        # 设置默认应用名称为海豚调度器版本
-        if '--app-name' not in sys.argv:
-            sys.argv.extend(['--app-name', 'BigDataTagSystem-Dolphin'])
-            
-        # 调用核心main函数
-        core_main()
-        
-    except ImportError as e:
-        print(f"❌ 无法导入核心模块: {e}")
-        print("请确保src/tag_engine目录存在并包含所需模块")
-        sys.exit(1)
-        
-    except Exception as e:
-        print(f"❌ 系统异常: {e}")
-        import traceback
-        traceback.print_exc()
-        sys.exit(1)
-
-if __name__ == "__main__":
-    main()
-'''
-        return main_content
     
     def create_optimized_deploy_guide(self, custom_extract_path: str = None) -> str:
         """创建优化的部署指南"""
@@ -648,10 +602,13 @@ client.triggerWorkflow("tag_system_compute", Map.of(
                     zip_file.write(file_path, arc_name)
                     print(f"  ✅ 添加源码: {arc_name}")
             
-            # 添加优化后的主程序入口（使用统一MySQL配置）
-            main_content = self.create_optimized_main_entry()
-            zip_file.writestr("main.py", main_content)
-            print("  ✅ 添加主程序: main.py")
+            # 直接使用核心引擎作为主程序入口
+            core_main_path = self.project_root / "src" / "tag_engine" / "main.py"
+            if core_main_path.exists():
+                zip_file.write(core_main_path, "main.py")
+                print("  ✅ 添加主程序: main.py (来自 src/tag_engine/main.py)")
+            else:
+                print("  ❌ 核心引擎文件不存在: src/tag_engine/main.py")
             
             # 添加测试数据生成器
             test_generator = self.create_test_data_generator()

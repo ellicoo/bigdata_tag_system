@@ -5,11 +5,18 @@
 支持多种执行模式和参数配置
 """
 import sys
+import os
 import argparse
 from typing import List, Optional, Dict
 from pyspark.sql import SparkSession
 
-from .engine.TagEngine import TagEngine
+# 动态添加项目根目录到Python路径
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(os.path.dirname(current_dir))  # 向上两级到项目根目录
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from src.tag_engine.engine.TagEngine import TagEngine
 
 
 def create_spark_session(app_name: str = "TagComputeEngine") -> SparkSession:
@@ -117,6 +124,10 @@ def main():
     print("🏷️  大数据标签计算系统")
     print("=" * 60)
     print(f"执行模式: {args.mode}")
+    print(f"当前工作目录: {os.getcwd()}")
+    print(f"脚本目录: {current_dir}")
+    print(f"项目根目录: {project_root}")
+    print(f"Python路径前3项: {sys.path[:3]}")
     
     if args.tag_ids:
         print(f"指定标签: {args.tag_ids}")
@@ -176,7 +187,7 @@ def main():
             
         elif args.mode == "list-tasks":
             print("\n📋 列出可用标签任务...")
-            from .meta.MysqlMeta import MysqlMeta
+            from src.tag_engine.meta.MysqlMeta import MysqlMeta
             mysql_meta = MysqlMeta(spark, mysql_config)
             
             try:
