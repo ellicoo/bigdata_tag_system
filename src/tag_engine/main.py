@@ -46,13 +46,15 @@ def load_mysql_config() -> Dict[str, str]:
         Dict: MySQL配置字典
     """
     # 从环境变量或配置文件加载
-    # 这里使用默认配置，实际部署时应从外部配置加载
+    # 海豚调度器环境使用统一配置
+    import os
+    
     return {
-        "host": "localhost",
-        "port": 3307,
-        "database": "tag_system",
-        "user": "tag_user",
-        "password": "tag_password",
+        "host": os.getenv("MYSQL_HOST", "cex-mysql-test.c5mgk4qm8m2z.ap-southeast-1.rds.amazonaws.com"),
+        "port": int(os.getenv("MYSQL_PORT", "3358")),
+        "database": os.getenv("MYSQL_DATABASE", "biz_statistics"),
+        "user": os.getenv("MYSQL_USER", "root"),
+        "password": os.getenv("MYSQL_PASSWORD", "ayjUzzH8b7gcQYRh"),
         "charset": "utf8mb4"
     }
 
@@ -156,23 +158,32 @@ def main():
         elif args.mode == "generate-test-data":
             print("\n🧪 生成测试数据...")
             # 先创建数据库
-            spark.sql("CREATE DATABASE IF NOT EXISTS tag_test")
-            print("✅ 数据库 tag_test 创建成功")
+            spark.sql("CREATE DATABASE IF NOT EXISTS tag_system")
+            print("✅ 数据库 tag_system 创建成功")
             
-            # 这里可以集成测试数据生成逻辑
-            from ..utils.test_data_generator import generate_test_data
-            success = generate_test_data(spark)
+            # 使用部署包中的测试数据生成器
+            try:
+                # 尝试导入部署包中的测试数据生成器（海豚调度器环境）
+                from generate_test_data import generate_test_data
+                generate_test_data(spark)
+                success = True
+                print("✅ 测试数据生成完成")
+            except ImportError:
+                print("❌ 无法找到测试数据生成器")
+                print("海豚调度器环境需要 generate_test_data.py 在当前目录中")
+                print("请确保部署包正确解压并包含 generate_test_data.py 文件")
+                success = False
             
         elif args.mode == "list-tasks":
             print("\n📋 列出可用标签任务...")
             from .meta.MysqlMeta import MysqlMeta
-            mysql_meta = MysqlMeta(spark)
+            mysql_meta = MysqlMeta(spark, mysql_config)
             
             try:
-                tags = mysql_meta.loadActiveTagRules()
+                tags = mysql_meta.loadTagRules()
                 print("可用标签任务:")
                 for tag in tags.collect():
-                    print(f"  {tag.tag_id}: {tag.tag_name}")
+                    print(f"  {tag.tag_id}: {tag.tag_name if hasattr(tag, 'tag_name') else '未知标签'}")
                 success = True
             except Exception as e:
                 print(f"❌ 获取标签列表失败: {e}")
