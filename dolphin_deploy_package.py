@@ -25,7 +25,7 @@ class DolphinGUIDeployPackager:
 -- 基于现有 crate_table_demo.sql 格式
 
 -- 用户基本信息表
-CREATE EXTERNAL TABLE IF NOT EXISTS tag_test.user_basic_info (
+CREATE EXTERNAL TABLE IF NOT EXISTS tag_system.user_basic_info (
     user_id string COMMENT '用户ID',
     age int COMMENT '年龄',
     user_level string COMMENT '用户等级',
@@ -44,7 +44,7 @@ LOCATION
     's3://exchanges-flink-test/batch/data/tag_system/user_basic_info/';
 
 -- 用户资产汇总表
-CREATE EXTERNAL TABLE IF NOT EXISTS tag_test.user_asset_summary (
+CREATE EXTERNAL TABLE IF NOT EXISTS tag_system.user_asset_summary (
     user_id string COMMENT '用户ID',
     total_asset_value double COMMENT '总资产价值',
     cash_balance double COMMENT '现金余额'
@@ -60,7 +60,7 @@ LOCATION
     's3://exchanges-flink-test/batch/data/tag_system/user_asset_summary/';
 
 -- 用户活动汇总表
-CREATE EXTERNAL TABLE IF NOT EXISTS tag_test.user_activity_summary (
+CREATE EXTERNAL TABLE IF NOT EXISTS tag_system.user_activity_summary (
     user_id string COMMENT '用户ID',
     trade_count_30d int COMMENT '30天交易次数',
     last_login_date string COMMENT '最后登录日期'
@@ -133,7 +133,7 @@ def generate_test_data(spark, dt='2025-01-20'):
     user_basic_df.write \\
         .mode("overwrite") \\
         .partitionBy("dt") \\
-        .saveAsTable("tag_test.user_basic_info")
+        .saveAsTable("tag_system.user_basic_info")
     
     print("✅ 用户基本信息测试数据生成完成")
     
@@ -158,7 +158,7 @@ def generate_test_data(spark, dt='2025-01-20'):
     user_asset_df.write \\
         .mode("overwrite") \\
         .partitionBy("dt") \\
-        .saveAsTable("tag_test.user_asset_summary")
+        .saveAsTable("tag_system.user_asset_summary")
     
     print("✅ 用户资产测试数据生成完成")
     
@@ -183,23 +183,23 @@ def generate_test_data(spark, dt='2025-01-20'):
     user_activity_df.write \\
         .mode("overwrite") \\
         .partitionBy("dt") \\
-        .saveAsTable("tag_test.user_activity_summary")
+        .saveAsTable("tag_system.user_activity_summary")
     
     print("✅ 用户活动测试数据生成完成")
     
     # 验证数据
     print("\\n📊 数据验证:")
-    print(f"用户基本信息表记录数: {spark.table('tag_test.user_basic_info').count()}")
-    print(f"用户资产表记录数: {spark.table('tag_test.user_asset_summary').count()}")
-    print(f"用户活动表记录数: {spark.table('tag_test.user_activity_summary').count()}")
+    print(f"用户基本信息表记录数: {spark.table('tag_system.user_basic_info').count()}")
+    print(f"用户资产表记录数: {spark.table('tag_system.user_asset_summary').count()}")
+    print(f"用户活动表记录数: {spark.table('tag_system.user_activity_summary').count()}")
 
 if __name__ == "__main__":
     spark = create_spark_session()
     
     try:
         # 创建数据库
-        spark.sql("CREATE DATABASE IF NOT EXISTS tag_test")
-        print("✅ 数据库 tag_test 创建成功")
+        spark.sql("CREATE DATABASE IF NOT EXISTS tag_system")
+        print("✅ 数据库 tag_system 创建成功")
         
         # 生成测试数据
         generate_test_data(spark)

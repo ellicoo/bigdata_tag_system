@@ -1,0 +1,1203 @@
+// 标签1: 数值等于操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_asset_summary",
+            "field": "total_asset_value",
+            "operator": "=",
+            "value": "100000",
+            "type": "number"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签2: 数值不等于操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_asset_summary",
+            "field": "total_asset_value",
+            "operator": "!=",
+            "value": "0",
+            "type": "number"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签3: 数值大于操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_activity_summary",
+            "field": "trade_count_30d",
+            "operator": ">",
+            "value": "10",
+            "type": "number"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签4: 数值小于操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_activity_summary",
+            "field": "trade_count_30d",
+            "operator": "<",
+            "value": "5",
+            "type": "number"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签5: 数值大于等于操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_asset_summary",
+            "field": "cash_balance",
+            "operator": ">=",
+            "value": "50000",
+            "type": "number"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签6: 数值小于等于操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_risk_profile",
+            "field": "risk_score",
+            "operator": "<=",
+            "value": "30",
+            "type": "number"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签7: 数值在范围内操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "age",
+            "operator": "in_range",
+            "value": ["18", "65"],
+            "type": "number"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签8: 数值不在范围内操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "age",
+            "operator": "not_in_range",
+            "value": ["0", "17"],
+            "type": "number"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签9: 数值为空操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_asset_summary",
+            "field": "debt_amount",
+            "operator": "is_null",
+            "value": "",
+            "type": "number"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签10: 数值不为空操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_asset_summary",
+            "field": "total_asset_value",
+            "operator": "is_not_null",
+            "value": "",
+            "type": "number"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签11: 字符串等于操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "user_level",
+            "operator": "=",
+            "value": "VIP3",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签12: 字符串不等于操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "user_level",
+            "operator": "!=",
+            "value": "VIP1",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签13: 字符串包含操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "phone_number",
+            "operator": "contains",
+            "value": "138",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签14: 字符串不包含操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "email",
+            "operator": "not_contains",
+            "value": "temp",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签15: 字符串开头是操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "phone_number",
+            "operator": "starts_with",
+            "value": "+86",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签16: 字符串结尾是操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "email",
+            "operator": "ends_with",
+            "value": "gmail.com",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签17: 字符串为空操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "middle_name",
+            "operator": "is_null",
+            "value": "",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签18: 字符串不为空操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "first_name",
+            "operator": "is_not_null",
+            "value": "",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签19: 日期等于操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "registration_date",
+            "operator": "=",
+            "value": "2025-01-01",
+            "type": "date"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签20: 日期不等于操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_activity_summary",
+            "field": "last_login_date",
+            "operator": "!=",
+            "value": "2025-01-01",
+            "type": "date"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签21: 日期大于操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_activity_summary",
+            "field": "last_login_date",
+            "operator": ">",
+            "value": "2025-01-01",
+            "type": "date"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签22: 日期小于操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "registration_date",
+            "operator": "<",
+            "value": "2024-12-31",
+            "type": "date"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签23: 日期在区间内操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "registration_date",
+            "operator": "date_in_range",
+            "value": ["2024-01-01", "2024-12-31"],
+            "type": "date"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签24: 日期不在区间内操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_activity_summary",
+            "field": "last_login_date",
+            "operator": "date_not_in_range",
+            "value": ["2023-01-01", "2023-12-31"],
+            "type": "date"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签25: 日期为空操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_activity_summary",
+            "field": "last_trade_date",
+            "operator": "is_null",
+            "value": "",
+            "type": "date"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签26: 日期不为空操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "birthday",
+            "operator": "is_not_null",
+            "value": "",
+            "type": "date"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签27: 布尔类型为真操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "is_vip",
+            "operator": "is_true",
+            "value": "true",
+            "type": "boolean"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签28: 布尔类型为假操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "is_banned",
+            "operator": "is_false",
+            "value": "false",
+            "type": "boolean"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签29: 枚举等于操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "kyc_status",
+            "operator": "=",
+            "value": "verified",
+            "type": "enum"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签30: 枚举不等于操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "account_status",
+            "operator": "!=",
+            "value": "suspended",
+            "type": "enum"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签31: 枚举属于操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "user_level",
+            "operator": "belongs_to",
+            "value": ["VIP1", "VIP2", "VIP3"],
+            "type": "enum"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签32: 枚举不属于操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "account_status",
+            "operator": "not_belongs_to",
+            "value": ["suspended", "banned"],
+            "type": "enum"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签33: 枚举为空操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "secondary_status",
+            "operator": "is_null",
+            "value": "",
+            "type": "enum"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签34: 枚举不为空操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "primary_status",
+            "operator": "is_not_null",
+            "value": "",
+            "type": "enum"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签35: 列表包含任意操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_preferences",
+            "field": "interested_products",
+            "operator": "contains_any",
+            "value": ["stocks", "bonds"],
+            "type": "list"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签36: 列表包含全部操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_preferences",
+            "field": "owned_products",
+            "operator": "contains_all",
+            "value": ["savings", "checking"],
+            "type": "list"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签37: 列表不包含操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_preferences",
+            "field": "blacklisted_products",
+            "operator": "not_contains",
+            "value": ["forex"],
+            "type": "list"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签38: 列表相交操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_preferences",
+            "field": "active_products",
+            "operator": "intersects",
+            "value": ["premium", "gold"],
+            "type": "list"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签39: 列表无交集操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_preferences",
+            "field": "expired_products",
+            "operator": "no_intersection",
+            "value": ["premium", "platinum"],
+            "type": "list"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签40: 列表为空操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_preferences",
+            "field": "optional_services",
+            "operator": "is_null",
+            "value": "",
+            "type": "list"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签41: 列表不为空操作符
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_preferences",
+            "field": "required_services",
+            "operator": "is_not_null",
+            "value": "",
+            "type": "list"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签42: NOT逻辑示例（简单）
+{
+  "logic": "NOT",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "user_level",
+            "operator": "=",
+            "value": "VIP1",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签43: NOT逻辑示例（复杂）
+{
+  "logic": "NOT",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "AND",
+        "fields": [
+          {
+            "table": "tag_test.user_asset_summary",
+            "field": "total_asset_value",
+            "operator": "<",
+            "value": "1000",
+            "type": "number"
+          },
+          {
+            "table": "tag_test.user_activity_summary",
+            "field": "trade_count_30d",
+            "operator": "=",
+            "value": "0",
+            "type": "number"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签44: 复杂多条件组合（AND + OR + AND）
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "OR",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "user_level",
+            "operator": "belongs_to",
+            "value": ["VIP2", "VIP3"],
+            "type": "enum"
+          },
+          {
+            "table": "tag_test.user_asset_summary",
+            "field": "total_asset_value",
+            "operator": ">=",
+            "value": "100000",
+            "type": "number"
+          }
+        ]
+      }
+    },
+    {
+      "condition": {
+        "logic": "AND",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "kyc_status",
+            "operator": "=",
+            "value": "verified",
+            "type": "enum"
+          },
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "is_banned",
+            "operator": "is_false",
+            "value": "false",
+            "type": "boolean"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签45: 复杂多条件组合（OR + AND + None）
+{
+  "logic": "OR",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "AND",
+        "fields": [
+          {
+            "table": "tag_test.user_activity_summary",
+            "field": "last_login_date",
+            "operator": "date_in_range",
+            "value": ["2025-01-01", "2025-07-26"],
+            "type": "date"
+          },
+          {
+            "table": "tag_test.user_activity_summary",
+            "field": "trade_count_30d",
+            "operator": ">",
+            "value": "5",
+            "type": "number"
+          }
+        ]
+      }
+    },
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_asset_summary",
+            "field": "cash_balance",
+            "operator": ">=",
+            "value": "50000",
+            "type": "number"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签46: NOT逻辑嵌套OR条件
+{
+  "logic": "NOT",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "OR",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "account_status",
+            "operator": "belongs_to",
+            "value": ["suspended", "banned"],
+            "type": "enum"
+          },
+          {
+            "table": "tag_test.user_activity_summary",
+            "field": "last_login_date",
+            "operator": "date_not_in_range",
+            "value": ["2024-01-01", "2025-07-26"],
+            "type": "date"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签47: 字符串模糊匹配组合
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "OR",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "email",
+            "operator": "ends_with",
+            "value": "gmail.com",
+            "type": "string"
+          },
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "email",
+            "operator": "ends_with",
+            "value": "yahoo.com",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "condition": {
+        "logic": "None",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "phone_number",
+            "operator": "starts_with",
+            "value": "+86",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签48: 数值范围和枚举组合
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "AND",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "age",
+            "operator": "in_range",
+            "value": ["25", "45"],
+            "type": "number"
+          },
+          {
+            "table": "tag_test.user_asset_summary",
+            "field": "total_asset_value",
+            "operator": "not_in_range",
+            "value": ["0", "1000"],
+            "type": "number"
+          }
+        ]
+      }
+    },
+    {
+      "condition": {
+        "logic": "OR",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "user_level",
+            "operator": "belongs_to",
+            "value": ["VIP3", "VIP4", "VIP5"],
+            "type": "enum"
+          },
+          {
+            "table": "tag_test.user_preferences",
+            "field": "owned_products",
+            "operator": "contains_any",
+            "value": ["premium", "platinum"],
+            "type": "list"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签49: 列表操作和布尔组合（NOT逻辑）
+{
+  "logic": "NOT",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "AND",
+        "fields": [
+          {
+            "table": "tag_test.user_preferences",
+            "field": "interested_products",
+            "operator": "contains_all",
+            "value": ["high_risk", "speculative"],
+            "type": "list"
+          },
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "is_vip",
+            "operator": "is_false",
+            "value": "false",
+            "type": "boolean"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// 标签50: 空值检查组合
+{
+  "logic": "AND",
+  "conditions": [
+    {
+      "condition": {
+        "logic": "AND",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "first_name",
+            "operator": "is_not_null",
+            "value": "",
+            "type": "string"
+          },
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "last_name",
+            "operator": "is_not_null",
+            "value": "",
+            "type": "string"
+          },
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "birthday",
+            "operator": "is_not_null",
+            "value": "",
+            "type": "date"
+          }
+        ]
+      }
+    },
+    {
+      "condition": {
+        "logic": "OR",
+        "fields": [
+          {
+            "table": "tag_test.user_basic_info",
+            "field": "middle_name",
+            "operator": "is_null",
+            "value": "",
+            "type": "string"
+          },
+          {
+            "table": "tag_test.user_preferences",
+            "field": "optional_services",
+            "operator": "is_null",
+            "value": "",
+            "type": "list"
+          }
+        ]
+      }
+    }
+  ]
+}

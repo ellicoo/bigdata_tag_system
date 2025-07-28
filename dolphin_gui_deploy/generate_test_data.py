@@ -51,7 +51,7 @@ def generate_test_data(spark, dt='2025-01-20'):
     user_basic_df.write \
         .mode("overwrite") \
         .partitionBy("dt") \
-        .saveAsTable("tag_test.user_basic_info")
+        .saveAsTable("tag_system.user_basic_info")
     
     print("✅ 用户基本信息测试数据生成完成")
     
@@ -76,7 +76,7 @@ def generate_test_data(spark, dt='2025-01-20'):
     user_asset_df.write \
         .mode("overwrite") \
         .partitionBy("dt") \
-        .saveAsTable("tag_test.user_asset_summary")
+        .saveAsTable("tag_system.user_asset_summary")
     
     print("✅ 用户资产测试数据生成完成")
     
@@ -101,23 +101,23 @@ def generate_test_data(spark, dt='2025-01-20'):
     user_activity_df.write \
         .mode("overwrite") \
         .partitionBy("dt") \
-        .saveAsTable("tag_test.user_activity_summary")
+        .saveAsTable("tag_system.user_activity_summary")
     
     print("✅ 用户活动测试数据生成完成")
     
     # 验证数据
     print("\n📊 数据验证:")
-    print(f"用户基本信息表记录数: {spark.table('tag_test.user_basic_info').count()}")
-    print(f"用户资产表记录数: {spark.table('tag_test.user_asset_summary').count()}")
-    print(f"用户活动表记录数: {spark.table('tag_test.user_activity_summary').count()}")
+    print(f"用户基本信息表记录数: {spark.table('tag_system.user_basic_info').count()}")
+    print(f"用户资产表记录数: {spark.table('tag_system.user_asset_summary').count()}")
+    print(f"用户活动表记录数: {spark.table('tag_system.user_activity_summary').count()}")
 
 if __name__ == "__main__":
     spark = create_spark_session()
     
     try:
         # 创建数据库
-        spark.sql("CREATE DATABASE IF NOT EXISTS tag_test")
-        print("✅ 数据库 tag_test 创建成功")
+        spark.sql("CREATE DATABASE IF NOT EXISTS tag_system")
+        print("✅ 数据库 tag_system 创建成功")
         
         # 生成测试数据
         generate_test_data(spark)
