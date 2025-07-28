@@ -173,8 +173,15 @@ class TagRuleParser:
     
     def _extractTablesRecursive(self, rule: dict, tables: Set[str]):
         """递归提取规则中的所有表名"""
-        conditions = rule.get("conditions", [])
+        # 处理直接在当前rule中的fields
+        if "fields" in rule:
+            for field in rule["fields"]:
+                tableName = field.get("table")
+                if tableName:
+                    tables.add(tableName)
         
+        # 处理conditions数组
+        conditions = rule.get("conditions", [])
         for condition in conditions:
             if "condition" in condition:
                 # 嵌套条件，递归处理
@@ -188,8 +195,19 @@ class TagRuleParser:
     
     def _extractFieldsRecursive(self, rule: dict, tableFields: Dict[str, Set[str]]):
         """递归提取规则中的字段依赖"""
-        conditions = rule.get("conditions", [])
+        # 处理直接在当前rule中的fields
+        if "fields" in rule:
+            for field in rule["fields"]:
+                tableName = field.get("table")
+                fieldName = field.get("field")
+                
+                if tableName and fieldName:
+                    if tableName not in tableFields:
+                        tableFields[tableName] = set()
+                    tableFields[tableName].add(fieldName)
         
+        # 处理conditions数组
+        conditions = rule.get("conditions", [])
         for condition in conditions:
             if "condition" in condition:
                 # 嵌套条件，递归处理
