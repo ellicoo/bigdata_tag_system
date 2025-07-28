@@ -2,7 +2,7 @@
 """
 海豚调度器主程序入口
 支持通过海豚调度器图形界面的主程序参数执行
-使用统一的MySQL配置（src.config.base.MySQLConfig）
+使用新的src/tag_engine架构
 """
 
 import sys
@@ -16,7 +16,7 @@ sys.path.append(current_dir)
 
 
 def create_spark_session():
-    """创建Spark会话 - 基于现有HiveToKafka.py模式"""
+    """创建Spark会话 - 基于现有架构"""
     spark = SparkSession.builder \
         .appName("BigDataTagSystem-Dolphin") \
         .enableHiveSupport() \
@@ -28,10 +28,9 @@ def main():
     """主程序入口"""
     parser = argparse.ArgumentParser(description="海豚调度器标签系统")
     parser.add_argument("--mode", required=True, choices=[
-        "health", "task-all", "task-tags", "task-users", "list-tasks", "generate-test-data"
+        "health", "task-all", "task-tags", "generate-test-data", "list-tasks"
     ], help="执行模式")
     parser.add_argument("--tag-ids", help="标签ID列表，逗号分隔")
-    parser.add_argument("--user-ids", help="用户ID列表，逗号分隔")
     parser.add_argument("--dt", default="2025-01-20", help="数据日期")
 
     args = parser.parse_args()
@@ -54,10 +53,6 @@ def main():
             from generate_test_data import generate_test_data
             generate_test_data(spark, args.dt)
 
-            # 生成测试数据
-            # from generate_test_data import generate_test_data
-            # generate_test_data(spark, args.dt)
-
         elif args.mode == "health":
             # 健康检查
             print("🔍 执行系统健康检查...")
@@ -70,23 +65,18 @@ def main():
                 print(f"❌ Hive访问失败: {e}")
                 return 1
 
-            # 检查MySQL连接（使用统一配置）
+            # 检查MySQL连接（使用新架构）
             try:
-                from src.config.base import MySQLConfig
-                config = MySQLConfig()
+                from src.tag_engine.meta.MysqlMeta import MysqlMeta
+                mysql_meta = MysqlMeta(spark)
 
                 # 测试MySQL连接
-                mysql_df = spark.read \
-                    .format("jdbc") \
-                    .option("url", config.jdbc_url) \
-                    .option("driver", "com.mysql.cj.jdbc.Driver") \
-                    .option("user", config.username) \
-                    .option("password", config.password) \
-                    .option("query", "SELECT 1 as test") \
-                    .load()
-
-                mysql_df.show()
-                print("✅ MySQL连接正常")
+                result = mysql_meta.testConnection()
+                if result:
+                    print("✅ MySQL连接正常")
+                else:
+                    print("❌ MySQL连接失败")
+                    return 1
 
             except Exception as e:
                 print(f"❌ MySQL连接失败: {e}")
@@ -96,12 +86,12 @@ def main():
 
         elif args.mode == "task-all":
             # 全量标签计算
-            from src.entry.tag_system_api import TagSystemAPI
+            from src.tag_engine.engine.TagEngine import TagEngine
 
-            with TagSystemAPI(environment='dolphinscheduler') as api:
-                success = api.run_task_all_users_all_tags()
-                if not success:
-                    return 1
+            engine = TagEngine(spark, environment='dolphinscheduler')
+            success = engine.computeTags(mode="task-all", tagIds=None)
+            if not success:
+                return 1
 
         elif args.mode == "task-tags":
             # 指定标签计算
@@ -111,21 +101,25 @@ def main():
 
             tag_ids = [int(x.strip()) for x in args.tag_ids.split(',')]
 
-            from src.entry.tag_system_api import TagSystemAPI
-            with TagSystemAPI(environment='dolphinscheduler') as api:
-                success = api.run_task_specific_tags(tag_ids)
-                if not success:
-                    return 1
+            from src.tag_engine.engine.TagEngine import TagEngine
+            engine = TagEngine(spark, environment='dolphinscheduler')
+            success = engine.computeTags(mode="task-tags", tagIds=tag_ids)
+            if not success:
+                return 1
 
         elif args.mode == "list-tasks":
             # 列出可用任务
-            from src.tasks.task_registry import TagTaskFactory
-            TagTaskFactory.register_all_tasks()
-            tasks = TagTaskFactory.get_all_available_tasks()
+            from src.tag_engine.meta.MysqlMeta import MysqlMeta
+            mysql_meta = MysqlMeta(spark)
 
-            print("📋 可用标签任务:")
-            for task_id, task_class in tasks.items():
-                print(f"  {task_id}: {task_class.__name__}")
+            try:
+                tags = mysql_meta.loadActiveTagRules()
+                print("📋 可用标签任务:")
+                for tag in tags.collect():
+                    print(f"  {tag.tag_id}: {tag.tag_name}")
+            except Exception as e:
+                print(f"❌ 获取标签列表失败: {e}")
+                return 1
 
         else:
             print(f"❌ 不支持的模式: {args.mode}")
