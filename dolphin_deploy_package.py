@@ -274,36 +274,52 @@ def main():
             
             # 检查MySQL连接
             try:
-                from mysql_config import DolphinMySQLConfig
-                config = DolphinMySQLConfig()
+                from src.tag_engine.engine.TagEngine import TagEngine
                 
-                # 测试MySQL连接
-                mysql_df = spark.read \\
-                    .format("jdbc") \\
-                    .option("url", config.get_connection_url()) \\
-                    .option("driver", "com.mysql.cj.jdbc.Driver") \\
-                    .option("user", config.MYSQL_USERNAME) \\
-                    .option("password", config.MYSQL_PASSWORD) \\
-                    .option("query", "SELECT 1 as test") \\
-                    .load()
+                # 创建MySQL配置
+                mysql_config = {
+                    'host': os.getenv('MYSQL_HOST', 'localhost'),
+                    'port': int(os.getenv('MYSQL_PORT', '3306')),
+                    'database': os.getenv('MYSQL_DATABASE', 'tag_system'),
+                    'user': os.getenv('MYSQL_USER', 'root'),
+                    'password': os.getenv('MYSQL_PASSWORD', 'password')
+                }
                 
-                mysql_df.show()
-                print("✅ MySQL连接正常")
+                # 执行健康检查
+                engine = TagEngine(spark, mysqlConfig=mysql_config)
+                health_ok = engine.healthCheck()
+                
+                if health_ok:
+                    print("✅ 系统健康检查通过")
+                else:
+                    print("❌ 系统健康检查失败")
+                    return 1
                 
             except Exception as e:
-                print(f"❌ MySQL连接失败: {e}")
+                print(f"❌ 健康检查异常: {e}")
                 return 1
             
             print("🎉 系统健康检查通过")
             
         elif args.mode == "task-all":
             # 全量标签计算
-            from src.entry.tag_system_api import TagSystemAPI
+            print("🏷️ 执行全量标签计算...")
+            from src.tag_engine.engine.TagEngine import TagEngine
             
-            with TagSystemAPI(environment='dolphinscheduler') as api:
-                success = api.run_task_all_users_all_tags()
-                if not success:
-                    return 1
+            # 创建MySQL配置
+            mysql_config = {
+                'host': os.getenv('MYSQL_HOST', 'localhost'),
+                'port': int(os.getenv('MYSQL_PORT', '3306')),
+                'database': os.getenv('MYSQL_DATABASE', 'tag_system'),
+                'user': os.getenv('MYSQL_USER', 'root'),
+                'password': os.getenv('MYSQL_PASSWORD', 'password')
+            }
+            
+            # 执行标签计算
+            engine = TagEngine(spark, mysqlConfig=mysql_config)
+            success = engine.computeTags(mode="full")
+            if not success:
+                return 1
                     
         elif args.mode == "task-tags":
             # 指定标签计算
@@ -312,22 +328,47 @@ def main():
                 return 1
                 
             tag_ids = [int(x.strip()) for x in args.tag_ids.split(',')]
+            print(f"🎯 执行指定标签计算: {tag_ids}")
             
-            from src.entry.tag_system_api import TagSystemAPI
-            with TagSystemAPI(environment='dolphinscheduler') as api:
-                success = api.run_task_specific_tags(tag_ids)
-                if not success:
-                    return 1
+            from src.tag_engine.engine.TagEngine import TagEngine
+            
+            # 创建MySQL配置
+            mysql_config = {
+                'host': os.getenv('MYSQL_HOST', 'localhost'),
+                'port': int(os.getenv('MYSQL_PORT', '3306')),
+                'database': os.getenv('MYSQL_DATABASE', 'tag_system'),
+                'user': os.getenv('MYSQL_USER', 'root'),
+                'password': os.getenv('MYSQL_PASSWORD', 'password')
+            }
+            
+            # 执行标签计算
+            engine = TagEngine(spark, mysqlConfig=mysql_config)
+            success = engine.computeTags(mode="specific", tagIds=tag_ids)
+            if not success:
+                return 1
                     
         elif args.mode == "list-tasks":
-            # 列出可用任务
-            from src.tasks.task_registry import TagTaskFactory
-            TagTaskFactory.register_all_tasks()
-            tasks = TagTaskFactory.get_all_available_tasks()
+            # 列出可用标签任务
+            print("📋 列出所有可用标签...")
+            from src.tag_engine.meta.MysqlMeta import MysqlMeta
+            
+            # 创建MySQL配置
+            mysql_config = {
+                'host': os.getenv('MYSQL_HOST', 'localhost'),
+                'port': int(os.getenv('MYSQL_PORT', '3306')),
+                'database': os.getenv('MYSQL_DATABASE', 'tag_system'),
+                'user': os.getenv('MYSQL_USER', 'root'),
+                'password': os.getenv('MYSQL_PASSWORD', 'password')
+            }
+            
+            # 查询所有标签
+            mysql_meta = MysqlMeta(spark, mysql_config)
+            rules_df = mysql_meta.loadTagRules()
             
             print("📋 可用标签任务:")
-            for task_id, task_class in tasks.items():
-                print(f"  {task_id}: {task_class.__name__}")
+            rules_data = rules_df.collect()
+            for row in rules_data:
+                print(f"  标签ID {row['tag_id']}: {row['tag_name']} - {row['description']}")
                 
         else:
             print(f"❌ 不支持的模式: {args.mode}")
