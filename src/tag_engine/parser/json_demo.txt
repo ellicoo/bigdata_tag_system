@@ -7,7 +7,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_asset_summary",
+            "table": "tag_system.user_asset_summary",
             "field": "total_asset_value",
             "operator": "=",
             "value": "100000",
@@ -28,7 +28,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_asset_summary",
+            "table": "tag_system.user_asset_summary",
             "field": "total_asset_value",
             "operator": "!=",
             "value": "0",
@@ -49,7 +49,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_activity_summary",
+            "table": "tag_system.user_activity_summary",
             "field": "trade_count_30d",
             "operator": ">",
             "value": "10",
@@ -70,7 +70,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_activity_summary",
+            "table": "tag_system.user_activity_summary",
             "field": "trade_count_30d",
             "operator": "<",
             "value": "5",
@@ -91,7 +91,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_asset_summary",
+            "table": "tag_system.user_asset_summary",
             "field": "cash_balance",
             "operator": ">=",
             "value": "50000",
@@ -112,7 +112,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_risk_profile",
+            "table": "tag_system.user_risk_profile",
             "field": "risk_score",
             "operator": "<=",
             "value": "30",
@@ -133,7 +133,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "age",
             "operator": "in_range",
             "value": ["18", "65"],
@@ -154,7 +154,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "age",
             "operator": "not_in_range",
             "value": ["0", "17"],
@@ -175,7 +175,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_asset_summary",
+            "table": "tag_system.user_asset_summary",
             "field": "debt_amount",
             "operator": "is_null",
             "value": "",
@@ -196,7 +196,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_asset_summary",
+            "table": "tag_system.user_asset_summary",
             "field": "total_asset_value",
             "operator": "is_not_null",
             "value": "",
@@ -217,7 +217,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "user_level",
             "operator": "=",
             "value": "VIP3",
@@ -238,7 +238,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "user_level",
             "operator": "!=",
             "value": "VIP1",
@@ -259,7 +259,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "phone_number",
             "operator": "contains",
             "value": "138",
@@ -280,7 +280,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "email",
             "operator": "not_contains",
             "value": "temp",
@@ -301,7 +301,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "phone_number",
             "operator": "starts_with",
             "value": "+86",
@@ -322,7 +322,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "email",
             "operator": "ends_with",
             "value": "gmail.com",
@@ -343,7 +343,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "middle_name",
             "operator": "is_null",
             "value": "",
@@ -364,7 +364,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "first_name",
             "operator": "is_not_null",
             "value": "",
@@ -385,7 +385,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "registration_date",
             "operator": "=",
             "value": "2025-01-01",
@@ -406,7 +406,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_activity_summary",
+            "table": "tag_system.user_activity_summary",
             "field": "last_login_date",
             "operator": "!=",
             "value": "2025-01-01",
@@ -427,7 +427,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_activity_summary",
+            "table": "tag_system.user_activity_summary",
             "field": "last_login_date",
             "operator": ">",
             "value": "2025-01-01",
@@ -448,7 +448,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "registration_date",
             "operator": "<",
             "value": "2024-12-31",
@@ -469,7 +469,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "registration_date",
             "operator": "date_in_range",
             "value": ["2024-01-01", "2024-12-31"],
@@ -490,7 +490,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_activity_summary",
+            "table": "tag_system.user_activity_summary",
             "field": "last_login_date",
             "operator": "date_not_in_range",
             "value": ["2023-01-01", "2023-12-31"],
@@ -511,7 +511,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_activity_summary",
+            "table": "tag_system.user_activity_summary",
             "field": "last_trade_date",
             "operator": "is_null",
             "value": "",
@@ -532,7 +532,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "birthday",
             "operator": "is_not_null",
             "value": "",
@@ -553,7 +553,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "is_vip",
             "operator": "is_true",
             "value": "true",
@@ -574,7 +574,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "is_banned",
             "operator": "is_false",
             "value": "false",
@@ -595,7 +595,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "kyc_status",
             "operator": "=",
             "value": "verified",
@@ -616,7 +616,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "account_status",
             "operator": "!=",
             "value": "suspended",
@@ -637,7 +637,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "user_level",
             "operator": "belongs_to",
             "value": ["VIP1", "VIP2", "VIP3"],
@@ -658,7 +658,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "account_status",
             "operator": "not_belongs_to",
             "value": ["suspended", "banned"],
@@ -679,7 +679,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "secondary_status",
             "operator": "is_null",
             "value": "",
@@ -700,7 +700,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "primary_status",
             "operator": "is_not_null",
             "value": "",
@@ -721,7 +721,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_preferences",
+            "table": "tag_system.user_preferences",
             "field": "interested_products",
             "operator": "contains_any",
             "value": ["stocks", "bonds"],
@@ -742,7 +742,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_preferences",
+            "table": "tag_system.user_preferences",
             "field": "owned_products",
             "operator": "contains_all",
             "value": ["savings", "checking"],
@@ -763,7 +763,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_preferences",
+            "table": "tag_system.user_preferences",
             "field": "blacklisted_products",
             "operator": "not_contains",
             "value": ["forex"],
@@ -784,7 +784,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_preferences",
+            "table": "tag_system.user_preferences",
             "field": "active_products",
             "operator": "intersects",
             "value": ["premium", "gold"],
@@ -805,7 +805,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_preferences",
+            "table": "tag_system.user_preferences",
             "field": "expired_products",
             "operator": "no_intersection",
             "value": ["premium", "platinum"],
@@ -826,7 +826,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_preferences",
+            "table": "tag_system.user_preferences",
             "field": "optional_services",
             "operator": "is_null",
             "value": "",
@@ -847,7 +847,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_preferences",
+            "table": "tag_system.user_preferences",
             "field": "required_services",
             "operator": "is_not_null",
             "value": "",
@@ -868,7 +868,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "user_level",
             "operator": "=",
             "value": "VIP1",
@@ -889,14 +889,14 @@
         "logic": "AND",
         "fields": [
           {
-            "table": "tag_test.user_asset_summary",
+            "table": "tag_system.user_asset_summary",
             "field": "total_asset_value",
             "operator": "<",
             "value": "1000",
             "type": "number"
           },
           {
-            "table": "tag_test.user_activity_summary",
+            "table": "tag_system.user_activity_summary",
             "field": "trade_count_30d",
             "operator": "=",
             "value": "0",
@@ -917,14 +917,14 @@
         "logic": "OR",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "user_level",
             "operator": "belongs_to",
             "value": ["VIP2", "VIP3"],
             "type": "enum"
           },
           {
-            "table": "tag_test.user_asset_summary",
+            "table": "tag_system.user_asset_summary",
             "field": "total_asset_value",
             "operator": ">=",
             "value": "100000",
@@ -938,14 +938,14 @@
         "logic": "AND",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "kyc_status",
             "operator": "=",
             "value": "verified",
             "type": "enum"
           },
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "is_banned",
             "operator": "is_false",
             "value": "false",
@@ -966,14 +966,14 @@
         "logic": "AND",
         "fields": [
           {
-            "table": "tag_test.user_activity_summary",
+            "table": "tag_system.user_activity_summary",
             "field": "last_login_date",
             "operator": "date_in_range",
             "value": ["2025-01-01", "2025-07-26"],
             "type": "date"
           },
           {
-            "table": "tag_test.user_activity_summary",
+            "table": "tag_system.user_activity_summary",
             "field": "trade_count_30d",
             "operator": ">",
             "value": "5",
@@ -987,7 +987,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_asset_summary",
+            "table": "tag_system.user_asset_summary",
             "field": "cash_balance",
             "operator": ">=",
             "value": "50000",
@@ -1008,14 +1008,14 @@
         "logic": "OR",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "account_status",
             "operator": "belongs_to",
             "value": ["suspended", "banned"],
             "type": "enum"
           },
           {
-            "table": "tag_test.user_activity_summary",
+            "table": "tag_system.user_activity_summary",
             "field": "last_login_date",
             "operator": "date_not_in_range",
             "value": ["2024-01-01", "2025-07-26"],
@@ -1036,14 +1036,14 @@
         "logic": "OR",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "email",
             "operator": "ends_with",
             "value": "gmail.com",
             "type": "string"
           },
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "email",
             "operator": "ends_with",
             "value": "yahoo.com",
@@ -1057,7 +1057,7 @@
         "logic": "None",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "phone_number",
             "operator": "starts_with",
             "value": "+86",
@@ -1078,14 +1078,14 @@
         "logic": "AND",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "age",
             "operator": "in_range",
             "value": ["25", "45"],
             "type": "number"
           },
           {
-            "table": "tag_test.user_asset_summary",
+            "table": "tag_system.user_asset_summary",
             "field": "total_asset_value",
             "operator": "not_in_range",
             "value": ["0", "1000"],
@@ -1099,14 +1099,14 @@
         "logic": "OR",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "user_level",
             "operator": "belongs_to",
             "value": ["VIP3", "VIP4", "VIP5"],
             "type": "enum"
           },
           {
-            "table": "tag_test.user_preferences",
+            "table": "tag_system.user_preferences",
             "field": "owned_products",
             "operator": "contains_any",
             "value": ["premium", "platinum"],
@@ -1127,14 +1127,14 @@
         "logic": "AND",
         "fields": [
           {
-            "table": "tag_test.user_preferences",
+            "table": "tag_system.user_preferences",
             "field": "interested_products",
             "operator": "contains_all",
             "value": ["high_risk", "speculative"],
             "type": "list"
           },
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "is_vip",
             "operator": "is_false",
             "value": "false",
@@ -1155,21 +1155,21 @@
         "logic": "AND",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "first_name",
             "operator": "is_not_null",
             "value": "",
             "type": "string"
           },
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "last_name",
             "operator": "is_not_null",
             "value": "",
             "type": "string"
           },
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "birthday",
             "operator": "is_not_null",
             "value": "",
@@ -1183,14 +1183,14 @@
         "logic": "OR",
         "fields": [
           {
-            "table": "tag_test.user_basic_info",
+            "table": "tag_system.user_basic_info",
             "field": "middle_name",
             "operator": "is_null",
             "value": "",
             "type": "string"
           },
           {
-            "table": "tag_test.user_preferences",
+            "table": "tag_system.user_preferences",
             "field": "optional_services",
             "operator": "is_null",
             "value": "",

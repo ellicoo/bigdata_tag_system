@@ -1,23 +1,23 @@
-[LOG-PATH]: /usr/local/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250728/18466477060960/8/885/3440.log, [HOST]:  Host(ip=172.31.9.77, port=1234)
-[INFO] 2025-07-28 16:13:58.551 +0000 - ***********************************************************************************************
-[INFO] 2025-07-28 16:13:58.552 +0000 - *********************************  Initialize task context  ***********************************
-[INFO] 2025-07-28 16:13:58.552 +0000 - ***********************************************************************************************
-[INFO] 2025-07-28 16:13:58.552 +0000 - Begin to initialize task
-[INFO] 2025-07-28 16:13:58.553 +0000 - Set task startTime: 1753719238553
-[INFO] 2025-07-28 16:13:58.553 +0000 - Set task appId: 885_3440
-[INFO] 2025-07-28 16:13:58.553 +0000 - End initialize task {
-  "taskInstanceId" : 3440,
+[LOG-PATH]: /usr/local/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250729/18466477060960/8/892/3447.log, [HOST]:  Host(ip=172.31.9.77, port=1234)
+[INFO] 2025-07-29 04:03:29.736 +0000 - ***********************************************************************************************
+[INFO] 2025-07-29 04:03:29.737 +0000 - *********************************  Initialize task context  ***********************************
+[INFO] 2025-07-29 04:03:29.737 +0000 - ***********************************************************************************************
+[INFO] 2025-07-29 04:03:29.737 +0000 - Begin to initialize task
+[INFO] 2025-07-29 04:03:29.737 +0000 - Set task startTime: 1753761809737
+[INFO] 2025-07-29 04:03:29.737 +0000 - Set task appId: 892_3447
+[INFO] 2025-07-29 04:03:29.737 +0000 - End initialize task {
+  "taskInstanceId" : 3447,
   "taskName" : "full_compute_tags",
-  "firstSubmitTime" : 1753719238528,
-  "startTime" : 1753719238553,
+  "firstSubmitTime" : 1753761809675,
+  "startTime" : 1753761809737,
   "taskType" : "SPARK",
   "workflowInstanceHost" : "172.31.9.77:5678",
   "host" : "172.31.9.77:1234",
-  "logPath" : "/usr/local/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250728/18466477060960/8/885/3440.log",
+  "logPath" : "/usr/local/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250729/18466477060960/8/892/3447.log",
   "processId" : 0,
   "processDefineCode" : 18466477060960,
   "processDefineVersion" : 8,
-  "processInstanceId" : 885,
+  "processInstanceId" : 892,
   "scheduleTime" : 0,
   "executorId" : 1,
   "cmdTypeIfComplement" : 0,
@@ -49,25 +49,25 @@
       "prop" : "system.workflow.instance.id",
       "direct" : "IN",
       "type" : "VARCHAR",
-      "value" : "885"
+      "value" : "892"
     },
     "system.biz.curdate" : {
       "prop" : "system.biz.curdate",
       "direct" : "IN",
       "type" : "VARCHAR",
-      "value" : "20250728"
+      "value" : "20250729"
     },
     "system.biz.date" : {
       "prop" : "system.biz.date",
       "direct" : "IN",
       "type" : "VARCHAR",
-      "value" : "20250727"
+      "value" : "20250728"
     },
     "system.task.instance.id" : {
       "prop" : "system.task.instance.id",
       "direct" : "IN",
       "type" : "VARCHAR",
-      "value" : "3440"
+      "value" : "3447"
     },
     "system.workflow.definition.name" : {
       "prop" : "system.workflow.definition.name",
@@ -97,10 +97,10 @@
       "prop" : "system.datetime",
       "direct" : "IN",
       "type" : "VARCHAR",
-      "value" : "20250728161358"
+      "value" : "20250729040329"
     }
   },
-  "taskAppId" : "885_3440",
+  "taskAppId" : "892_3447",
   "taskTimeout" : 2147483647,
   "workerGroup" : "default",
   "delayTime" : 0,
@@ -117,18 +117,18 @@
   "logBufferEnable" : false,
   "dispatchFailTimes" : 0
 }
-[INFO] 2025-07-28 16:13:58.553 +0000 - ***********************************************************************************************
-[INFO] 2025-07-28 16:13:58.553 +0000 - *********************************  Load task instance plugin  *********************************
-[INFO] 2025-07-28 16:13:58.553 +0000 - ***********************************************************************************************
-[INFO] 2025-07-28 16:13:58.553 +0000 - Send task status RUNNING_EXECUTION master: 172.31.9.77:1234
-[WARN] 2025-07-28 16:13:58.553 +0000 - Current tenant is default tenant, will use root to execute the task
-[INFO] 2025-07-28 16:13:58.553 +0000 - TenantCode: default check successfully
-[INFO] 2025-07-28 16:13:58.554 +0000 - WorkflowInstanceExecDir: /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/885/3440 check successfully
-[INFO] 2025-07-28 16:13:58.554 +0000 - get resource file from path:file:/dolphinscheduler/default/resources/bigdata_tag_system/main.py
-[INFO] 2025-07-28 16:13:58.555 +0000 - Download resources: {file:/dolphinscheduler/default/resources/bigdata_tag_system/main.py=file:/dolphinscheduler/default/resources/bigdata_tag_system/main.py} successfully
-[INFO] 2025-07-28 16:13:58.555 +0000 - Download upstream files: [] successfully
-[INFO] 2025-07-28 16:13:58.555 +0000 - Task plugin instance: SPARK create successfully
-[INFO] 2025-07-28 16:13:58.555 +0000 - Initialize spark task params {
+[INFO] 2025-07-29 04:03:29.738 +0000 - ***********************************************************************************************
+[INFO] 2025-07-29 04:03:29.738 +0000 - *********************************  Load task instance plugin  *********************************
+[INFO] 2025-07-29 04:03:29.738 +0000 - ***********************************************************************************************
+[INFO] 2025-07-29 04:03:29.738 +0000 - Send task status RUNNING_EXECUTION master: 172.31.9.77:1234
+[WARN] 2025-07-29 04:03:29.738 +0000 - Current tenant is default tenant, will use root to execute the task
+[INFO] 2025-07-29 04:03:29.738 +0000 - TenantCode: default check successfully
+[INFO] 2025-07-29 04:03:29.738 +0000 - WorkflowInstanceExecDir: /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447 check successfully
+[INFO] 2025-07-29 04:03:29.739 +0000 - get resource file from path:file:/dolphinscheduler/default/resources/bigdata_tag_system/main.py
+[INFO] 2025-07-29 04:03:29.740 +0000 - Download resources: {file:/dolphinscheduler/default/resources/bigdata_tag_system/main.py=file:/dolphinscheduler/default/resources/bigdata_tag_system/main.py} successfully
+[INFO] 2025-07-29 04:03:29.740 +0000 - Download upstream files: [] successfully
+[INFO] 2025-07-29 04:03:29.740 +0000 - Task plugin instance: SPARK create successfully
+[INFO] 2025-07-29 04:03:29.740 +0000 - Initialize spark task params {
   "localParams" : [ ],
   "varPool" : null,
   "mainJar" : {
@@ -153,81 +153,81 @@
   "resourceList" : [ ],
   "sqlExecutionType" : "SCRIPT"
 }
-[INFO] 2025-07-28 16:13:58.556 +0000 - Success initialized task plugin instance successfully
-[INFO] 2025-07-28 16:13:58.556 +0000 - Set taskVarPool: null successfully
-[INFO] 2025-07-28 16:13:58.556 +0000 - ***********************************************************************************************
-[INFO] 2025-07-28 16:13:58.556 +0000 - *********************************  Execute task instance  *************************************
-[INFO] 2025-07-28 16:13:58.556 +0000 - ***********************************************************************************************
-[INFO] 2025-07-28 16:13:58.556 +0000 - Final Shell file is :
+[INFO] 2025-07-29 04:03:29.740 +0000 - Success initialized task plugin instance successfully
+[INFO] 2025-07-29 04:03:29.740 +0000 - Set taskVarPool: null successfully
+[INFO] 2025-07-29 04:03:29.740 +0000 - ***********************************************************************************************
+[INFO] 2025-07-29 04:03:29.740 +0000 - *********************************  Execute task instance  *************************************
+[INFO] 2025-07-29 04:03:29.740 +0000 - ***********************************************************************************************
+[INFO] 2025-07-29 04:03:29.741 +0000 - Final Shell file is :
 #!/bin/bash
 BASEDIR=$(cd `dirname $0`; pwd)
 cd $BASEDIR
 ${SPARK_HOME}/bin/spark-submit --master local --conf spark.driver.cores=1 --conf spark.driver.memory=512M --conf spark.executor.instances=2 --conf spark.executor.cores=2 --conf spark.executor.memory=2G --jars /dolphinscheduler/default/resources/mysql-connector-j-8.0.33.jar file:/dolphinscheduler/default/resources/bigdata_tag_system/main.py --mode task-all
-[INFO] 2025-07-28 16:13:58.557 +0000 - Executing shell command : sudo -u root -i /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/885/3440/885_3440.sh
-[INFO] 2025-07-28 16:13:58.559 +0000 - process start, process id is: 744882
-[INFO] 2025-07-28 16:14:00.560 +0000 -  ->
-	25/07/28 16:13:59 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
-[INFO] 2025-07-28 16:14:01.561 +0000 -  ->
+[INFO] 2025-07-29 04:03:29.741 +0000 - Executing shell command : sudo -u root -i /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447/892_3447.sh
+[INFO] 2025-07-29 04:03:29.743 +0000 - process start, process id is: 755295
+[INFO] 2025-07-29 04:03:31.744 +0000 -  ->
+	25/07/29 04:03:31 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
 	============================================================
 	🏷️  大数据标签计算系统
 	============================================================
 	执行模式: task-all
-	当前工作目录: /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/885/3440
+	当前工作目录: /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447
 	脚本目录: /dolphinscheduler/default/resources/bigdata_tag_system
 	项目根目录: /dolphinscheduler/default
 	Python路径前3项: ['/dolphinscheduler/default', '/dolphinscheduler/default/resources/bigdata_tag_system', '/mnt/spark/python/lib/pyspark.zip']
 	🚀 创建Spark会话: TagComputeEngine
-	25/07/28 16:14:00 INFO EMRParamSideChannel: Setting FGAC mode to false
-	25/07/28 16:14:00 INFO SparkContext: Running Spark version 3.5.2-amzn-1
-	25/07/28 16:14:00 INFO SparkContext: OS info Linux, 6.8.0-1029-aws, amd64
-	25/07/28 16:14:00 INFO SparkContext: Java version 17.0.15
-	25/07/28 16:14:00 INFO ResourceUtils: ==============================================================
-	25/07/28 16:14:00 INFO ResourceUtils: No custom resources configured for spark.driver.
-	25/07/28 16:14:00 INFO ResourceUtils: ==============================================================
-	25/07/28 16:14:00 INFO SparkContext: Submitted application: TagComputeEngine
-	25/07/28 16:14:00 INFO ResourceProfile: Default ResourceProfile created, executor resources: Map(executorType -> name: executorType, amount: 1, script: , vendor: , cores -> name: cores, amount: 2, script: , vendor: , memory -> name: memory, amount: 2048, script: , vendor: , offHeap -> name: offHeap, amount: 0, script: , vendor: ), task resources: Map(cpus -> name: cpus, amount: 1.0)
-	25/07/28 16:14:00 INFO ResourceProfile: Limiting resource is cpus at 2 tasks per executor
-	25/07/28 16:14:00 INFO ResourceProfileManager: Added ResourceProfile id: 0
-	25/07/28 16:14:00 INFO ResourceProfile: User executor ResourceProfile created, executor resources: Map(executorType -> name: executorType, amount: 1, script: , vendor: , cores -> name: cores, amount: 2, script: , vendor: , memory -> name: memory, amount: 2048, script: , vendor: , offHeap -> name: offHeap, amount: 0, script: , vendor: ), task resources: Map(cpus -> name: cpus, amount: 1.0)
-	25/07/28 16:14:00 INFO ResourceProfile: Limiting resource is cpus at 2 tasks per executor
-	25/07/28 16:14:00 INFO ResourceProfileManager: Added ResourceProfile id: 1
-	25/07/28 16:14:00 INFO SecurityManager: Changing view acls to: root
-	25/07/28 16:14:00 INFO SecurityManager: Changing modify acls to: root
-	25/07/28 16:14:00 INFO SecurityManager: Changing view acls groups to:
-	25/07/28 16:14:00 INFO SecurityManager: Changing modify acls groups to:
-	25/07/28 16:14:00 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users with view permissions: root; groups with view permissions: EMPTY; users with modify permissions: root; groups with modify permissions: EMPTY
-	25/07/28 16:14:00 INFO Utils: Successfully started service 'sparkDriver' on port 4791.
-	25/07/28 16:14:00 INFO SparkEnv: Registering MapOutputTracker
-	25/07/28 16:14:01 INFO SparkEnv: Registering BlockManagerMaster
-	25/07/28 16:14:01 INFO BlockManagerMasterEndpoint: Using org.apache.spark.storage.DefaultTopologyMapper for getting topology information
-	25/07/28 16:14:01 INFO BlockManagerMasterEndpoint: BlockManagerMasterEndpoint up
-	25/07/28 16:14:01 INFO SparkEnv: Registering BlockManagerMasterHeartbeat
-	25/07/28 16:14:01 INFO DiskBlockManager: Created local directory at /tmp/blockmgr-c5eb0331-88a9-4048-9034-ee9a40407025
-	25/07/28 16:14:01 INFO MemoryStore: MemoryStore started with capacity 127.2 MiB
-	25/07/28 16:14:01 INFO SparkEnv: Registering OutputCommitCoordinator
-	25/07/28 16:14:01 INFO SubResultCacheManager: Sub-result caches are disabled.
-	25/07/28 16:14:01 INFO JettyUtils: Start Jetty 0.0.0.0:4040 for SparkUI
-	25/07/28 16:14:01 INFO Utils: Successfully started service 'SparkUI' on port 4040.
-	25/07/28 16:14:01 INFO SparkContext: Added JAR file:///dolphinscheduler/default/resources/mysql-connector-j-8.0.33.jar at spark://ip-172-31-9-77.ap-southeast-1.compute.internal:4791/jars/mysql-connector-j-8.0.33.jar with timestamp 1753719240754
-	25/07/28 16:14:01 INFO Executor: Starting executor ID driver on host ip-172-31-9-77.ap-southeast-1.compute.internal
-	25/07/28 16:14:01 INFO Executor: OS info Linux, 6.8.0-1029-aws, amd64
-	25/07/28 16:14:01 INFO Executor: Java version 17.0.15
-	25/07/28 16:14:01 INFO Executor: Starting executor with user classpath (userClassPathFirst = false): 'file:/usr/lib/hadoop-lzo/lib/*,file:/usr/lib/hadoop/hadoop-aws.jar,file:/usr/share/aws/aws-java-sdk/*,file:/usr/share/aws/aws-java-sdk-v2/*,file:/usr/share/aws/emr/goodies/lib/emr-spark-goodies.jar,file:/usr/share/aws/emr/security/conf,file:/usr/share/aws/emr/security/lib/*,file:/usr/share/aws/redshift/jdbc/*,file:/usr/share/aws/redshift/spark-redshift/lib/*,file:/usr/share/aws/kinesis/spark-sql-kinesis/lib/*,file:/usr/share/aws/hmclient/lib/aws-glue-datacatalog-spark-client.jar,file:/usr/share/java/Hive-JSON-Serde/hive-openx-serde.jar,file:/usr/share/aws/emr/s3select/lib/emr-s3-select-spark-connector.jar,file:/docker/usr/lib/hadoop-lzo/lib/*,file:/docker/usr/lib/hadoop/hadoop-aws.jar,file:/docker/usr/share/aws/aws-java-sdk/*,file:/docker/usr/share/aws/aws-java-sdk-v2/*,file:/docker/usr/share/aws/emr/goodies/lib/emr-spark-goodies.jar,file:/docker/usr/share/aws/emr/security/conf,file:/docker/usr/share/aws/emr/security/lib/*,file:/docker/usr/share/aws/redshift/jdbc/*,file:/docker/usr/share/aws/redshift/spark-redshift/lib/*,file:/docker/usr/share/aws/kinesis/spark-sql-kinesis/lib/*,file:/docker/usr/share/aws/hmclient/lib/aws-glue-datacatalog-spark-client.jar,file:/docker/usr/share/java/Hive-JSON-Serde/hive-openx-serde.jar,file:/docker/usr/share/aws/emr/s3select/lib/emr-s3-select-spark-connector.jar,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/885/3440/conf,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/885/3440/hive-openx-serde.jar,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/885/3440/*,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/885/3440/emr-spark-goodies.jar,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/885/3440/hadoop-aws.jar,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/885/3440/aws-glue-datacatalog-spark-client.jar,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/885/3440/emr-s3-select-spark-connector.jar'
-	25/07/28 16:14:01 INFO Executor: Created or updated repl class loader org.apache.spark.util.MutableURLClassLoader@1bdc1a72 for default.
-	25/07/28 16:14:01 INFO Executor: Fetching spark://ip-172-31-9-77.ap-southeast-1.compute.internal:4791/jars/mysql-connector-j-8.0.33.jar with timestamp 1753719240754
-	25/07/28 16:14:01 INFO TransportClientFactory: Successfully created connection to ip-172-31-9-77.ap-southeast-1.compute.internal/172.31.9.77:4791 after 16 ms (0 ms spent in bootstraps)
-	25/07/28 16:14:01 INFO Utils: Fetching spark://ip-172-31-9-77.ap-southeast-1.compute.internal:4791/jars/mysql-connector-j-8.0.33.jar to /tmp/spark-eec8929b-95eb-4ffa-90c1-098ea267ea7c/userFiles-e473efdc-1f47-4d93-8bc6-c6c5d274b156/fetchFileTemp3421525033606839988.tmp
-	25/07/28 16:14:01 INFO Executor: Adding file:/tmp/spark-eec8929b-95eb-4ffa-90c1-098ea267ea7c/userFiles-e473efdc-1f47-4d93-8bc6-c6c5d274b156/mysql-connector-j-8.0.33.jar to class loader default
-	25/07/28 16:14:01 INFO Utils: Successfully started service 'org.apache.spark.network.netty.NettyBlockTransferService' on port 23579.
-	25/07/28 16:14:01 INFO NettyBlockTransferService: Server created on ip-172-31-9-77.ap-southeast-1.compute.internal:23579
-	25/07/28 16:14:01 INFO BlockManager: Using org.apache.spark.storage.RandomBlockReplicationPolicy for block replication policy
-	25/07/28 16:14:01 INFO BlockManager: external shuffle service port = 7337
-	25/07/28 16:14:01 INFO BlockManagerMaster: Registering BlockManager BlockManagerId(driver, ip-172-31-9-77.ap-southeast-1.compute.internal, 23579, None)
-	25/07/28 16:14:01 INFO BlockManagerMasterEndpoint: Registering block manager ip-172-31-9-77.ap-southeast-1.compute.internal:23579 with 127.2 MiB RAM, BlockManagerId(driver, ip-172-31-9-77.ap-southeast-1.compute.internal, 23579, None)
-	25/07/28 16:14:01 INFO BlockManagerMaster: Registered BlockManager BlockManagerId(driver, ip-172-31-9-77.ap-southeast-1.compute.internal, 23579, None)
-	25/07/28 16:14:01 INFO BlockManager: Initialized BlockManager: BlockManagerId(driver, ip-172-31-9-77.ap-southeast-1.compute.internal, 23579, None)
-[INFO] 2025-07-28 16:14:02.562 +0000 -  ->
-	25/07/28 16:14:01 INFO SingleEventLogFileWriter: Logging events to hdfs:/var/log/spark/apps/local-1753719241252.inprogress
+[INFO] 2025-07-29 04:03:32.745 +0000 -  ->
+	25/07/29 04:03:31 INFO EMRParamSideChannel: Setting FGAC mode to false
+	25/07/29 04:03:31 INFO SparkContext: Running Spark version 3.5.2-amzn-1
+	25/07/29 04:03:31 INFO SparkContext: OS info Linux, 6.8.0-1029-aws, amd64
+	25/07/29 04:03:31 INFO SparkContext: Java version 17.0.15
+	25/07/29 04:03:31 INFO ResourceUtils: ==============================================================
+	25/07/29 04:03:31 INFO ResourceUtils: No custom resources configured for spark.driver.
+	25/07/29 04:03:31 INFO ResourceUtils: ==============================================================
+	25/07/29 04:03:31 INFO SparkContext: Submitted application: TagComputeEngine
+	25/07/29 04:03:31 INFO ResourceProfile: Default ResourceProfile created, executor resources: Map(executorType -> name: executorType, amount: 1, script: , vendor: , cores -> name: cores, amount: 2, script: , vendor: , memory -> name: memory, amount: 2048, script: , vendor: , offHeap -> name: offHeap, amount: 0, script: , vendor: ), task resources: Map(cpus -> name: cpus, amount: 1.0)
+	25/07/29 04:03:31 INFO ResourceProfile: Limiting resource is cpus at 2 tasks per executor
+	25/07/29 04:03:31 INFO ResourceProfileManager: Added ResourceProfile id: 0
+	25/07/29 04:03:31 INFO ResourceProfile: User executor ResourceProfile created, executor resources: Map(executorType -> name: executorType, amount: 1, script: , vendor: , cores -> name: cores, amount: 2, script: , vendor: , memory -> name: memory, amount: 2048, script: , vendor: , offHeap -> name: offHeap, amount: 0, script: , vendor: ), task resources: Map(cpus -> name: cpus, amount: 1.0)
+	25/07/29 04:03:31 INFO ResourceProfile: Limiting resource is cpus at 2 tasks per executor
+	25/07/29 04:03:31 INFO ResourceProfileManager: Added ResourceProfile id: 1
+	25/07/29 04:03:31 INFO SecurityManager: Changing view acls to: root
+	25/07/29 04:03:31 INFO SecurityManager: Changing modify acls to: root
+	25/07/29 04:03:31 INFO SecurityManager: Changing view acls groups to:
+	25/07/29 04:03:31 INFO SecurityManager: Changing modify acls groups to:
+	25/07/29 04:03:31 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users with view permissions: root; groups with view permissions: EMPTY; users with modify permissions: root; groups with modify permissions: EMPTY
+	25/07/29 04:03:32 INFO Utils: Successfully started service 'sparkDriver' on port 3823.
+	25/07/29 04:03:32 INFO SparkEnv: Registering MapOutputTracker
+	25/07/29 04:03:32 INFO SparkEnv: Registering BlockManagerMaster
+	25/07/29 04:03:32 INFO BlockManagerMasterEndpoint: Using org.apache.spark.storage.DefaultTopologyMapper for getting topology information
+	25/07/29 04:03:32 INFO BlockManagerMasterEndpoint: BlockManagerMasterEndpoint up
+	25/07/29 04:03:32 INFO SparkEnv: Registering BlockManagerMasterHeartbeat
+	25/07/29 04:03:32 INFO DiskBlockManager: Created local directory at /tmp/blockmgr-aa69cce7-7a69-418d-a193-b209315748eb
+	25/07/29 04:03:32 INFO MemoryStore: MemoryStore started with capacity 127.2 MiB
+	25/07/29 04:03:32 INFO SparkEnv: Registering OutputCommitCoordinator
+	25/07/29 04:03:32 INFO SubResultCacheManager: Sub-result caches are disabled.
+	25/07/29 04:03:32 INFO JettyUtils: Start Jetty 0.0.0.0:4040 for SparkUI
+	25/07/29 04:03:32 INFO Utils: Successfully started service 'SparkUI' on port 4040.
+	25/07/29 04:03:32 INFO SparkContext: Added JAR file:///dolphinscheduler/default/resources/mysql-connector-j-8.0.33.jar at spark://ip-172-31-9-77.ap-southeast-1.compute.internal:3823/jars/mysql-connector-j-8.0.33.jar with timestamp 1753761811915
+	25/07/29 04:03:32 INFO Executor: Starting executor ID driver on host ip-172-31-9-77.ap-southeast-1.compute.internal
+	25/07/29 04:03:32 INFO Executor: OS info Linux, 6.8.0-1029-aws, amd64
+	25/07/29 04:03:32 INFO Executor: Java version 17.0.15
+	25/07/29 04:03:32 INFO Executor: Starting executor with user classpath (userClassPathFirst = false): 'file:/usr/lib/hadoop-lzo/lib/*,file:/usr/lib/hadoop/hadoop-aws.jar,file:/usr/share/aws/aws-java-sdk/*,file:/usr/share/aws/aws-java-sdk-v2/*,file:/usr/share/aws/emr/goodies/lib/emr-spark-goodies.jar,file:/usr/share/aws/emr/security/conf,file:/usr/share/aws/emr/security/lib/*,file:/usr/share/aws/redshift/jdbc/*,file:/usr/share/aws/redshift/spark-redshift/lib/*,file:/usr/share/aws/kinesis/spark-sql-kinesis/lib/*,file:/usr/share/aws/hmclient/lib/aws-glue-datacatalog-spark-client.jar,file:/usr/share/java/Hive-JSON-Serde/hive-openx-serde.jar,file:/usr/share/aws/emr/s3select/lib/emr-s3-select-spark-connector.jar,file:/docker/usr/lib/hadoop-lzo/lib/*,file:/docker/usr/lib/hadoop/hadoop-aws.jar,file:/docker/usr/share/aws/aws-java-sdk/*,file:/docker/usr/share/aws/aws-java-sdk-v2/*,file:/docker/usr/share/aws/emr/goodies/lib/emr-spark-goodies.jar,file:/docker/usr/share/aws/emr/security/conf,file:/docker/usr/share/aws/emr/security/lib/*,file:/docker/usr/share/aws/redshift/jdbc/*,file:/docker/usr/share/aws/redshift/spark-redshift/lib/*,file:/docker/usr/share/aws/kinesis/spark-sql-kinesis/lib/*,file:/docker/usr/share/aws/hmclient/lib/aws-glue-datacatalog-spark-client.jar,file:/docker/usr/share/java/Hive-JSON-Serde/hive-openx-serde.jar,file:/docker/usr/share/aws/emr/s3select/lib/emr-s3-select-spark-connector.jar,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447/hadoop-aws.jar,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447/*,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447/emr-spark-goodies.jar,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447/emr-s3-select-spark-connector.jar,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447/conf,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447/aws-glue-datacatalog-spark-client.jar,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447/hive-openx-serde.jar'
+	25/07/29 04:03:32 INFO Executor: Created or updated repl class loader org.apache.spark.util.MutableURLClassLoader@1bdc1a72 for default.
+	25/07/29 04:03:32 INFO Executor: Fetching spark://ip-172-31-9-77.ap-southeast-1.compute.internal:3823/jars/mysql-connector-j-8.0.33.jar with timestamp 1753761811915
+	25/07/29 04:03:32 INFO TransportClientFactory: Successfully created connection to ip-172-31-9-77.ap-southeast-1.compute.internal/172.31.9.77:3823 after 16 ms (0 ms spent in bootstraps)
+	25/07/29 04:03:32 INFO Utils: Fetching spark://ip-172-31-9-77.ap-southeast-1.compute.internal:3823/jars/mysql-connector-j-8.0.33.jar to /tmp/spark-94f5d610-cf1f-4ea3-aafd-324a77210306/userFiles-06a45e04-ec37-4cbb-9466-6c28f09f937d/fetchFileTemp15158573182311310503.tmp
+	25/07/29 04:03:32 INFO Executor: Adding file:/tmp/spark-94f5d610-cf1f-4ea3-aafd-324a77210306/userFiles-06a45e04-ec37-4cbb-9466-6c28f09f937d/mysql-connector-j-8.0.33.jar to class loader default
+	25/07/29 04:03:32 INFO Utils: Successfully started service 'org.apache.spark.network.netty.NettyBlockTransferService' on port 30085.
+	25/07/29 04:03:32 INFO NettyBlockTransferService: Server created on ip-172-31-9-77.ap-southeast-1.compute.internal:30085
+	25/07/29 04:03:32 INFO BlockManager: Using org.apache.spark.storage.RandomBlockReplicationPolicy for block replication policy
+	25/07/29 04:03:32 INFO BlockManager: external shuffle service port = 7337
+	25/07/29 04:03:32 INFO BlockManagerMaster: Registering BlockManager BlockManagerId(driver, ip-172-31-9-77.ap-southeast-1.compute.internal, 30085, None)
+	25/07/29 04:03:32 INFO BlockManagerMasterEndpoint: Registering block manager ip-172-31-9-77.ap-southeast-1.compute.internal:30085 with 127.2 MiB RAM, BlockManagerId(driver, ip-172-31-9-77.ap-southeast-1.compute.internal, 30085, None)
+	25/07/29 04:03:32 INFO BlockManagerMaster: Registered BlockManager BlockManagerId(driver, ip-172-31-9-77.ap-southeast-1.compute.internal, 30085, None)
+	25/07/29 04:03:32 INFO BlockManager: Initialized BlockManager: BlockManagerId(driver, ip-172-31-9-77.ap-southeast-1.compute.internal, 30085, None)
+[INFO] 2025-07-29 04:03:33.746 +0000 -  ->
+	25/07/29 04:03:33 INFO SingleEventLogFileWriter: Logging events to hdfs:/var/log/spark/apps/local-1753761812393.inprogress
 	✅ Spark会话创建完成，版本: 3.5.2-amzn-1
 	MySQL配置: cex-mysql-test.c5mgk4qm8m2z.ap-southeast-1.rds.amazonaws.com:3358/biz_statistics
 	🗄️  HiveMeta初始化完成
@@ -239,256 +239,469 @@ ${SPARK_HOME}/bin/spark-submit --master local --conf spark.driver.cores=1 --conf
 	🚀 开始标签计算，模式: task-all
 	📋 加载标签规则...
 	📋 加载标签规则，指定标签: None
-[INFO] 2025-07-28 16:14:05.562 +0000 -  ->
+[INFO] 2025-07-29 04:03:36.747 +0000 -  ->
 	✅ 标签规则加载完成: 50 个标签
 	🎯 分析标签依赖关系...
 	🔍 分析标签规则依赖关系...
-	   📋 标签 1: 依赖表 []
-	   📋 标签 2: 依赖表 []
-	   📋 标签 3: 依赖表 []
-	   📋 标签 4: 依赖表 []
-	   📋 标签 5: 依赖表 []
-	   📋 标签 6: 依赖表 []
-	   📋 标签 7: 依赖表 []
-	   📋 标签 8: 依赖表 []
-	   📋 标签 9: 依赖表 []
-	   📋 标签 10: 依赖表 []
-	   📋 标签 11: 依赖表 []
-	   📋 标签 12: 依赖表 []
-	   📋 标签 13: 依赖表 []
-	   📋 标签 14: 依赖表 []
-	   📋 标签 15: 依赖表 []
-	   📋 标签 16: 依赖表 []
-	   📋 标签 17: 依赖表 []
-	   📋 标签 18: 依赖表 []
-	   📋 标签 19: 依赖表 []
-	   📋 标签 20: 依赖表 []
-	   📋 标签 21: 依赖表 []
-	   📋 标签 22: 依赖表 []
-	   📋 标签 23: 依赖表 []
-	   📋 标签 24: 依赖表 []
-	   📋 标签 25: 依赖表 []
-	   📋 标签 26: 依赖表 []
-	   📋 标签 27: 依赖表 []
-	   📋 标签 28: 依赖表 []
-	   📋 标签 29: 依赖表 []
-	   📋 标签 30: 依赖表 []
-	   📋 标签 31: 依赖表 []
-	   📋 标签 32: 依赖表 []
-	   📋 标签 33: 依赖表 []
-	   📋 标签 34: 依赖表 []
-	   📋 标签 35: 依赖表 []
-	   📋 标签 36: 依赖表 []
-	   📋 标签 37: 依赖表 []
-	   📋 标签 38: 依赖表 []
-	   📋 标签 39: 依赖表 []
-	   📋 标签 40: 依赖表 []
-	   📋 标签 41: 依赖表 []
-	   📋 标签 42: 依赖表 []
-	   📋 标签 43: 依赖表 []
-	   📋 标签 44: 依赖表 []
-	   📋 标签 45: 依赖表 []
-	   📋 标签 46: 依赖表 []
-	   📋 标签 47: 依赖表 []
-	   📋 标签 48: 依赖表 []
-	   📋 标签 49: 依赖表 []
-	   📋 标签 50: 依赖表 []
+	   📋 标签 1: 依赖表 ['tag_system.user_asset_summary']
+	   📋 标签 2: 依赖表 ['tag_system.user_asset_summary']
+	   📋 标签 3: 依赖表 ['tag_system.user_activity_summary']
+	   📋 标签 4: 依赖表 ['tag_system.user_activity_summary']
+	   📋 标签 5: 依赖表 ['tag_system.user_asset_summary']
+	   📋 标签 6: 依赖表 ['tag_system.user_risk_profile']
+	   📋 标签 7: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 8: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 9: 依赖表 ['tag_system.user_asset_summary']
+	   📋 标签 10: 依赖表 ['tag_system.user_asset_summary']
+	   📋 标签 11: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 12: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 13: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 14: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 15: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 16: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 17: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 18: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 19: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 20: 依赖表 ['tag_system.user_activity_summary']
+	   📋 标签 21: 依赖表 ['tag_system.user_activity_summary']
+	   📋 标签 22: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 23: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 24: 依赖表 ['tag_system.user_activity_summary']
+	   📋 标签 25: 依赖表 ['tag_system.user_activity_summary']
+	   📋 标签 26: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 27: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 28: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 29: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 30: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 31: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 32: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 33: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 34: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 35: 依赖表 ['tag_system.user_preferences']
+	   📋 标签 36: 依赖表 ['tag_system.user_preferences']
+	   📋 标签 37: 依赖表 ['tag_system.user_preferences']
+	   📋 标签 38: 依赖表 ['tag_system.user_preferences']
+	   📋 标签 39: 依赖表 ['tag_system.user_preferences']
+	   📋 标签 40: 依赖表 ['tag_system.user_preferences']
+	   📋 标签 41: 依赖表 ['tag_system.user_preferences']
+	   📋 标签 42: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 43: 依赖表 ['tag_system.user_asset_summary', 'tag_system.user_activity_summary']
+	   📋 标签 44: 依赖表 ['tag_system.user_basic_info', 'tag_system.user_asset_summary']
+	   📋 标签 45: 依赖表 ['tag_system.user_activity_summary', 'tag_system.user_asset_summary']
+	   📋 标签 46: 依赖表 ['tag_system.user_basic_info', 'tag_system.user_activity_summary']
+	   📋 标签 47: 依赖表 ['tag_system.user_basic_info']
+	   📋 标签 48: 依赖表 ['tag_system.user_preferences', 'tag_system.user_basic_info', 'tag_system.user_asset_summary']
+	   📋 标签 49: 依赖表 ['tag_system.user_preferences', 'tag_system.user_basic_info']
+	   📋 标签 50: 依赖表 ['tag_system.user_preferences', 'tag_system.user_basic_info']
 	✅ 依赖分析完成: 50 个标签
 	🎯 智能分组标签...
-	📦 创建标签组: Group_50tags_0tables
-	   🏷️  标签: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50]
-	   📊 依赖表: []
-	   🏷️  组 1: 标签[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50] → 表[]
-	✅ 分组完成: 1 个计算组
-	🚀 并行计算 1 个标签组...
-	   📦 计算标签组 1/1: Group_50tags_0tables
-	🚀 开始计算标签组: Group_50tags_0tables
-	   📋 该组标签规则数: 50
+	📦 创建标签组: Group_5tags_1tables
+	   🏷️  标签: [1, 2, 5, 9, 10]
+	   📊 依赖表: ['tag_system.user_asset_summary']
+	   🏷️  组 1: 标签[1, 2, 5, 9, 10] → 表['tag_system.user_asset_summary']
+	📦 创建标签组: Group_6tags_1tables
+	   🏷️  标签: [3, 4, 20, 21, 24, 25]
+	   📊 依赖表: ['tag_system.user_activity_summary']
+	   🏷️  组 2: 标签[3, 4, 20, 21, 24, 25] → 表['tag_system.user_activity_summary']
+	📦 创建标签组: Group_1tags_1tables
+	   🏷️  标签: [6]
+	   📊 依赖表: ['tag_system.user_risk_profile']
+	   🏷️  组 3: 标签[6] → 表['tag_system.user_risk_profile']
+	📦 创建标签组: Group_24tags_1tables
+	   🏷️  标签: [7, 8, 11, 12, 13, 14, 15, 16, 17, 18, 19, 22, 23, 26, 27, 28, 29, 30, 31, 32, 33, 34, 42, 47]
+	   📊 依赖表: ['tag_system.user_basic_info']
+	   🏷️  组 4: 标签[7, 8, 11, 12, 13, 14, 15, 16, 17, 18, 19, 22, 23, 26, 27, 28, 29, 30, 31, 32, 33, 34, 42, 47] → 表['tag_system.user_basic_info']
+	📦 创建标签组: Group_7tags_1tables
+	   🏷️  标签: [35, 36, 37, 38, 39, 40, 41]
+	   📊 依赖表: ['tag_system.user_preferences']
+	   🏷️  组 5: 标签[35, 36, 37, 38, 39, 40, 41] → 表['tag_system.user_preferences']
+	📦 创建标签组: Group_2tags_2tables
+	   🏷️  标签: [43, 45]
+	   📊 依赖表: ['tag_system.user_activity_summary', 'tag_system.user_asset_summary']
+	   🏷️  组 6: 标签[43, 45] → 表['tag_system.user_activity_summary', 'tag_system.user_asset_summary']
+	📦 创建标签组: Group_1tags_2tables
+	   🏷️  标签: [44]
+	   📊 依赖表: ['tag_system.user_asset_summary', 'tag_system.user_basic_info']
+	   🏷️  组 7: 标签[44] → 表['tag_system.user_asset_summary', 'tag_system.user_basic_info']
+	📦 创建标签组: Group_1tags_2tables
+	   🏷️  标签: [46]
+	   📊 依赖表: ['tag_system.user_activity_summary', 'tag_system.user_basic_info']
+	   🏷️  组 8: 标签[46] → 表['tag_system.user_activity_summary', 'tag_system.user_basic_info']
+	📦 创建标签组: Group_1tags_3tables
+	   🏷️  标签: [48]
+	   📊 依赖表: ['tag_system.user_asset_summary', 'tag_system.user_basic_info', 'tag_system.user_preferences']
+	   🏷️  组 9: 标签[48] → 表['tag_system.user_asset_summary', 'tag_system.user_basic_info', 'tag_system.user_preferences']
+	📦 创建标签组: Group_2tags_2tables
+	   🏷️  标签: [49, 50]
+	   📊 依赖表: ['tag_system.user_basic_info', 'tag_system.user_preferences']
+	   🏷️  组 10: 标签[49, 50] → 表['tag_system.user_basic_info', 'tag_system.user_preferences']
+	✅ 分组完成: 10 个计算组
+	🚀 并行计算 10 个标签组...
+	   📦 计算标签组 1/10: Group_5tags_1tables
+	🚀 开始计算标签组: Group_5tags_1tables
+	   📋 该组标签规则数: 5
 	🔍 TagRuleParser初始化完成
 	🔍 分析字段依赖关系...
-	✅ 字段依赖分析完成: 0 个表
-[INFO] 2025-07-28 16:14:06.563 +0000 -  ->
-	   🔗 JOIN完成，用户数: 0
-	   🎯 并行计算 50 个标签...
+[INFO] 2025-07-29 04:03:37.748 +0000 -  ->
+	✅ 字段依赖分析完成: 1 个表
+	   📊 tag_system.user_asset_summary: ['debt_amount', 'total_asset_value', 'cash_balance', 'user_id']
+	📖 加载Hive表: tag_system.user_asset_summary
+	25/07/29 04:03:37 WARN HiveConf: HiveConf of name hive.server2.thrift.url does not exist
+	✅ 表 tag_system.user_asset_summary 加载完成，字段: {'debt_amount', 'total_asset_value', 'cash_balance', 'user_id'}
+[INFO] 2025-07-29 04:03:38.748 +0000 -  ->
+	   🔗 JOIN完成，用户数: 1000
+	   🎯 并行计算 5 个标签...
 	      🏷️  计算标签 1...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 1: 0 个用户
+	         ✅ 标签 1: 1000 个用户
 	      🏷️  计算标签 2...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 2: 0 个用户
-	      🏷️  计算标签 3...
-	🔍 TagRuleParser初始化完成
-[INFO] 2025-07-28 16:14:07.563 +0000 -  ->
-	         ✅ 标签 3: 0 个用户
-	      🏷️  计算标签 4...
-	🔍 TagRuleParser初始化完成
-	         ✅ 标签 4: 0 个用户
+	         ✅ 标签 2: 1000 个用户
 	      🏷️  计算标签 5...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 5: 0 个用户
-	      🏷️  计算标签 6...
-	🔍 TagRuleParser初始化完成
-	         ✅ 标签 6: 0 个用户
-	      🏷️  计算标签 7...
-	🔍 TagRuleParser初始化完成
-	         ✅ 标签 7: 0 个用户
-	      🏷️  计算标签 8...
-	🔍 TagRuleParser初始化完成
-	         ✅ 标签 8: 0 个用户
+[INFO] 2025-07-29 04:03:39.748 +0000 -  ->
+	         ✅ 标签 5: 1000 个用户
 	      🏷️  计算标签 9...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 9: 0 个用户
+	         ✅ 标签 9: 1000 个用户
 	      🏷️  计算标签 10...
 	🔍 TagRuleParser初始化完成
-[INFO] 2025-07-28 16:14:08.563 +0000 -  ->
-	         ✅ 标签 10: 0 个用户
-	      🏷️  计算标签 11...
+	         ✅ 标签 10: 1000 个用户
+	   🔀 聚合用户标签...
+	   ✅ 用户标签聚合完成: 1000 个用户
+[INFO] 2025-07-29 04:03:40.749 +0000 -  ->
+	✅ 标签组计算完成: 1000 个用户
+	   📦 计算标签组 2/10: Group_6tags_1tables
+	🚀 开始计算标签组: Group_6tags_1tables
+	   📋 该组标签规则数: 6
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 11: 0 个用户
-	      🏷️  计算标签 12...
+	🔍 分析字段依赖关系...
+	✅ 字段依赖分析完成: 1 个表
+	   📊 tag_system.user_activity_summary: ['user_id', 'last_login_date', 'trade_count_30d', 'last_trade_date']
+	📖 加载Hive表: tag_system.user_activity_summary
+	✅ 表 tag_system.user_activity_summary 加载完成，字段: {'user_id', 'last_login_date', 'trade_count_30d', 'last_trade_date'}
+	   🔗 JOIN完成，用户数: 1000
+	   🎯 并行计算 6 个标签...
+	      🏷️  计算标签 3...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 12: 0 个用户
-	      🏷️  计算标签 13...
+	         ✅ 标签 3: 1000 个用户
+	      🏷️  计算标签 4...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 13: 0 个用户
-	      🏷️  计算标签 14...
-	🔍 TagRuleParser初始化完成
-	         ✅ 标签 14: 0 个用户
-	      🏷️  计算标签 15...
-	🔍 TagRuleParser初始化完成
-	         ✅ 标签 15: 0 个用户
-	      🏷️  计算标签 16...
-	🔍 TagRuleParser初始化完成
-	         ✅ 标签 16: 0 个用户
-	      🏷️  计算标签 17...
-	🔍 TagRuleParser初始化完成
-	         ✅ 标签 17: 0 个用户
-	      🏷️  计算标签 18...
-	🔍 TagRuleParser初始化完成
-	         ✅ 标签 18: 0 个用户
-	      🏷️  计算标签 19...
-	🔍 TagRuleParser初始化完成
-[INFO] 2025-07-28 16:14:09.564 +0000 -  ->
-	         ✅ 标签 19: 0 个用户
+[INFO] 2025-07-29 04:03:41.749 +0000 -  ->
+	         ✅ 标签 4: 1000 个用户
 	      🏷️  计算标签 20...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 20: 0 个用户
+	         ✅ 标签 20: 1000 个用户
 	      🏷️  计算标签 21...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 21: 0 个用户
-	      🏷️  计算标签 22...
-	🔍 TagRuleParser初始化完成
-	         ✅ 标签 22: 0 个用户
-	      🏷️  计算标签 23...
-	🔍 TagRuleParser初始化完成
-	         ✅ 标签 23: 0 个用户
+	         ✅ 标签 21: 1000 个用户
 	      🏷️  计算标签 24...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 24: 0 个用户
+	         ✅ 标签 24: 1000 个用户
 	      🏷️  计算标签 25...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 25: 0 个用户
+	         ✅ 标签 25: 1000 个用户
+	   🔀 聚合用户标签...
+	   ✅ 用户标签聚合完成: 1000 个用户
+	✅ 标签组计算完成: 1000 个用户
+	   📦 计算标签组 3/10: Group_1tags_1tables
+	🚀 开始计算标签组: Group_1tags_1tables
+	   📋 该组标签规则数: 1
+	🔍 TagRuleParser初始化完成
+	🔍 分析字段依赖关系...
+	✅ 字段依赖分析完成: 1 个表
+	   📊 tag_system.user_risk_profile: ['risk_score', 'user_id']
+	📖 加载Hive表: tag_system.user_risk_profile
+[INFO] 2025-07-29 04:03:42.749 +0000 -  ->
+	✅ 表 tag_system.user_risk_profile 加载完成，字段: {'risk_score', 'user_id'}
+	   🔗 JOIN完成，用户数: 1000
+	   🎯 并行计算 1 个标签...
+	      🏷️  计算标签 6...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 6: 1000 个用户
+	   🔀 聚合用户标签...
+	   ✅ 用户标签聚合完成: 1000 个用户
+	✅ 标签组计算完成: 1000 个用户
+	   📦 计算标签组 4/10: Group_24tags_1tables
+	🚀 开始计算标签组: Group_24tags_1tables
+	   📋 该组标签规则数: 24
+	🔍 TagRuleParser初始化完成
+	🔍 分析字段依赖关系...
+	✅ 字段依赖分析完成: 1 个表
+	   📊 tag_system.user_basic_info: ['birthday', 'kyc_status', 'secondary_status', 'primary_status', 'first_name', 'middle_name', 'registration_date', 'is_banned', 'account_status', 'age', 'is_vip', 'user_id', 'user_level', 'phone_number', 'email']
+	📖 加载Hive表: tag_system.user_basic_info
+	✅ 表 tag_system.user_basic_info 加载完成，字段: {'birthday', 'kyc_status', 'secondary_status', 'primary_status', 'first_name', 'middle_name', 'registration_date', 'is_banned', 'account_status', 'age', 'is_vip', 'user_id', 'user_level', 'phone_number', 'email'}
+[INFO] 2025-07-29 04:03:43.750 +0000 -  ->
+	   🔗 JOIN完成，用户数: 1000
+	   🎯 并行计算 24 个标签...
+	      🏷️  计算标签 7...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 7: 1000 个用户
+	      🏷️  计算标签 8...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 8: 1000 个用户
+	      🏷️  计算标签 11...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 11: 1000 个用户
+	      🏷️  计算标签 12...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 12: 1000 个用户
+	      🏷️  计算标签 13...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 13: 1000 个用户
+	      🏷️  计算标签 14...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 14: 1000 个用户
+	      🏷️  计算标签 15...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 15: 1000 个用户
+	      🏷️  计算标签 16...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 16: 1000 个用户
+	      🏷️  计算标签 17...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 17: 1000 个用户
+	      🏷️  计算标签 18...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 18: 1000 个用户
+	      🏷️  计算标签 19...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 19: 1000 个用户
+	      🏷️  计算标签 22...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 22: 1000 个用户
+	      🏷️  计算标签 23...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 23: 1000 个用户
 	      🏷️  计算标签 26...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 26: 0 个用户
+	         ✅ 标签 26: 1000 个用户
 	      🏷️  计算标签 27...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 27: 0 个用户
+	         ✅ 标签 27: 1000 个用户
 	      🏷️  计算标签 28...
 	🔍 TagRuleParser初始化完成
-[INFO] 2025-07-28 16:14:10.564 +0000 -  ->
-	         ✅ 标签 28: 0 个用户
+[INFO] 2025-07-29 04:03:44.751 +0000 -  ->
+	         ✅ 标签 28: 1000 个用户
 	      🏷️  计算标签 29...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 29: 0 个用户
+	         ✅ 标签 29: 1000 个用户
 	      🏷️  计算标签 30...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 30: 0 个用户
+	         ✅ 标签 30: 1000 个用户
 	      🏷️  计算标签 31...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 31: 0 个用户
+	         ✅ 标签 31: 1000 个用户
 	      🏷️  计算标签 32...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 32: 0 个用户
+	         ✅ 标签 32: 1000 个用户
 	      🏷️  计算标签 33...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 33: 0 个用户
+	         ✅ 标签 33: 1000 个用户
 	      🏷️  计算标签 34...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 34: 0 个用户
-	      🏷️  计算标签 35...
-	🔍 TagRuleParser初始化完成
-	         ✅ 标签 35: 0 个用户
-	      🏷️  计算标签 36...
-	🔍 TagRuleParser初始化完成
-	         ✅ 标签 36: 0 个用户
-	      🏷️  计算标签 37...
-	🔍 TagRuleParser初始化完成
-	         ✅ 标签 37: 0 个用户
-	      🏷️  计算标签 38...
-	🔍 TagRuleParser初始化完成
-	         ✅ 标签 38: 0 个用户
-	      🏷️  计算标签 39...
-	🔍 TagRuleParser初始化完成
-[INFO] 2025-07-28 16:14:11.564 +0000 -  ->
-	         ✅ 标签 39: 0 个用户
-	      🏷️  计算标签 40...
-	🔍 TagRuleParser初始化完成
-	         ✅ 标签 40: 0 个用户
-	      🏷️  计算标签 41...
-	🔍 TagRuleParser初始化完成
-	         ✅ 标签 41: 0 个用户
+	         ✅ 标签 34: 1000 个用户
 	      🏷️  计算标签 42...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 42: 0 个用户
-	      🏷️  计算标签 43...
-	🔍 TagRuleParser初始化完成
-	         ✅ 标签 43: 0 个用户
-	      🏷️  计算标签 44...
-	🔍 TagRuleParser初始化完成
-	         ✅ 标签 44: 0 个用户
-	      🏷️  计算标签 45...
-	🔍 TagRuleParser初始化完成
-	         ✅ 标签 45: 0 个用户
-	      🏷️  计算标签 46...
-	🔍 TagRuleParser初始化完成
-	         ✅ 标签 46: 0 个用户
+	         ✅ 标签 42: 1000 个用户
 	      🏷️  计算标签 47...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 47: 0 个用户
+	         ✅ 标签 47: 1000 个用户
+	   🔀 聚合用户标签...
+[INFO] 2025-07-29 04:03:45.751 +0000 -  ->
+	   ✅ 用户标签聚合完成: 1000 个用户
+	✅ 标签组计算完成: 1000 个用户
+	   📦 计算标签组 5/10: Group_7tags_1tables
+	🚀 开始计算标签组: Group_7tags_1tables
+	   📋 该组标签规则数: 7
+	🔍 TagRuleParser初始化完成
+	🔍 分析字段依赖关系...
+	✅ 字段依赖分析完成: 1 个表
+	   📊 tag_system.user_preferences: ['active_products', 'required_services', 'interested_products', 'user_id', 'blacklisted_products', 'expired_products', 'owned_products', 'optional_services']
+	📖 加载Hive表: tag_system.user_preferences
+	✅ 表 tag_system.user_preferences 加载完成，字段: {'active_products', 'required_services', 'interested_products', 'user_id', 'blacklisted_products', 'expired_products', 'owned_products', 'optional_services'}
+[INFO] 2025-07-29 04:03:46.751 +0000 -  ->
+	   🔗 JOIN完成，用户数: 1000
+	   🎯 并行计算 7 个标签...
+	      🏷️  计算标签 35...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 35: 1000 个用户
+	      🏷️  计算标签 36...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 36: 1000 个用户
+	      🏷️  计算标签 37...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 37: 1000 个用户
+	      🏷️  计算标签 38...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 38: 1000 个用户
+	      🏷️  计算标签 39...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 39: 1000 个用户
+	      🏷️  计算标签 40...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 40: 1000 个用户
+	      🏷️  计算标签 41...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 41: 1000 个用户
+	   🔀 聚合用户标签...
+	   ✅ 用户标签聚合完成: 1000 个用户
+	✅ 标签组计算完成: 1000 个用户
+	   📦 计算标签组 6/10: Group_2tags_2tables
+	🚀 开始计算标签组: Group_2tags_2tables
+	   📋 该组标签规则数: 2
+	🔍 TagRuleParser初始化完成
+	🔍 分析字段依赖关系...
+	✅ 字段依赖分析完成: 2 个表
+	   📊 tag_system.user_asset_summary: ['total_asset_value', 'cash_balance', 'user_id']
+	   📊 tag_system.user_activity_summary: ['last_login_date', 'trade_count_30d', 'user_id']
+	🔗 开始JOIN表: ['tag_system.user_activity_summary', 'tag_system.user_asset_summary']
+	📖 加载Hive表: tag_system.user_activity_summary
+[INFO] 2025-07-29 04:03:47.752 +0000 -  ->
+	✅ 表 tag_system.user_activity_summary 加载完成，字段: {'last_login_date', 'trade_count_30d', 'user_id'}
+	📖 加载Hive表: tag_system.user_asset_summary
+	✅ 表 tag_system.user_asset_summary 加载完成，字段: {'total_asset_value', 'cash_balance', 'user_id'}
+	📚 批量加载完成: 2 个表
+	   📋 基础表: tag_system.user_activity_summary
+	   🔗 LEFT JOIN: tag_system.user_asset_summary
+	✅ JOIN完成，涉及 2 个表
+	   🔗 JOIN完成，用户数: 1000
+	   🎯 并行计算 2 个标签...
+	      🏷️  计算标签 43...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 43: 1000 个用户
+	      🏷️  计算标签 45...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 45: 1000 个用户
+	   🔀 聚合用户标签...
+[INFO] 2025-07-29 04:03:48.752 +0000 -  ->
+	   ✅ 用户标签聚合完成: 1000 个用户
+	✅ 标签组计算完成: 1000 个用户
+	   📦 计算标签组 7/10: Group_1tags_2tables
+	🚀 开始计算标签组: Group_1tags_2tables
+	   📋 该组标签规则数: 1
+	🔍 TagRuleParser初始化完成
+	🔍 分析字段依赖关系...
+	✅ 字段依赖分析完成: 2 个表
+	   📊 tag_system.user_basic_info: ['user_level', 'is_banned', 'kyc_status', 'user_id']
+	   📊 tag_system.user_asset_summary: ['total_asset_value', 'user_id']
+	🔗 开始JOIN表: ['tag_system.user_asset_summary', 'tag_system.user_basic_info']
+	📖 加载Hive表: tag_system.user_asset_summary
+	✅ 表 tag_system.user_asset_summary 加载完成，字段: {'total_asset_value', 'user_id'}
+	📖 加载Hive表: tag_system.user_basic_info
+	✅ 表 tag_system.user_basic_info 加载完成，字段: {'user_level', 'is_banned', 'kyc_status', 'user_id'}
+	📚 批量加载完成: 2 个表
+	   📋 基础表: tag_system.user_asset_summary
+	   🔗 LEFT JOIN: tag_system.user_basic_info
+	✅ JOIN完成，涉及 2 个表
+[INFO] 2025-07-29 04:03:49.753 +0000 -  ->
+	   🔗 JOIN完成，用户数: 1000
+	   🎯 并行计算 1 个标签...
+	      🏷️  计算标签 44...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 44: 1000 个用户
+	   🔀 聚合用户标签...
+	   ✅ 用户标签聚合完成: 1000 个用户
+	✅ 标签组计算完成: 1000 个用户
+	   📦 计算标签组 8/10: Group_1tags_2tables
+	🚀 开始计算标签组: Group_1tags_2tables
+	   📋 该组标签规则数: 1
+	🔍 TagRuleParser初始化完成
+	🔍 分析字段依赖关系...
+	✅ 字段依赖分析完成: 2 个表
+	   📊 tag_system.user_basic_info: ['account_status', 'user_id']
+	   📊 tag_system.user_activity_summary: ['last_login_date', 'user_id']
+	🔗 开始JOIN表: ['tag_system.user_activity_summary', 'tag_system.user_basic_info']
+	📖 加载Hive表: tag_system.user_activity_summary
+	✅ 表 tag_system.user_activity_summary 加载完成，字段: {'last_login_date', 'user_id'}
+	📖 加载Hive表: tag_system.user_basic_info
+	✅ 表 tag_system.user_basic_info 加载完成，字段: {'account_status', 'user_id'}
+	📚 批量加载完成: 2 个表
+	   📋 基础表: tag_system.user_activity_summary
+	   🔗 LEFT JOIN: tag_system.user_basic_info
+	✅ JOIN完成，涉及 2 个表
+	   🔗 JOIN完成，用户数: 1000
+	   🎯 并行计算 1 个标签...
+	      🏷️  计算标签 46...
+	🔍 TagRuleParser初始化完成
+	         ✅ 标签 46: 1000 个用户
+	   🔀 聚合用户标签...
+[INFO] 2025-07-29 04:03:50.753 +0000 -  ->
+	   ✅ 用户标签聚合完成: 1000 个用户
+	✅ 标签组计算完成: 1000 个用户
+	   📦 计算标签组 9/10: Group_1tags_3tables
+	🚀 开始计算标签组: Group_1tags_3tables
+	   📋 该组标签规则数: 1
+	🔍 TagRuleParser初始化完成
+	🔍 分析字段依赖关系...
+	✅ 字段依赖分析完成: 3 个表
+	   📊 tag_system.user_basic_info: ['user_level', 'age', 'user_id']
+	   📊 tag_system.user_asset_summary: ['total_asset_value', 'user_id']
+	   📊 tag_system.user_preferences: ['owned_products', 'user_id']
+	🔗 开始JOIN表: ['tag_system.user_asset_summary', 'tag_system.user_basic_info', 'tag_system.user_preferences']
+	📖 加载Hive表: tag_system.user_basic_info
+	✅ 表 tag_system.user_basic_info 加载完成，字段: {'user_level', 'age', 'user_id'}
+	📖 加载Hive表: tag_system.user_preferences
+	✅ 表 tag_system.user_preferences 加载完成，字段: {'owned_products', 'user_id'}
+	📚 批量加载完成: 3 个表
+	   📋 基础表: tag_system.user_asset_summary
+	   🔗 LEFT JOIN: tag_system.user_basic_info
+	   🔗 LEFT JOIN: tag_system.user_preferences
+	✅ JOIN完成，涉及 3 个表
+	   🔗 JOIN完成，用户数: 1000
+	   🎯 并行计算 1 个标签...
 	      🏷️  计算标签 48...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 48: 0 个用户
+	         ✅ 标签 48: 1000 个用户
+	   🔀 聚合用户标签...
+	   ✅ 用户标签聚合完成: 1000 个用户
+	✅ 标签组计算完成: 1000 个用户
+	   📦 计算标签组 10/10: Group_2tags_2tables
+	🚀 开始计算标签组: Group_2tags_2tables
+[INFO] 2025-07-29 04:03:51.753 +0000 -  ->
+	   📋 该组标签规则数: 2
+	🔍 TagRuleParser初始化完成
+	🔍 分析字段依赖关系...
+	✅ 字段依赖分析完成: 2 个表
+	   📊 tag_system.user_preferences: ['interested_products', 'optional_services', 'user_id']
+	   📊 tag_system.user_basic_info: ['first_name', 'birthday', 'user_id', 'is_vip', 'middle_name', 'last_name']
+	🔗 开始JOIN表: ['tag_system.user_basic_info', 'tag_system.user_preferences']
+	📖 加载Hive表: tag_system.user_basic_info
+	✅ 表 tag_system.user_basic_info 加载完成，字段: {'first_name', 'birthday', 'user_id', 'is_vip', 'middle_name', 'last_name'}
+	📖 加载Hive表: tag_system.user_preferences
+	✅ 表 tag_system.user_preferences 加载完成，字段: {'interested_products', 'optional_services', 'user_id'}
+	📚 批量加载完成: 2 个表
+	   📋 基础表: tag_system.user_basic_info
+	   🔗 LEFT JOIN: tag_system.user_preferences
+	✅ JOIN完成，涉及 2 个表
+	   🔗 JOIN完成，用户数: 1000
+	   🎯 并行计算 2 个标签...
 	      🏷️  计算标签 49...
 	🔍 TagRuleParser初始化完成
-[INFO] 2025-07-28 16:14:12.565 +0000 -  ->
-	         ✅ 标签 49: 0 个用户
+	         ✅ 标签 49: 1000 个用户
 	      🏷️  计算标签 50...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 50: 0 个用户
+	         ✅ 标签 50: 1000 个用户
 	   🔀 聚合用户标签...
-[INFO] 2025-07-28 16:14:16.565 +0000 -  ->
-	   ✅ 用户标签聚合完成: 0 个用户
-[INFO] 2025-07-28 16:14:19.566 +0000 -  ->
-	✅ 标签组计算完成: 0 个用户
-	✅ 所有标签组计算完成，成功: 1 个
+	   ✅ 用户标签聚合完成: 1000 个用户
+[INFO] 2025-07-29 04:03:52.756 +0000 -  ->
+	✅ 标签组计算完成: 1000 个用户
+	✅ 所有标签组计算完成，成功: 10 个
 	🔀 合并所有标签组结果...
-[INFO] 2025-07-28 16:14:22.566 +0000 -  ->
-	   ⚠️  所有标签组结果都为空
+[INFO] 2025-07-29 04:03:55.757 +0000 -  ->
+	   ✅ 标签结果合并完成: 1000 个用户
 	💾 与现有标签合并并保存...
 	📖 加载现有用户标签数据...
 	✅ 现有标签数据加载完成: 0 个用户
 	💾 开始写入标签结果到MySQL...
-	⚠️  没有结果需要写入
-[INFO] 2025-07-28 16:14:23.566 +0000 -  ->
-	   ✅ 标签结果保存成功: 0 个用户
+[INFO] 2025-07-29 04:03:58.757 +0000 -  ->
+	📤 准备写入 1000 条标签记录...
+[INFO] 2025-07-29 04:03:59.758 +0000 -  ->
+	✅ 标签结果写入成功: 1000 条记录
+[INFO] 2025-07-29 04:04:01.758 +0000 -  ->
+	   ✅ 标签结果保存成功: 1000 个用户
 	✅ 标签计算完成
-
-	📊 标签系统统计信息:
-	   活跃标签数: 50
-	   有标签用户数: 0
-	   总标签数: 0
-	   平均每用户标签数: 0
+	❌ 获取标签统计失败: [NOT_COLUMN_OR_STR] Argument `col` should be a Column or str, got Decimal.
 
 	============================================================
 	✅ 任务执行成功
@@ -496,18 +709,17 @@ ${SPARK_HOME}/bin/spark-submit --master local --conf spark.driver.cores=1 --conf
 	🧹 HiveMeta缓存已清理
 	🧹 TagEngine资源清理完成
 	🧹 关闭Spark会话...
-[INFO] 2025-07-28 16:14:24.567 +0000 -  ->
 	👋 程序退出
 	🧹 HiveMeta缓存已清理
 	🧹 TagEngine资源清理完成
-[INFO] 2025-07-28 16:14:24.567 +0000 - process has exited. execute path:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/885/3440, processId:744882 ,exitStatusCode:0 ,processWaitForStatus:true ,processExitValue:0
-[INFO] 2025-07-28 16:14:24.568 +0000 - Start finding appId in /usr/local/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250728/18466477060960/8/885/3440.log, fetch way: log
-[INFO] 2025-07-28 16:14:24.568 +0000 - ***********************************************************************************************
-[INFO] 2025-07-28 16:14:24.568 +0000 - *********************************  Finalize task instance  ************************************
-[INFO] 2025-07-28 16:14:24.568 +0000 - ***********************************************************************************************
-[INFO] 2025-07-28 16:14:24.569 +0000 - Upload output files: [] successfully
-[INFO] 2025-07-28 16:14:24.569 +0000 - Send task execute status: SUCCESS to master : 172.31.9.77:1234
-[INFO] 2025-07-28 16:14:24.569 +0000 - Remove the current task execute context from worker cache
-[INFO] 2025-07-28 16:14:24.569 +0000 - The current execute mode isn't develop mode, will clear the task execute file: /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/885/3440
-[INFO] 2025-07-28 16:14:24.570 +0000 - Success clear the task execute file: /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/885/3440
-[INFO] 2025-07-28 16:14:24.570 +0000 - FINALIZE_SESSION
+[INFO] 2025-07-29 04:04:02.758 +0000 - process has exited. execute path:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447, processId:755295 ,exitStatusCode:0 ,processWaitForStatus:true ,processExitValue:0
+[INFO] 2025-07-29 04:04:02.759 +0000 - Start finding appId in /usr/local/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250729/18466477060960/8/892/3447.log, fetch way: log
+[INFO] 2025-07-29 04:04:02.760 +0000 - ***********************************************************************************************
+[INFO] 2025-07-29 04:04:02.760 +0000 - *********************************  Finalize task instance  ************************************
+[INFO] 2025-07-29 04:04:02.760 +0000 - ***********************************************************************************************
+[INFO] 2025-07-29 04:04:02.760 +0000 - Upload output files: [] successfully
+[INFO] 2025-07-29 04:04:02.760 +0000 - Send task execute status: SUCCESS to master : 172.31.9.77:1234
+[INFO] 2025-07-29 04:04:02.760 +0000 - Remove the current task execute context from worker cache
+[INFO] 2025-07-29 04:04:02.760 +0000 - The current execute mode isn't develop mode, will clear the task execute file: /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447
+[INFO] 2025-07-29 04:04:02.761 +0000 - Success clear the task execute file: /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447
+[INFO] 2025-07-29 04:04:02.761 +0000 - FINALIZE_SESSION
