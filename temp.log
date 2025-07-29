@@ -1,23 +1,23 @@
-[LOG-PATH]: /usr/local/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250729/18466477060960/8/892/3447.log, [HOST]:  Host(ip=172.31.9.77, port=1234)
-[INFO] 2025-07-29 04:03:29.736 +0000 - ***********************************************************************************************
-[INFO] 2025-07-29 04:03:29.737 +0000 - *********************************  Initialize task context  ***********************************
-[INFO] 2025-07-29 04:03:29.737 +0000 - ***********************************************************************************************
-[INFO] 2025-07-29 04:03:29.737 +0000 - Begin to initialize task
-[INFO] 2025-07-29 04:03:29.737 +0000 - Set task startTime: 1753761809737
-[INFO] 2025-07-29 04:03:29.737 +0000 - Set task appId: 892_3447
-[INFO] 2025-07-29 04:03:29.737 +0000 - End initialize task {
-  "taskInstanceId" : 3447,
+[LOG-PATH]: /usr/local/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250729/18466477060960/8/895/3450.log, [HOST]:  Host(ip=172.31.9.77, port=1234)
+[INFO] 2025-07-29 08:13:05.530 +0000 - ***********************************************************************************************
+[INFO] 2025-07-29 08:13:05.532 +0000 - *********************************  Initialize task context  ***********************************
+[INFO] 2025-07-29 08:13:05.532 +0000 - ***********************************************************************************************
+[INFO] 2025-07-29 08:13:05.532 +0000 - Begin to initialize task
+[INFO] 2025-07-29 08:13:05.532 +0000 - Set task startTime: 1753776785532
+[INFO] 2025-07-29 08:13:05.532 +0000 - Set task appId: 895_3450
+[INFO] 2025-07-29 08:13:05.532 +0000 - End initialize task {
+  "taskInstanceId" : 3450,
   "taskName" : "full_compute_tags",
-  "firstSubmitTime" : 1753761809675,
-  "startTime" : 1753761809737,
+  "firstSubmitTime" : 1753776785507,
+  "startTime" : 1753776785532,
   "taskType" : "SPARK",
   "workflowInstanceHost" : "172.31.9.77:5678",
   "host" : "172.31.9.77:1234",
-  "logPath" : "/usr/local/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250729/18466477060960/8/892/3447.log",
+  "logPath" : "/usr/local/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250729/18466477060960/8/895/3450.log",
   "processId" : 0,
   "processDefineCode" : 18466477060960,
   "processDefineVersion" : 8,
-  "processInstanceId" : 892,
+  "processInstanceId" : 895,
   "scheduleTime" : 0,
   "executorId" : 1,
   "cmdTypeIfComplement" : 0,
@@ -49,7 +49,7 @@
       "prop" : "system.workflow.instance.id",
       "direct" : "IN",
       "type" : "VARCHAR",
-      "value" : "892"
+      "value" : "895"
     },
     "system.biz.curdate" : {
       "prop" : "system.biz.curdate",
@@ -67,7 +67,7 @@
       "prop" : "system.task.instance.id",
       "direct" : "IN",
       "type" : "VARCHAR",
-      "value" : "3447"
+      "value" : "3450"
     },
     "system.workflow.definition.name" : {
       "prop" : "system.workflow.definition.name",
@@ -97,10 +97,10 @@
       "prop" : "system.datetime",
       "direct" : "IN",
       "type" : "VARCHAR",
-      "value" : "20250729040329"
+      "value" : "20250729081305"
     }
   },
-  "taskAppId" : "892_3447",
+  "taskAppId" : "895_3450",
   "taskTimeout" : 2147483647,
   "workerGroup" : "default",
   "delayTime" : 0,
@@ -117,18 +117,18 @@
   "logBufferEnable" : false,
   "dispatchFailTimes" : 0
 }
-[INFO] 2025-07-29 04:03:29.738 +0000 - ***********************************************************************************************
-[INFO] 2025-07-29 04:03:29.738 +0000 - *********************************  Load task instance plugin  *********************************
-[INFO] 2025-07-29 04:03:29.738 +0000 - ***********************************************************************************************
-[INFO] 2025-07-29 04:03:29.738 +0000 - Send task status RUNNING_EXECUTION master: 172.31.9.77:1234
-[WARN] 2025-07-29 04:03:29.738 +0000 - Current tenant is default tenant, will use root to execute the task
-[INFO] 2025-07-29 04:03:29.738 +0000 - TenantCode: default check successfully
-[INFO] 2025-07-29 04:03:29.738 +0000 - WorkflowInstanceExecDir: /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447 check successfully
-[INFO] 2025-07-29 04:03:29.739 +0000 - get resource file from path:file:/dolphinscheduler/default/resources/bigdata_tag_system/main.py
-[INFO] 2025-07-29 04:03:29.740 +0000 - Download resources: {file:/dolphinscheduler/default/resources/bigdata_tag_system/main.py=file:/dolphinscheduler/default/resources/bigdata_tag_system/main.py} successfully
-[INFO] 2025-07-29 04:03:29.740 +0000 - Download upstream files: [] successfully
-[INFO] 2025-07-29 04:03:29.740 +0000 - Task plugin instance: SPARK create successfully
-[INFO] 2025-07-29 04:03:29.740 +0000 - Initialize spark task params {
+[INFO] 2025-07-29 08:13:05.532 +0000 - ***********************************************************************************************
+[INFO] 2025-07-29 08:13:05.533 +0000 - *********************************  Load task instance plugin  *********************************
+[INFO] 2025-07-29 08:13:05.533 +0000 - ***********************************************************************************************
+[INFO] 2025-07-29 08:13:05.533 +0000 - Send task status RUNNING_EXECUTION master: 172.31.9.77:1234
+[WARN] 2025-07-29 08:13:05.533 +0000 - Current tenant is default tenant, will use root to execute the task
+[INFO] 2025-07-29 08:13:05.533 +0000 - TenantCode: default check successfully
+[INFO] 2025-07-29 08:13:05.533 +0000 - WorkflowInstanceExecDir: /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/895/3450 check successfully
+[INFO] 2025-07-29 08:13:05.533 +0000 - get resource file from path:file:/dolphinscheduler/default/resources/bigdata_tag_system/main.py
+[INFO] 2025-07-29 08:13:05.534 +0000 - Download resources: {file:/dolphinscheduler/default/resources/bigdata_tag_system/main.py=file:/dolphinscheduler/default/resources/bigdata_tag_system/main.py} successfully
+[INFO] 2025-07-29 08:13:05.534 +0000 - Download upstream files: [] successfully
+[INFO] 2025-07-29 08:13:05.535 +0000 - Task plugin instance: SPARK create successfully
+[INFO] 2025-07-29 08:13:05.535 +0000 - Initialize spark task params {
   "localParams" : [ ],
   "varPool" : null,
   "mainJar" : {
@@ -153,81 +153,81 @@
   "resourceList" : [ ],
   "sqlExecutionType" : "SCRIPT"
 }
-[INFO] 2025-07-29 04:03:29.740 +0000 - Success initialized task plugin instance successfully
-[INFO] 2025-07-29 04:03:29.740 +0000 - Set taskVarPool: null successfully
-[INFO] 2025-07-29 04:03:29.740 +0000 - ***********************************************************************************************
-[INFO] 2025-07-29 04:03:29.740 +0000 - *********************************  Execute task instance  *************************************
-[INFO] 2025-07-29 04:03:29.740 +0000 - ***********************************************************************************************
-[INFO] 2025-07-29 04:03:29.741 +0000 - Final Shell file is :
+[INFO] 2025-07-29 08:13:05.535 +0000 - Success initialized task plugin instance successfully
+[INFO] 2025-07-29 08:13:05.535 +0000 - Set taskVarPool: null successfully
+[INFO] 2025-07-29 08:13:05.535 +0000 - ***********************************************************************************************
+[INFO] 2025-07-29 08:13:05.535 +0000 - *********************************  Execute task instance  *************************************
+[INFO] 2025-07-29 08:13:05.535 +0000 - ***********************************************************************************************
+[INFO] 2025-07-29 08:13:05.535 +0000 - Final Shell file is :
 #!/bin/bash
 BASEDIR=$(cd `dirname $0`; pwd)
 cd $BASEDIR
 ${SPARK_HOME}/bin/spark-submit --master local --conf spark.driver.cores=1 --conf spark.driver.memory=512M --conf spark.executor.instances=2 --conf spark.executor.cores=2 --conf spark.executor.memory=2G --jars /dolphinscheduler/default/resources/mysql-connector-j-8.0.33.jar file:/dolphinscheduler/default/resources/bigdata_tag_system/main.py --mode task-all
-[INFO] 2025-07-29 04:03:29.741 +0000 - Executing shell command : sudo -u root -i /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447/892_3447.sh
-[INFO] 2025-07-29 04:03:29.743 +0000 - process start, process id is: 755295
-[INFO] 2025-07-29 04:03:31.744 +0000 -  ->
-	25/07/29 04:03:31 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+[INFO] 2025-07-29 08:13:05.535 +0000 - Executing shell command : sudo -u root -i /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/895/3450/895_3450.sh
+[INFO] 2025-07-29 08:13:05.538 +0000 - process start, process id is: 759483
+[INFO] 2025-07-29 08:13:07.538 +0000 -  ->
+	25/07/29 08:13:06 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
 	============================================================
 	🏷️  大数据标签计算系统
 	============================================================
 	执行模式: task-all
-	当前工作目录: /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447
+	当前工作目录: /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/895/3450
 	脚本目录: /dolphinscheduler/default/resources/bigdata_tag_system
 	项目根目录: /dolphinscheduler/default
 	Python路径前3项: ['/dolphinscheduler/default', '/dolphinscheduler/default/resources/bigdata_tag_system', '/mnt/spark/python/lib/pyspark.zip']
 	🚀 创建Spark会话: TagComputeEngine
-[INFO] 2025-07-29 04:03:32.745 +0000 -  ->
-	25/07/29 04:03:31 INFO EMRParamSideChannel: Setting FGAC mode to false
-	25/07/29 04:03:31 INFO SparkContext: Running Spark version 3.5.2-amzn-1
-	25/07/29 04:03:31 INFO SparkContext: OS info Linux, 6.8.0-1029-aws, amd64
-	25/07/29 04:03:31 INFO SparkContext: Java version 17.0.15
-	25/07/29 04:03:31 INFO ResourceUtils: ==============================================================
-	25/07/29 04:03:31 INFO ResourceUtils: No custom resources configured for spark.driver.
-	25/07/29 04:03:31 INFO ResourceUtils: ==============================================================
-	25/07/29 04:03:31 INFO SparkContext: Submitted application: TagComputeEngine
-	25/07/29 04:03:31 INFO ResourceProfile: Default ResourceProfile created, executor resources: Map(executorType -> name: executorType, amount: 1, script: , vendor: , cores -> name: cores, amount: 2, script: , vendor: , memory -> name: memory, amount: 2048, script: , vendor: , offHeap -> name: offHeap, amount: 0, script: , vendor: ), task resources: Map(cpus -> name: cpus, amount: 1.0)
-	25/07/29 04:03:31 INFO ResourceProfile: Limiting resource is cpus at 2 tasks per executor
-	25/07/29 04:03:31 INFO ResourceProfileManager: Added ResourceProfile id: 0
-	25/07/29 04:03:31 INFO ResourceProfile: User executor ResourceProfile created, executor resources: Map(executorType -> name: executorType, amount: 1, script: , vendor: , cores -> name: cores, amount: 2, script: , vendor: , memory -> name: memory, amount: 2048, script: , vendor: , offHeap -> name: offHeap, amount: 0, script: , vendor: ), task resources: Map(cpus -> name: cpus, amount: 1.0)
-	25/07/29 04:03:31 INFO ResourceProfile: Limiting resource is cpus at 2 tasks per executor
-	25/07/29 04:03:31 INFO ResourceProfileManager: Added ResourceProfile id: 1
-	25/07/29 04:03:31 INFO SecurityManager: Changing view acls to: root
-	25/07/29 04:03:31 INFO SecurityManager: Changing modify acls to: root
-	25/07/29 04:03:31 INFO SecurityManager: Changing view acls groups to:
-	25/07/29 04:03:31 INFO SecurityManager: Changing modify acls groups to:
-	25/07/29 04:03:31 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users with view permissions: root; groups with view permissions: EMPTY; users with modify permissions: root; groups with modify permissions: EMPTY
-	25/07/29 04:03:32 INFO Utils: Successfully started service 'sparkDriver' on port 3823.
-	25/07/29 04:03:32 INFO SparkEnv: Registering MapOutputTracker
-	25/07/29 04:03:32 INFO SparkEnv: Registering BlockManagerMaster
-	25/07/29 04:03:32 INFO BlockManagerMasterEndpoint: Using org.apache.spark.storage.DefaultTopologyMapper for getting topology information
-	25/07/29 04:03:32 INFO BlockManagerMasterEndpoint: BlockManagerMasterEndpoint up
-	25/07/29 04:03:32 INFO SparkEnv: Registering BlockManagerMasterHeartbeat
-	25/07/29 04:03:32 INFO DiskBlockManager: Created local directory at /tmp/blockmgr-aa69cce7-7a69-418d-a193-b209315748eb
-	25/07/29 04:03:32 INFO MemoryStore: MemoryStore started with capacity 127.2 MiB
-	25/07/29 04:03:32 INFO SparkEnv: Registering OutputCommitCoordinator
-	25/07/29 04:03:32 INFO SubResultCacheManager: Sub-result caches are disabled.
-	25/07/29 04:03:32 INFO JettyUtils: Start Jetty 0.0.0.0:4040 for SparkUI
-	25/07/29 04:03:32 INFO Utils: Successfully started service 'SparkUI' on port 4040.
-	25/07/29 04:03:32 INFO SparkContext: Added JAR file:///dolphinscheduler/default/resources/mysql-connector-j-8.0.33.jar at spark://ip-172-31-9-77.ap-southeast-1.compute.internal:3823/jars/mysql-connector-j-8.0.33.jar with timestamp 1753761811915
-	25/07/29 04:03:32 INFO Executor: Starting executor ID driver on host ip-172-31-9-77.ap-southeast-1.compute.internal
-	25/07/29 04:03:32 INFO Executor: OS info Linux, 6.8.0-1029-aws, amd64
-	25/07/29 04:03:32 INFO Executor: Java version 17.0.15
-	25/07/29 04:03:32 INFO Executor: Starting executor with user classpath (userClassPathFirst = false): 'file:/usr/lib/hadoop-lzo/lib/*,file:/usr/lib/hadoop/hadoop-aws.jar,file:/usr/share/aws/aws-java-sdk/*,file:/usr/share/aws/aws-java-sdk-v2/*,file:/usr/share/aws/emr/goodies/lib/emr-spark-goodies.jar,file:/usr/share/aws/emr/security/conf,file:/usr/share/aws/emr/security/lib/*,file:/usr/share/aws/redshift/jdbc/*,file:/usr/share/aws/redshift/spark-redshift/lib/*,file:/usr/share/aws/kinesis/spark-sql-kinesis/lib/*,file:/usr/share/aws/hmclient/lib/aws-glue-datacatalog-spark-client.jar,file:/usr/share/java/Hive-JSON-Serde/hive-openx-serde.jar,file:/usr/share/aws/emr/s3select/lib/emr-s3-select-spark-connector.jar,file:/docker/usr/lib/hadoop-lzo/lib/*,file:/docker/usr/lib/hadoop/hadoop-aws.jar,file:/docker/usr/share/aws/aws-java-sdk/*,file:/docker/usr/share/aws/aws-java-sdk-v2/*,file:/docker/usr/share/aws/emr/goodies/lib/emr-spark-goodies.jar,file:/docker/usr/share/aws/emr/security/conf,file:/docker/usr/share/aws/emr/security/lib/*,file:/docker/usr/share/aws/redshift/jdbc/*,file:/docker/usr/share/aws/redshift/spark-redshift/lib/*,file:/docker/usr/share/aws/kinesis/spark-sql-kinesis/lib/*,file:/docker/usr/share/aws/hmclient/lib/aws-glue-datacatalog-spark-client.jar,file:/docker/usr/share/java/Hive-JSON-Serde/hive-openx-serde.jar,file:/docker/usr/share/aws/emr/s3select/lib/emr-s3-select-spark-connector.jar,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447/hadoop-aws.jar,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447/*,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447/emr-spark-goodies.jar,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447/emr-s3-select-spark-connector.jar,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447/conf,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447/aws-glue-datacatalog-spark-client.jar,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447/hive-openx-serde.jar'
-	25/07/29 04:03:32 INFO Executor: Created or updated repl class loader org.apache.spark.util.MutableURLClassLoader@1bdc1a72 for default.
-	25/07/29 04:03:32 INFO Executor: Fetching spark://ip-172-31-9-77.ap-southeast-1.compute.internal:3823/jars/mysql-connector-j-8.0.33.jar with timestamp 1753761811915
-	25/07/29 04:03:32 INFO TransportClientFactory: Successfully created connection to ip-172-31-9-77.ap-southeast-1.compute.internal/172.31.9.77:3823 after 16 ms (0 ms spent in bootstraps)
-	25/07/29 04:03:32 INFO Utils: Fetching spark://ip-172-31-9-77.ap-southeast-1.compute.internal:3823/jars/mysql-connector-j-8.0.33.jar to /tmp/spark-94f5d610-cf1f-4ea3-aafd-324a77210306/userFiles-06a45e04-ec37-4cbb-9466-6c28f09f937d/fetchFileTemp15158573182311310503.tmp
-	25/07/29 04:03:32 INFO Executor: Adding file:/tmp/spark-94f5d610-cf1f-4ea3-aafd-324a77210306/userFiles-06a45e04-ec37-4cbb-9466-6c28f09f937d/mysql-connector-j-8.0.33.jar to class loader default
-	25/07/29 04:03:32 INFO Utils: Successfully started service 'org.apache.spark.network.netty.NettyBlockTransferService' on port 30085.
-	25/07/29 04:03:32 INFO NettyBlockTransferService: Server created on ip-172-31-9-77.ap-southeast-1.compute.internal:30085
-	25/07/29 04:03:32 INFO BlockManager: Using org.apache.spark.storage.RandomBlockReplicationPolicy for block replication policy
-	25/07/29 04:03:32 INFO BlockManager: external shuffle service port = 7337
-	25/07/29 04:03:32 INFO BlockManagerMaster: Registering BlockManager BlockManagerId(driver, ip-172-31-9-77.ap-southeast-1.compute.internal, 30085, None)
-	25/07/29 04:03:32 INFO BlockManagerMasterEndpoint: Registering block manager ip-172-31-9-77.ap-southeast-1.compute.internal:30085 with 127.2 MiB RAM, BlockManagerId(driver, ip-172-31-9-77.ap-southeast-1.compute.internal, 30085, None)
-	25/07/29 04:03:32 INFO BlockManagerMaster: Registered BlockManager BlockManagerId(driver, ip-172-31-9-77.ap-southeast-1.compute.internal, 30085, None)
-	25/07/29 04:03:32 INFO BlockManager: Initialized BlockManager: BlockManagerId(driver, ip-172-31-9-77.ap-southeast-1.compute.internal, 30085, None)
-[INFO] 2025-07-29 04:03:33.746 +0000 -  ->
-	25/07/29 04:03:33 INFO SingleEventLogFileWriter: Logging events to hdfs:/var/log/spark/apps/local-1753761812393.inprogress
+[INFO] 2025-07-29 08:13:08.540 +0000 -  ->
+	25/07/29 08:13:07 INFO EMRParamSideChannel: Setting FGAC mode to false
+	25/07/29 08:13:07 INFO SparkContext: Running Spark version 3.5.2-amzn-1
+	25/07/29 08:13:07 INFO SparkContext: OS info Linux, 6.8.0-1029-aws, amd64
+	25/07/29 08:13:07 INFO SparkContext: Java version 17.0.15
+	25/07/29 08:13:07 INFO ResourceUtils: ==============================================================
+	25/07/29 08:13:07 INFO ResourceUtils: No custom resources configured for spark.driver.
+	25/07/29 08:13:07 INFO ResourceUtils: ==============================================================
+	25/07/29 08:13:07 INFO SparkContext: Submitted application: TagComputeEngine
+	25/07/29 08:13:07 INFO ResourceProfile: Default ResourceProfile created, executor resources: Map(executorType -> name: executorType, amount: 1, script: , vendor: , cores -> name: cores, amount: 2, script: , vendor: , memory -> name: memory, amount: 2048, script: , vendor: , offHeap -> name: offHeap, amount: 0, script: , vendor: ), task resources: Map(cpus -> name: cpus, amount: 1.0)
+	25/07/29 08:13:07 INFO ResourceProfile: Limiting resource is cpus at 2 tasks per executor
+	25/07/29 08:13:07 INFO ResourceProfileManager: Added ResourceProfile id: 0
+	25/07/29 08:13:07 INFO ResourceProfile: User executor ResourceProfile created, executor resources: Map(executorType -> name: executorType, amount: 1, script: , vendor: , cores -> name: cores, amount: 2, script: , vendor: , memory -> name: memory, amount: 2048, script: , vendor: , offHeap -> name: offHeap, amount: 0, script: , vendor: ), task resources: Map(cpus -> name: cpus, amount: 1.0)
+	25/07/29 08:13:07 INFO ResourceProfile: Limiting resource is cpus at 2 tasks per executor
+	25/07/29 08:13:07 INFO ResourceProfileManager: Added ResourceProfile id: 1
+	25/07/29 08:13:07 INFO SecurityManager: Changing view acls to: root
+	25/07/29 08:13:07 INFO SecurityManager: Changing modify acls to: root
+	25/07/29 08:13:07 INFO SecurityManager: Changing view acls groups to:
+	25/07/29 08:13:07 INFO SecurityManager: Changing modify acls groups to:
+	25/07/29 08:13:07 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users with view permissions: root; groups with view permissions: EMPTY; users with modify permissions: root; groups with modify permissions: EMPTY
+	25/07/29 08:13:07 INFO Utils: Successfully started service 'sparkDriver' on port 17325.
+	25/07/29 08:13:07 INFO SparkEnv: Registering MapOutputTracker
+	25/07/29 08:13:07 INFO SparkEnv: Registering BlockManagerMaster
+	25/07/29 08:13:07 INFO BlockManagerMasterEndpoint: Using org.apache.spark.storage.DefaultTopologyMapper for getting topology information
+	25/07/29 08:13:07 INFO BlockManagerMasterEndpoint: BlockManagerMasterEndpoint up
+	25/07/29 08:13:07 INFO SparkEnv: Registering BlockManagerMasterHeartbeat
+	25/07/29 08:13:08 INFO DiskBlockManager: Created local directory at /tmp/blockmgr-9dcb296e-29ab-4643-a577-b67c02aeb80a
+	25/07/29 08:13:08 INFO MemoryStore: MemoryStore started with capacity 127.2 MiB
+	25/07/29 08:13:08 INFO SparkEnv: Registering OutputCommitCoordinator
+	25/07/29 08:13:08 INFO SubResultCacheManager: Sub-result caches are disabled.
+	25/07/29 08:13:08 INFO JettyUtils: Start Jetty 0.0.0.0:4040 for SparkUI
+	25/07/29 08:13:08 INFO Utils: Successfully started service 'SparkUI' on port 4040.
+	25/07/29 08:13:08 INFO SparkContext: Added JAR file:///dolphinscheduler/default/resources/mysql-connector-j-8.0.33.jar at spark://ip-172-31-9-77.ap-southeast-1.compute.internal:17325/jars/mysql-connector-j-8.0.33.jar with timestamp 1753776787707
+	25/07/29 08:13:08 INFO Executor: Starting executor ID driver on host ip-172-31-9-77.ap-southeast-1.compute.internal
+	25/07/29 08:13:08 INFO Executor: OS info Linux, 6.8.0-1029-aws, amd64
+	25/07/29 08:13:08 INFO Executor: Java version 17.0.15
+	25/07/29 08:13:08 INFO Executor: Starting executor with user classpath (userClassPathFirst = false): 'file:/usr/lib/hadoop-lzo/lib/*,file:/usr/lib/hadoop/hadoop-aws.jar,file:/usr/share/aws/aws-java-sdk/*,file:/usr/share/aws/aws-java-sdk-v2/*,file:/usr/share/aws/emr/goodies/lib/emr-spark-goodies.jar,file:/usr/share/aws/emr/security/conf,file:/usr/share/aws/emr/security/lib/*,file:/usr/share/aws/redshift/jdbc/*,file:/usr/share/aws/redshift/spark-redshift/lib/*,file:/usr/share/aws/kinesis/spark-sql-kinesis/lib/*,file:/usr/share/aws/hmclient/lib/aws-glue-datacatalog-spark-client.jar,file:/usr/share/java/Hive-JSON-Serde/hive-openx-serde.jar,file:/usr/share/aws/emr/s3select/lib/emr-s3-select-spark-connector.jar,file:/docker/usr/lib/hadoop-lzo/lib/*,file:/docker/usr/lib/hadoop/hadoop-aws.jar,file:/docker/usr/share/aws/aws-java-sdk/*,file:/docker/usr/share/aws/aws-java-sdk-v2/*,file:/docker/usr/share/aws/emr/goodies/lib/emr-spark-goodies.jar,file:/docker/usr/share/aws/emr/security/conf,file:/docker/usr/share/aws/emr/security/lib/*,file:/docker/usr/share/aws/redshift/jdbc/*,file:/docker/usr/share/aws/redshift/spark-redshift/lib/*,file:/docker/usr/share/aws/kinesis/spark-sql-kinesis/lib/*,file:/docker/usr/share/aws/hmclient/lib/aws-glue-datacatalog-spark-client.jar,file:/docker/usr/share/java/Hive-JSON-Serde/hive-openx-serde.jar,file:/docker/usr/share/aws/emr/s3select/lib/emr-s3-select-spark-connector.jar,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/895/3450/hive-openx-serde.jar,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/895/3450/conf,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/895/3450/emr-s3-select-spark-connector.jar,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/895/3450/hadoop-aws.jar,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/895/3450/emr-spark-goodies.jar,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/895/3450/*,file:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/895/3450/aws-glue-datacatalog-spark-client.jar'
+	25/07/29 08:13:08 INFO Executor: Created or updated repl class loader org.apache.spark.util.MutableURLClassLoader@16c8d191 for default.
+	25/07/29 08:13:08 INFO Executor: Fetching spark://ip-172-31-9-77.ap-southeast-1.compute.internal:17325/jars/mysql-connector-j-8.0.33.jar with timestamp 1753776787707
+	25/07/29 08:13:08 INFO TransportClientFactory: Successfully created connection to ip-172-31-9-77.ap-southeast-1.compute.internal/172.31.9.77:17325 after 15 ms (0 ms spent in bootstraps)
+	25/07/29 08:13:08 INFO Utils: Fetching spark://ip-172-31-9-77.ap-southeast-1.compute.internal:17325/jars/mysql-connector-j-8.0.33.jar to /tmp/spark-3efd13b3-6a87-453e-baa7-96e2e08e300a/userFiles-b5aacd2d-53f1-4df5-b1df-a84deea3ad16/fetchFileTemp12430588756481273844.tmp
+	25/07/29 08:13:08 INFO Executor: Adding file:/tmp/spark-3efd13b3-6a87-453e-baa7-96e2e08e300a/userFiles-b5aacd2d-53f1-4df5-b1df-a84deea3ad16/mysql-connector-j-8.0.33.jar to class loader default
+	25/07/29 08:13:08 INFO Utils: Successfully started service 'org.apache.spark.network.netty.NettyBlockTransferService' on port 4593.
+	25/07/29 08:13:08 INFO NettyBlockTransferService: Server created on ip-172-31-9-77.ap-southeast-1.compute.internal:4593
+	25/07/29 08:13:08 INFO BlockManager: Using org.apache.spark.storage.RandomBlockReplicationPolicy for block replication policy
+	25/07/29 08:13:08 INFO BlockManager: external shuffle service port = 7337
+	25/07/29 08:13:08 INFO BlockManagerMaster: Registering BlockManager BlockManagerId(driver, ip-172-31-9-77.ap-southeast-1.compute.internal, 4593, None)
+	25/07/29 08:13:08 INFO BlockManagerMasterEndpoint: Registering block manager ip-172-31-9-77.ap-southeast-1.compute.internal:4593 with 127.2 MiB RAM, BlockManagerId(driver, ip-172-31-9-77.ap-southeast-1.compute.internal, 4593, None)
+	25/07/29 08:13:08 INFO BlockManagerMaster: Registered BlockManager BlockManagerId(driver, ip-172-31-9-77.ap-southeast-1.compute.internal, 4593, None)
+	25/07/29 08:13:08 INFO BlockManager: Initialized BlockManager: BlockManagerId(driver, ip-172-31-9-77.ap-southeast-1.compute.internal, 4593, None)
+[INFO] 2025-07-29 08:13:10.541 +0000 -  ->
+	25/07/29 08:13:09 INFO SingleEventLogFileWriter: Logging events to hdfs:/var/log/spark/apps/local-1753776788214.inprogress
 	✅ Spark会话创建完成，版本: 3.5.2-amzn-1
 	MySQL配置: cex-mysql-test.c5mgk4qm8m2z.ap-southeast-1.rds.amazonaws.com:3358/biz_statistics
 	🗄️  HiveMeta初始化完成
@@ -239,7 +239,7 @@ ${SPARK_HOME}/bin/spark-submit --master local --conf spark.driver.cores=1 --conf
 	🚀 开始标签计算，模式: task-all
 	📋 加载标签规则...
 	📋 加载标签规则，指定标签: None
-[INFO] 2025-07-29 04:03:36.747 +0000 -  ->
+[INFO] 2025-07-29 08:13:13.541 +0000 -  ->
 	✅ 标签规则加载完成: 50 个标签
 	🎯 分析标签依赖关系...
 	🔍 分析标签规则依赖关系...
@@ -342,37 +342,66 @@ ${SPARK_HOME}/bin/spark-submit --master local --conf spark.driver.cores=1 --conf
 	   📋 该组标签规则数: 5
 	🔍 TagRuleParser初始化完成
 	🔍 分析字段依赖关系...
-[INFO] 2025-07-29 04:03:37.748 +0000 -  ->
 	✅ 字段依赖分析完成: 1 个表
 	   📊 tag_system.user_asset_summary: ['debt_amount', 'total_asset_value', 'cash_balance', 'user_id']
 	📖 加载Hive表: tag_system.user_asset_summary
-	25/07/29 04:03:37 WARN HiveConf: HiveConf of name hive.server2.thrift.url does not exist
+	25/07/29 08:13:13 WARN HiveConf: HiveConf of name hive.server2.thrift.url does not exist
+[INFO] 2025-07-29 08:13:14.542 +0000 -  ->
 	✅ 表 tag_system.user_asset_summary 加载完成，字段: {'debt_amount', 'total_asset_value', 'cash_balance', 'user_id'}
-[INFO] 2025-07-29 04:03:38.748 +0000 -  ->
+[INFO] 2025-07-29 08:13:15.543 +0000 -  ->
 	   🔗 JOIN完成，用户数: 1000
 	   🎯 并行计算 5 个标签...
 	      🏷️  计算标签 1...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 1: 1000 个用户
+	         🔍 标签 1 SQL条件: (`tag_system.user_asset_summary`.`total_asset_value` = 100000)
+	         ❌ 标签 1 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_asset_summary`.`total_asset_value` cannot be resolved. Did you mean one of the following? [`user_asset_summary`.`total_asset_value`, `user_asset_summary`.`cash_balance`, `user_asset_summary`.`user_id`, `user_asset_summary`.`debt_amount`].; line 1 pos 1;
+	'Filter ('`tag_system.user_asset_summary`.total_asset_value = 100000)
+	+- Project [debt_amount#42, total_asset_value#40, cash_balance#41, user_id#39]
+	   +- SubqueryAlias spark_catalog.tag_system.user_asset_summary
+	      +- Relation spark_catalog.tag_system.user_asset_summary[user_id#39,total_asset_value#40,cash_balance#41,debt_amount#42,dt#43] parquet
+
 	      🏷️  计算标签 2...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 2: 1000 个用户
+	         🔍 标签 2 SQL条件: (`tag_system.user_asset_summary`.`total_asset_value` != 0)
+	         ❌ 标签 2 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_asset_summary`.`total_asset_value` cannot be resolved. Did you mean one of the following? [`user_asset_summary`.`total_asset_value`, `user_asset_summary`.`cash_balance`, `user_asset_summary`.`user_id`, `user_asset_summary`.`debt_amount`].; line 1 pos 1;
+	'Filter NOT ('`tag_system.user_asset_summary`.total_asset_value = 0)
+	+- Project [debt_amount#42, total_asset_value#40, cash_balance#41, user_id#39]
+	   +- SubqueryAlias spark_catalog.tag_system.user_asset_summary
+	      +- Relation spark_catalog.tag_system.user_asset_summary[user_id#39,total_asset_value#40,cash_balance#41,debt_amount#42,dt#43] parquet
+
 	      🏷️  计算标签 5...
 	🔍 TagRuleParser初始化完成
-[INFO] 2025-07-29 04:03:39.748 +0000 -  ->
-	         ✅ 标签 5: 1000 个用户
+	         🔍 标签 5 SQL条件: (`tag_system.user_asset_summary`.`cash_balance` >= 50000)
+	         ❌ 标签 5 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_asset_summary`.`cash_balance` cannot be resolved. Did you mean one of the following? [`user_asset_summary`.`cash_balance`, `user_asset_summary`.`debt_amount`, `user_asset_summary`.`user_id`, `user_asset_summary`.`total_asset_value`].; line 1 pos 1;
+	'Filter ('`tag_system.user_asset_summary`.cash_balance >= 50000)
+	+- Project [debt_amount#42, total_asset_value#40, cash_balance#41, user_id#39]
+	   +- SubqueryAlias spark_catalog.tag_system.user_asset_summary
+	      +- Relation spark_catalog.tag_system.user_asset_summary[user_id#39,total_asset_value#40,cash_balance#41,debt_amount#42,dt#43] parquet
+
 	      🏷️  计算标签 9...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 9: 1000 个用户
+	         🔍 标签 9 SQL条件: (`tag_system.user_asset_summary`.`debt_amount` IS NULL)
+	         ❌ 标签 9 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_asset_summary`.`debt_amount` cannot be resolved. Did you mean one of the following? [`user_asset_summary`.`debt_amount`, `user_asset_summary`.`user_id`, `user_asset_summary`.`cash_balance`, `user_asset_summary`.`total_asset_value`].; line 1 pos 1;
+	'Filter isnull('`tag_system.user_asset_summary`.debt_amount)
+	+- Project [debt_amount#42, total_asset_value#40, cash_balance#41, user_id#39]
+	   +- SubqueryAlias spark_catalog.tag_system.user_asset_summary
+	      +- Relation spark_catalog.tag_system.user_asset_summary[user_id#39,total_asset_value#40,cash_balance#41,debt_amount#42,dt#43] parquet
+
 	      🏷️  计算标签 10...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 10: 1000 个用户
+	         🔍 标签 10 SQL条件: (`tag_system.user_asset_summary`.`total_asset_value` IS NOT NULL)
+	         ❌ 标签 10 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_asset_summary`.`total_asset_value` cannot be resolved. Did you mean one of the following? [`user_asset_summary`.`total_asset_value`, `user_asset_summary`.`cash_balance`, `user_asset_summary`.`user_id`, `user_asset_summary`.`debt_amount`].; line 1 pos 1;
+	'Filter isnotnull('`tag_system.user_asset_summary`.total_asset_value)
+	+- Project [debt_amount#42, total_asset_value#40, cash_balance#41, user_id#39]
+	   +- SubqueryAlias spark_catalog.tag_system.user_asset_summary
+	      +- Relation spark_catalog.tag_system.user_asset_summary[user_id#39,total_asset_value#40,cash_balance#41,debt_amount#42,dt#43] parquet
+
 	   🔀 聚合用户标签...
-	   ✅ 用户标签聚合完成: 1000 个用户
-[INFO] 2025-07-29 04:03:40.749 +0000 -  ->
-	✅ 标签组计算完成: 1000 个用户
+	   ✅ 用户标签聚合完成: 0 个用户
+	✅ 标签组计算完成: 0 个用户
 	   📦 计算标签组 2/10: Group_6tags_1tables
 	🚀 开始计算标签组: Group_6tags_1tables
+[INFO] 2025-07-29 08:13:16.544 +0000 -  ->
 	   📋 该组标签规则数: 6
 	🔍 TagRuleParser初始化完成
 	🔍 分析字段依赖关系...
@@ -384,26 +413,61 @@ ${SPARK_HOME}/bin/spark-submit --master local --conf spark.driver.cores=1 --conf
 	   🎯 并行计算 6 个标签...
 	      🏷️  计算标签 3...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 3: 1000 个用户
+	         🔍 标签 3 SQL条件: (`tag_system.user_activity_summary`.`trade_count_30d` > 10)
+	         ❌ 标签 3 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_activity_summary`.`trade_count_30d` cannot be resolved. Did you mean one of the following? [`user_activity_summary`.`trade_count_30d`, `user_activity_summary`.`last_login_date`, `user_activity_summary`.`user_id`, `user_activity_summary`.`last_trade_date`].; line 1 pos 1;
+	'Filter ('`tag_system.user_activity_summary`.trade_count_30d > 10)
+	+- Project [user_id#689, last_login_date#691, trade_count_30d#690, last_trade_date#692]
+	   +- SubqueryAlias spark_catalog.tag_system.user_activity_summary
+	      +- Relation spark_catalog.tag_system.user_activity_summary[user_id#689,trade_count_30d#690,last_login_date#691,last_trade_date#692,dt#693] parquet
+
 	      🏷️  计算标签 4...
 	🔍 TagRuleParser初始化完成
-[INFO] 2025-07-29 04:03:41.749 +0000 -  ->
-	         ✅ 标签 4: 1000 个用户
+	         🔍 标签 4 SQL条件: (`tag_system.user_activity_summary`.`trade_count_30d` < 5)
+	         ❌ 标签 4 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_activity_summary`.`trade_count_30d` cannot be resolved. Did you mean one of the following? [`user_activity_summary`.`trade_count_30d`, `user_activity_summary`.`last_login_date`, `user_activity_summary`.`user_id`, `user_activity_summary`.`last_trade_date`].; line 1 pos 1;
+	'Filter ('`tag_system.user_activity_summary`.trade_count_30d < 5)
+	+- Project [user_id#689, last_login_date#691, trade_count_30d#690, last_trade_date#692]
+	   +- SubqueryAlias spark_catalog.tag_system.user_activity_summary
+	      +- Relation spark_catalog.tag_system.user_activity_summary[user_id#689,trade_count_30d#690,last_login_date#691,last_trade_date#692,dt#693] parquet
+
 	      🏷️  计算标签 20...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 20: 1000 个用户
+	         🔍 标签 20 SQL条件: (`tag_system.user_activity_summary`.`last_login_date` != '2025-01-01')
+	         ❌ 标签 20 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_activity_summary`.`last_login_date` cannot be resolved. Did you mean one of the following? [`user_activity_summary`.`last_login_date`, `user_activity_summary`.`last_trade_date`, `user_activity_summary`.`user_id`, `user_activity_summary`.`trade_count_30d`].; line 1 pos 1;
+	'Filter NOT ('`tag_system.user_activity_summary`.last_login_date = 2025-01-01)
+	+- Project [user_id#689, last_login_date#691, trade_count_30d#690, last_trade_date#692]
+	   +- SubqueryAlias spark_catalog.tag_system.user_activity_summary
+	      +- Relation spark_catalog.tag_system.user_activity_summary[user_id#689,trade_count_30d#690,last_login_date#691,last_trade_date#692,dt#693] parquet
+
 	      🏷️  计算标签 21...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 21: 1000 个用户
+	         🔍 标签 21 SQL条件: (`tag_system.user_activity_summary`.`last_login_date` > '2025-01-01')
+	         ❌ 标签 21 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_activity_summary`.`last_login_date` cannot be resolved. Did you mean one of the following? [`user_activity_summary`.`last_login_date`, `user_activity_summary`.`last_trade_date`, `user_activity_summary`.`user_id`, `user_activity_summary`.`trade_count_30d`].; line 1 pos 1;
+	'Filter ('`tag_system.user_activity_summary`.last_login_date > 2025-01-01)
+	+- Project [user_id#689, last_login_date#691, trade_count_30d#690, last_trade_date#692]
+	   +- SubqueryAlias spark_catalog.tag_system.user_activity_summary
+	      +- Relation spark_catalog.tag_system.user_activity_summary[user_id#689,trade_count_30d#690,last_login_date#691,last_trade_date#692,dt#693] parquet
+
 	      🏷️  计算标签 24...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 24: 1000 个用户
+	         🔍 标签 24 SQL条件: (`tag_system.user_activity_summary`.`last_login_date` NOT BETWEEN '2023-01-01' AND '2023-12-31')
+	         ❌ 标签 24 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_activity_summary`.`last_login_date` cannot be resolved. Did you mean one of the following? [`user_activity_summary`.`last_login_date`, `user_activity_summary`.`last_trade_date`, `user_activity_summary`.`user_id`, `user_activity_summary`.`trade_count_30d`].; line 1 pos 1;
+	'Filter NOT (('`tag_system.user_activity_summary`.last_login_date >= 2023-01-01) AND ('`tag_system.user_activity_summary`.last_login_date <= 2023-12-31))
+	+- Project [user_id#689, last_login_date#691, trade_count_30d#690, last_trade_date#692]
+	   +- SubqueryAlias spark_catalog.tag_system.user_activity_summary
+	      +- Relation spark_catalog.tag_system.user_activity_summary[user_id#689,trade_count_30d#690,last_login_date#691,last_trade_date#692,dt#693] parquet
+
 	      🏷️  计算标签 25...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 25: 1000 个用户
+	         🔍 标签 25 SQL条件: (`tag_system.user_activity_summary`.`last_trade_date` IS NULL)
+	         ❌ 标签 25 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_activity_summary`.`last_trade_date` cannot be resolved. Did you mean one of the following? [`user_activity_summary`.`last_trade_date`, `user_activity_summary`.`last_login_date`, `user_activity_summary`.`user_id`, `user_activity_summary`.`trade_count_30d`].; line 1 pos 1;
+	'Filter isnull('`tag_system.user_activity_summary`.last_trade_date)
+	+- Project [user_id#689, last_login_date#691, trade_count_30d#690, last_trade_date#692]
+	   +- SubqueryAlias spark_catalog.tag_system.user_activity_summary
+	      +- Relation spark_catalog.tag_system.user_activity_summary[user_id#689,trade_count_30d#690,last_login_date#691,last_trade_date#692,dt#693] parquet
+
 	   🔀 聚合用户标签...
-	   ✅ 用户标签聚合完成: 1000 个用户
-	✅ 标签组计算完成: 1000 个用户
+	   ✅ 用户标签聚合完成: 0 个用户
+	✅ 标签组计算完成: 0 个用户
 	   📦 计算标签组 3/10: Group_1tags_1tables
 	🚀 开始计算标签组: Group_1tags_1tables
 	   📋 该组标签规则数: 1
@@ -412,16 +476,22 @@ ${SPARK_HOME}/bin/spark-submit --master local --conf spark.driver.cores=1 --conf
 	✅ 字段依赖分析完成: 1 个表
 	   📊 tag_system.user_risk_profile: ['risk_score', 'user_id']
 	📖 加载Hive表: tag_system.user_risk_profile
-[INFO] 2025-07-29 04:03:42.749 +0000 -  ->
+[INFO] 2025-07-29 08:13:17.544 +0000 -  ->
 	✅ 表 tag_system.user_risk_profile 加载完成，字段: {'risk_score', 'user_id'}
 	   🔗 JOIN完成，用户数: 1000
 	   🎯 并行计算 1 个标签...
 	      🏷️  计算标签 6...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 6: 1000 个用户
+	         🔍 标签 6 SQL条件: (`tag_system.user_risk_profile`.`risk_score` <= 30)
+	         ❌ 标签 6 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_risk_profile`.`risk_score` cannot be resolved. Did you mean one of the following? [`user_risk_profile`.`risk_score`, `user_risk_profile`.`user_id`].; line 1 pos 1;
+	'Filter ('`tag_system.user_risk_profile`.risk_score <= 30)
+	+- Project [risk_score#1432, user_id#1431]
+	   +- SubqueryAlias spark_catalog.tag_system.user_risk_profile
+	      +- Relation spark_catalog.tag_system.user_risk_profile[user_id#1431,risk_score#1432,dt#1433] parquet
+
 	   🔀 聚合用户标签...
-	   ✅ 用户标签聚合完成: 1000 个用户
-	✅ 标签组计算完成: 1000 个用户
+	   ✅ 用户标签聚合完成: 0 个用户
+	✅ 标签组计算完成: 0 个用户
 	   📦 计算标签组 4/10: Group_24tags_1tables
 	🚀 开始计算标签组: Group_24tags_1tables
 	   📋 该组标签规则数: 24
@@ -431,86 +501,228 @@ ${SPARK_HOME}/bin/spark-submit --master local --conf spark.driver.cores=1 --conf
 	   📊 tag_system.user_basic_info: ['birthday', 'kyc_status', 'secondary_status', 'primary_status', 'first_name', 'middle_name', 'registration_date', 'is_banned', 'account_status', 'age', 'is_vip', 'user_id', 'user_level', 'phone_number', 'email']
 	📖 加载Hive表: tag_system.user_basic_info
 	✅ 表 tag_system.user_basic_info 加载完成，字段: {'birthday', 'kyc_status', 'secondary_status', 'primary_status', 'first_name', 'middle_name', 'registration_date', 'is_banned', 'account_status', 'age', 'is_vip', 'user_id', 'user_level', 'phone_number', 'email'}
-[INFO] 2025-07-29 04:03:43.750 +0000 -  ->
+[INFO] 2025-07-29 08:13:18.545 +0000 -  ->
 	   🔗 JOIN完成，用户数: 1000
 	   🎯 并行计算 24 个标签...
 	      🏷️  计算标签 7...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 7: 1000 个用户
+	         🔍 标签 7 SQL条件: (`tag_system.user_basic_info`.`age` BETWEEN 18 AND 65)
+	         ❌ 标签 7 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`age` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`age`, `user_basic_info`.`email`, `user_basic_info`.`is_vip`, `user_basic_info`.`user_id`, `user_basic_info`.`birthday`].; line 1 pos 1;
+	'Filter (('`tag_system.user_basic_info`.age >= 18) AND ('`tag_system.user_basic_info`.age <= 65))
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	      🏷️  计算标签 8...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 8: 1000 个用户
+	         🔍 标签 8 SQL条件: (`tag_system.user_basic_info`.`age` NOT BETWEEN 0 AND 17)
+	         ❌ 标签 8 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`age` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`age`, `user_basic_info`.`email`, `user_basic_info`.`is_vip`, `user_basic_info`.`user_id`, `user_basic_info`.`birthday`].; line 1 pos 1;
+	'Filter NOT (('`tag_system.user_basic_info`.age >= 0) AND ('`tag_system.user_basic_info`.age <= 17))
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	      🏷️  计算标签 11...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 11: 1000 个用户
+	         🔍 标签 11 SQL条件: (`tag_system.user_basic_info`.`user_level` = 'VIP3')
+	         ❌ 标签 11 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`user_level` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`user_level`, `user_basic_info`.`user_id`, `user_basic_info`.`age`, `user_basic_info`.`birthday`, `user_basic_info`.`email`].; line 1 pos 1;
+	'Filter ('`tag_system.user_basic_info`.user_level = VIP3)
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	      🏷️  计算标签 12...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 12: 1000 个用户
+	         🔍 标签 12 SQL条件: (`tag_system.user_basic_info`.`user_level` != 'VIP1')
+	         ❌ 标签 12 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`user_level` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`user_level`, `user_basic_info`.`user_id`, `user_basic_info`.`age`, `user_basic_info`.`birthday`, `user_basic_info`.`email`].; line 1 pos 1;
+	'Filter NOT ('`tag_system.user_basic_info`.user_level = VIP1)
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	      🏷️  计算标签 13...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 13: 1000 个用户
+	         🔍 标签 13 SQL条件: (`tag_system.user_basic_info`.`phone_number` LIKE '%138%')
+	         ❌ 标签 13 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`phone_number` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`phone_number`, `user_basic_info`.`first_name`, `user_basic_info`.`middle_name`, `user_basic_info`.`age`, `user_basic_info`.`email`].; line 1 pos 1;
+	'Filter '`tag_system.user_basic_info`.phone_number LIKE %138%
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	      🏷️  计算标签 14...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 14: 1000 个用户
+	         🔍 标签 14 SQL条件: (`tag_system.user_basic_info`.`email` NOT LIKE '%temp%')
+	         ❌ 标签 14 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`email` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`email`, `user_basic_info`.`age`, `user_basic_info`.`is_vip`, `user_basic_info`.`user_id`, `user_basic_info`.`birthday`].; line 1 pos 1;
+	'Filter NOT '`tag_system.user_basic_info`.email LIKE %temp%
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	      🏷️  计算标签 15...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 15: 1000 个用户
+	         🔍 标签 15 SQL条件: (`tag_system.user_basic_info`.`phone_number` LIKE '+86%')
+	         ❌ 标签 15 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`phone_number` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`phone_number`, `user_basic_info`.`first_name`, `user_basic_info`.`middle_name`, `user_basic_info`.`age`, `user_basic_info`.`email`].; line 1 pos 1;
+	'Filter '`tag_system.user_basic_info`.phone_number LIKE +86%
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	      🏷️  计算标签 16...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 16: 1000 个用户
+	         🔍 标签 16 SQL条件: (`tag_system.user_basic_info`.`email` LIKE '%gmail.com')
+	         ❌ 标签 16 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`email` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`email`, `user_basic_info`.`age`, `user_basic_info`.`is_vip`, `user_basic_info`.`user_id`, `user_basic_info`.`birthday`].; line 1 pos 1;
+	'Filter '`tag_system.user_basic_info`.email LIKE %gmail.com
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	      🏷️  计算标签 17...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 17: 1000 个用户
+	         🔍 标签 17 SQL条件: (`tag_system.user_basic_info`.`middle_name` IS NULL)
+	         ❌ 标签 17 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`middle_name` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`middle_name`, `user_basic_info`.`first_name`, `user_basic_info`.`is_banned`, `user_basic_info`.`is_vip`, `user_basic_info`.`phone_number`].; line 1 pos 1;
+	'Filter isnull('`tag_system.user_basic_info`.middle_name)
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	      🏷️  计算标签 18...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 18: 1000 个用户
+	         🔍 标签 18 SQL条件: (`tag_system.user_basic_info`.`first_name` IS NOT NULL)
+	         ❌ 标签 18 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`first_name` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`first_name`, `user_basic_info`.`birthday`, `user_basic_info`.`is_vip`, `user_basic_info`.`middle_name`, `user_basic_info`.`is_banned`].; line 1 pos 1;
+	'Filter isnotnull('`tag_system.user_basic_info`.first_name)
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	      🏷️  计算标签 19...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 19: 1000 个用户
+	         🔍 标签 19 SQL条件: (`tag_system.user_basic_info`.`registration_date` = '2025-01-01')
+	         ❌ 标签 19 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`registration_date` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`registration_date`, `user_basic_info`.`birthday`, `user_basic_info`.`first_name`, `user_basic_info`.`is_banned`, `user_basic_info`.`user_id`].; line 1 pos 1;
+	'Filter ('`tag_system.user_basic_info`.registration_date = 2025-01-01)
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	      🏷️  计算标签 22...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 22: 1000 个用户
+	         🔍 标签 22 SQL条件: (`tag_system.user_basic_info`.`registration_date` < '2024-12-31')
+	         ❌ 标签 22 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`registration_date` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`registration_date`, `user_basic_info`.`birthday`, `user_basic_info`.`first_name`, `user_basic_info`.`is_banned`, `user_basic_info`.`user_id`].; line 1 pos 1;
+	'Filter ('`tag_system.user_basic_info`.registration_date < 2024-12-31)
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	      🏷️  计算标签 23...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 23: 1000 个用户
+	         🔍 标签 23 SQL条件: (`tag_system.user_basic_info`.`registration_date` BETWEEN '2024-01-01' AND '2024-12-31')
+	         ❌ 标签 23 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`registration_date` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`registration_date`, `user_basic_info`.`birthday`, `user_basic_info`.`first_name`, `user_basic_info`.`is_banned`, `user_basic_info`.`user_id`].; line 1 pos 1;
+	'Filter (('`tag_system.user_basic_info`.registration_date >= 2024-01-01) AND ('`tag_system.user_basic_info`.registration_date <= 2024-12-31))
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	      🏷️  计算标签 26...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 26: 1000 个用户
+	         🔍 标签 26 SQL条件: (`tag_system.user_basic_info`.`birthday` IS NOT NULL)
+	         ❌ 标签 26 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`birthday` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`birthday`, `user_basic_info`.`is_vip`, `user_basic_info`.`age`, `user_basic_info`.`email`, `user_basic_info`.`first_name`].; line 1 pos 1;
+	'Filter isnotnull('`tag_system.user_basic_info`.birthday)
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	      🏷️  计算标签 27...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 27: 1000 个用户
+	         🔍 标签 27 SQL条件: (`tag_system.user_basic_info`.`is_vip` = TRUE)
+	         ❌ 标签 27 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`is_vip` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`is_vip`, `user_basic_info`.`age`, `user_basic_info`.`email`, `user_basic_info`.`user_id`, `user_basic_info`.`is_banned`].; line 1 pos 1;
+	'Filter ('`tag_system.user_basic_info`.is_vip = true)
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	      🏷️  计算标签 28...
 	🔍 TagRuleParser初始化完成
-[INFO] 2025-07-29 04:03:44.751 +0000 -  ->
-	         ✅ 标签 28: 1000 个用户
+	         🔍 标签 28 SQL条件: (`tag_system.user_basic_info`.`is_banned` = FALSE)
+	         ❌ 标签 28 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`is_banned` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`is_banned`, `user_basic_info`.`age`, `user_basic_info`.`is_vip`, `user_basic_info`.`email`, `user_basic_info`.`first_name`].; line 1 pos 1;
+	'Filter ('`tag_system.user_basic_info`.is_banned = false)
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	      🏷️  计算标签 29...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 29: 1000 个用户
+	         🔍 标签 29 SQL条件: (`tag_system.user_basic_info`.`kyc_status` = 'verified')
+	         ❌ 标签 29 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`kyc_status` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`kyc_status`, `user_basic_info`.`account_status`, `user_basic_info`.`age`, `user_basic_info`.`email`, `user_basic_info`.`first_name`].; line 1 pos 1;
+	'Filter ('`tag_system.user_basic_info`.kyc_status = verified)
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	      🏷️  计算标签 30...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 30: 1000 个用户
+	         🔍 标签 30 SQL条件: (`tag_system.user_basic_info`.`account_status` != 'suspended')
+	         ❌ 标签 30 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`account_status` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`account_status`, `user_basic_info`.`kyc_status`, `user_basic_info`.`primary_status`, `user_basic_info`.`secondary_status`, `user_basic_info`.`first_name`].; line 1 pos 1;
+	'Filter NOT ('`tag_system.user_basic_info`.account_status = suspended)
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	      🏷️  计算标签 31...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 31: 1000 个用户
+	         🔍 标签 31 SQL条件: (`tag_system.user_basic_info`.`user_level` IN ('VIP1','VIP2','VIP3'))
+	         ❌ 标签 31 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`user_level` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`user_level`, `user_basic_info`.`user_id`, `user_basic_info`.`age`, `user_basic_info`.`birthday`, `user_basic_info`.`email`].; line 1 pos 1;
+	'Filter '`tag_system.user_basic_info`.user_level IN (VIP1,VIP2,VIP3)
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	      🏷️  计算标签 32...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 32: 1000 个用户
+	         🔍 标签 32 SQL条件: (`tag_system.user_basic_info`.`account_status` NOT IN ('suspended','banned'))
+	         ❌ 标签 32 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`account_status` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`account_status`, `user_basic_info`.`kyc_status`, `user_basic_info`.`primary_status`, `user_basic_info`.`secondary_status`, `user_basic_info`.`first_name`].; line 1 pos 1;
+	'Filter NOT '`tag_system.user_basic_info`.account_status IN (suspended,banned)
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	      🏷️  计算标签 33...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 33: 1000 个用户
+	         🔍 标签 33 SQL条件: (`tag_system.user_basic_info`.`secondary_status` IS NULL)
+	         ❌ 标签 33 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`secondary_status` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`secondary_status`, `user_basic_info`.`primary_status`, `user_basic_info`.`account_status`, `user_basic_info`.`kyc_status`, `user_basic_info`.`middle_name`].; line 1 pos 1;
+	'Filter isnull('`tag_system.user_basic_info`.secondary_status)
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	      🏷️  计算标签 34...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 34: 1000 个用户
+	         🔍 标签 34 SQL条件: (`tag_system.user_basic_info`.`primary_status` IS NOT NULL)
+	         ❌ 标签 34 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`primary_status` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`primary_status`, `user_basic_info`.`kyc_status`, `user_basic_info`.`secondary_status`, `user_basic_info`.`account_status`, `user_basic_info`.`birthday`].; line 1 pos 1;
+	'Filter isnotnull('`tag_system.user_basic_info`.primary_status)
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	      🏷️  计算标签 42...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 42: 1000 个用户
+	         🔍 标签 42 SQL条件: (`tag_system.user_basic_info`.`user_level` = 'VIP1')
+	         ❌ 标签 42 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`user_level` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`user_level`, `user_basic_info`.`user_id`, `user_basic_info`.`age`, `user_basic_info`.`birthday`, `user_basic_info`.`email`].; line 1 pos 1;
+	'Filter ('`tag_system.user_basic_info`.user_level = VIP1)
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	      🏷️  计算标签 47...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 47: 1000 个用户
+	         🔍 标签 47 SQL条件: (`tag_system.user_basic_info`.`email` LIKE '%gmail.com' OR `tag_system.user_basic_info`.`email` LIKE '%yahoo.com') AND (`tag_system.user_basic_info`.`phone_number` LIKE '+86%')
+	         ❌ 标签 47 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_basic_info`.`email` cannot be resolved. Did you mean one of the following? [`user_basic_info`.`email`, `user_basic_info`.`age`, `user_basic_info`.`is_vip`, `user_basic_info`.`user_id`, `user_basic_info`.`birthday`].; line 1 pos 1;
+	'Filter (('`tag_system.user_basic_info`.email LIKE %gmail.com OR '`tag_system.user_basic_info`.email LIKE %yahoo.com) AND '`tag_system.user_basic_info`.phone_number LIKE +86%)
+	+- Project [birthday#1599, kyc_status#1607, secondary_status#1610, primary_status#1609, first_name#1600, middle_name#1602, registration_date#1598, is_banned#1606, account_status#1608, age#1596, is_vip#1605, user_id#1595, user_level#1597, phone_number#1603, email#1604]
+	   +- SubqueryAlias spark_catalog.tag_system.user_basic_info
+	      +- Relation spark_catalog.tag_system.user_basic_info[user_id#1595,age#1596,user_level#1597,registration_date#1598,birthday#1599,first_name#1600,last_name#1601,middle_name#1602,phone_number#1603,email#1604,is_vip#1605,is_banned#1606,kyc_status#1607,account_status#1608,primary_status#1609,secondary_status#1610,dt#1611] parquet
+
 	   🔀 聚合用户标签...
-[INFO] 2025-07-29 04:03:45.751 +0000 -  ->
-	   ✅ 用户标签聚合完成: 1000 个用户
-	✅ 标签组计算完成: 1000 个用户
+	   ✅ 用户标签聚合完成: 0 个用户
+	✅ 标签组计算完成: 0 个用户
 	   📦 计算标签组 5/10: Group_7tags_1tables
 	🚀 开始计算标签组: Group_7tags_1tables
 	   📋 该组标签规则数: 7
@@ -520,33 +732,75 @@ ${SPARK_HOME}/bin/spark-submit --master local --conf spark.driver.cores=1 --conf
 	   📊 tag_system.user_preferences: ['active_products', 'required_services', 'interested_products', 'user_id', 'blacklisted_products', 'expired_products', 'owned_products', 'optional_services']
 	📖 加载Hive表: tag_system.user_preferences
 	✅ 表 tag_system.user_preferences 加载完成，字段: {'active_products', 'required_services', 'interested_products', 'user_id', 'blacklisted_products', 'expired_products', 'owned_products', 'optional_services'}
-[INFO] 2025-07-29 04:03:46.751 +0000 -  ->
+[INFO] 2025-07-29 08:13:19.549 +0000 -  ->
 	   🔗 JOIN完成，用户数: 1000
 	   🎯 并行计算 7 个标签...
 	      🏷️  计算标签 35...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 35: 1000 个用户
+	         🔍 标签 35 SQL条件: ((array_contains(`tag_system.user_preferences`.`interested_products`, 'stocks') OR array_contains(`tag_system.user_preferences`.`interested_products`, 'bonds')))
+	         ❌ 标签 35 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_preferences`.`interested_products` cannot be resolved. Did you mean one of the following? [`user_preferences`.`interested_products`, `user_preferences`.`expired_products`, `user_preferences`.`blacklisted_products`, `user_preferences`.`owned_products`, `user_preferences`.`active_products`].; line 1 pos 17;
+	'Filter ('array_contains('`tag_system.user_preferences`.interested_products, stocks) OR 'array_contains('`tag_system.user_preferences`.interested_products, bonds))
+	+- Project [active_products#9984, required_services#9987, interested_products#9981, user_id#9980, blacklisted_products#9983, expired_products#9985, owned_products#9982, optional_services#9986]
+	   +- SubqueryAlias spark_catalog.tag_system.user_preferences
+	      +- Relation spark_catalog.tag_system.user_preferences[user_id#9980,interested_products#9981,owned_products#9982,blacklisted_products#9983,active_products#9984,expired_products#9985,optional_services#9986,required_services#9987,dt#9988] parquet
+
 	      🏷️  计算标签 36...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 36: 1000 个用户
+	         🔍 标签 36 SQL条件: ((array_contains(`tag_system.user_preferences`.`owned_products`, 'savings') AND array_contains(`tag_system.user_preferences`.`owned_products`, 'checking')))
+	         ❌ 标签 36 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_preferences`.`owned_products` cannot be resolved. Did you mean one of the following? [`user_preferences`.`owned_products`, `user_preferences`.`expired_products`, `user_preferences`.`active_products`, `user_preferences`.`interested_products`, `user_preferences`.`blacklisted_products`].; line 1 pos 17;
+	'Filter ('array_contains('`tag_system.user_preferences`.owned_products, savings) AND 'array_contains('`tag_system.user_preferences`.owned_products, checking))
+	+- Project [active_products#9984, required_services#9987, interested_products#9981, user_id#9980, blacklisted_products#9983, expired_products#9985, owned_products#9982, optional_services#9986]
+	   +- SubqueryAlias spark_catalog.tag_system.user_preferences
+	      +- Relation spark_catalog.tag_system.user_preferences[user_id#9980,interested_products#9981,owned_products#9982,blacklisted_products#9983,active_products#9984,expired_products#9985,optional_services#9986,required_services#9987,dt#9988] parquet
+
 	      🏷️  计算标签 37...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 37: 1000 个用户
+	         🔍 标签 37 SQL条件: ((NOT array_contains(`tag_system.user_preferences`.`blacklisted_products`, 'forex')))
+	         ❌ 标签 37 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_preferences`.`blacklisted_products` cannot be resolved. Did you mean one of the following? [`user_preferences`.`blacklisted_products`, `user_preferences`.`active_products`, `user_preferences`.`interested_products`, `user_preferences`.`expired_products`, `user_preferences`.`owned_products`].; line 1 pos 21;
+	'Filter NOT 'array_contains('`tag_system.user_preferences`.blacklisted_products, forex)
+	+- Project [active_products#9984, required_services#9987, interested_products#9981, user_id#9980, blacklisted_products#9983, expired_products#9985, owned_products#9982, optional_services#9986]
+	   +- SubqueryAlias spark_catalog.tag_system.user_preferences
+	      +- Relation spark_catalog.tag_system.user_preferences[user_id#9980,interested_products#9981,owned_products#9982,blacklisted_products#9983,active_products#9984,expired_products#9985,optional_services#9986,required_services#9987,dt#9988] parquet
+
 	      🏷️  计算标签 38...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 38: 1000 个用户
+	         🔍 标签 38 SQL条件: ((array_contains(`tag_system.user_preferences`.`active_products`, 'premium') OR array_contains(`tag_system.user_preferences`.`active_products`, 'gold')))
+	         ❌ 标签 38 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_preferences`.`active_products` cannot be resolved. Did you mean one of the following? [`user_preferences`.`active_products`, `user_preferences`.`expired_products`, `user_preferences`.`owned_products`, `user_preferences`.`blacklisted_products`, `user_preferences`.`interested_products`].; line 1 pos 17;
+	'Filter ('array_contains('`tag_system.user_preferences`.active_products, premium) OR 'array_contains('`tag_system.user_preferences`.active_products, gold))
+	+- Project [active_products#9984, required_services#9987, interested_products#9981, user_id#9980, blacklisted_products#9983, expired_products#9985, owned_products#9982, optional_services#9986]
+	   +- SubqueryAlias spark_catalog.tag_system.user_preferences
+	      +- Relation spark_catalog.tag_system.user_preferences[user_id#9980,interested_products#9981,owned_products#9982,blacklisted_products#9983,active_products#9984,expired_products#9985,optional_services#9986,required_services#9987,dt#9988] parquet
+
 	      🏷️  计算标签 39...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 39: 1000 个用户
+	         🔍 标签 39 SQL条件: ((NOT array_contains(`tag_system.user_preferences`.`expired_products`, 'premium') AND NOT array_contains(`tag_system.user_preferences`.`expired_products`, 'platinum')))
+	         ❌ 标签 39 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_preferences`.`expired_products` cannot be resolved. Did you mean one of the following? [`user_preferences`.`expired_products`, `user_preferences`.`owned_products`, `user_preferences`.`active_products`, `user_preferences`.`interested_products`, `user_preferences`.`blacklisted_products`].; line 1 pos 21;
+	'Filter (NOT 'array_contains('`tag_system.user_preferences`.expired_products, premium) AND NOT 'array_contains('`tag_system.user_preferences`.expired_products, platinum))
+	+- Project [active_products#9984, required_services#9987, interested_products#9981, user_id#9980, blacklisted_products#9983, expired_products#9985, owned_products#9982, optional_services#9986]
+	   +- SubqueryAlias spark_catalog.tag_system.user_preferences
+	      +- Relation spark_catalog.tag_system.user_preferences[user_id#9980,interested_products#9981,owned_products#9982,blacklisted_products#9983,active_products#9984,expired_products#9985,optional_services#9986,required_services#9987,dt#9988] parquet
+
 	      🏷️  计算标签 40...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 40: 1000 个用户
+	         🔍 标签 40 SQL条件: (`tag_system.user_preferences`.`optional_services` IS NULL)
+	         ❌ 标签 40 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_preferences`.`optional_services` cannot be resolved. Did you mean one of the following? [`user_preferences`.`optional_services`, `user_preferences`.`required_services`, `user_preferences`.`user_id`, `user_preferences`.`active_products`, `user_preferences`.`owned_products`].; line 1 pos 1;
+	'Filter isnull('`tag_system.user_preferences`.optional_services)
+	+- Project [active_products#9984, required_services#9987, interested_products#9981, user_id#9980, blacklisted_products#9983, expired_products#9985, owned_products#9982, optional_services#9986]
+	   +- SubqueryAlias spark_catalog.tag_system.user_preferences
+	      +- Relation spark_catalog.tag_system.user_preferences[user_id#9980,interested_products#9981,owned_products#9982,blacklisted_products#9983,active_products#9984,expired_products#9985,optional_services#9986,required_services#9987,dt#9988] parquet
+
 	      🏷️  计算标签 41...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 41: 1000 个用户
+	         🔍 标签 41 SQL条件: (`tag_system.user_preferences`.`required_services` IS NOT NULL)
+	         ❌ 标签 41 计算失败: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column or function parameter with name `tag_system.user_preferences`.`required_services` cannot be resolved. Did you mean one of the following? [`user_preferences`.`required_services`, `user_preferences`.`optional_services`, `user_preferences`.`expired_products`, `user_preferences`.`user_id`, `user_preferences`.`active_products`].; line 1 pos 1;
+	'Filter isnotnull('`tag_system.user_preferences`.required_services)
+	+- Project [active_products#9984, required_services#9987, interested_products#9981, user_id#9980, blacklisted_products#9983, expired_products#9985, owned_products#9982, optional_services#9986]
+	   +- SubqueryAlias spark_catalog.tag_system.user_preferences
+	      +- Relation spark_catalog.tag_system.user_preferences[user_id#9980,interested_products#9981,owned_products#9982,blacklisted_products#9983,active_products#9984,expired_products#9985,optional_services#9986,required_services#9987,dt#9988] parquet
+
 	   🔀 聚合用户标签...
-	   ✅ 用户标签聚合完成: 1000 个用户
-	✅ 标签组计算完成: 1000 个用户
+	   ✅ 用户标签聚合完成: 0 个用户
+	✅ 标签组计算完成: 0 个用户
 	   📦 计算标签组 6/10: Group_2tags_2tables
 	🚀 开始计算标签组: Group_2tags_2tables
 	   📋 该组标签规则数: 2
@@ -557,7 +811,6 @@ ${SPARK_HOME}/bin/spark-submit --master local --conf spark.driver.cores=1 --conf
 	   📊 tag_system.user_activity_summary: ['last_login_date', 'trade_count_30d', 'user_id']
 	🔗 开始JOIN表: ['tag_system.user_activity_summary', 'tag_system.user_asset_summary']
 	📖 加载Hive表: tag_system.user_activity_summary
-[INFO] 2025-07-29 04:03:47.752 +0000 -  ->
 	✅ 表 tag_system.user_activity_summary 加载完成，字段: {'last_login_date', 'trade_count_30d', 'user_id'}
 	📖 加载Hive表: tag_system.user_asset_summary
 	✅ 表 tag_system.user_asset_summary 加载完成，字段: {'total_asset_value', 'cash_balance', 'user_id'}
@@ -565,18 +818,21 @@ ${SPARK_HOME}/bin/spark-submit --master local --conf spark.driver.cores=1 --conf
 	   📋 基础表: tag_system.user_activity_summary
 	   🔗 LEFT JOIN: tag_system.user_asset_summary
 	✅ JOIN完成，涉及 2 个表
+[INFO] 2025-07-29 08:13:20.550 +0000 -  ->
 	   🔗 JOIN完成，用户数: 1000
 	   🎯 并行计算 2 个标签...
 	      🏷️  计算标签 43...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 43: 1000 个用户
+	         🔍 标签 43 SQL条件: (`tag_system.user_asset_summary`.`total_asset_value` < 1000 AND `tag_system.user_activity_summary`.`trade_count_30d` = 0)
+	         ✅ 标签 43: 31 个用户
 	      🏷️  计算标签 45...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 45: 1000 个用户
+	         🔍 标签 45 SQL条件: (`tag_system.user_activity_summary`.`last_login_date` BETWEEN '2025-01-01' AND '2025-07-26' AND `tag_system.user_activity_summary`.`trade_count_30d` > 5) OR (`tag_system.user_asset_summary`.`cash_balance` >= 50000)
+	         ✅ 标签 45: 657 个用户
 	   🔀 聚合用户标签...
-[INFO] 2025-07-29 04:03:48.752 +0000 -  ->
-	   ✅ 用户标签聚合完成: 1000 个用户
-	✅ 标签组计算完成: 1000 个用户
+[INFO] 2025-07-29 08:13:21.551 +0000 -  ->
+	   ✅ 用户标签聚合完成: 671 个用户
+	✅ 标签组计算完成: 671 个用户
 	   📦 计算标签组 7/10: Group_1tags_2tables
 	🚀 开始计算标签组: Group_1tags_2tables
 	   📋 该组标签规则数: 1
@@ -594,20 +850,22 @@ ${SPARK_HOME}/bin/spark-submit --master local --conf spark.driver.cores=1 --conf
 	   📋 基础表: tag_system.user_asset_summary
 	   🔗 LEFT JOIN: tag_system.user_basic_info
 	✅ JOIN完成，涉及 2 个表
-[INFO] 2025-07-29 04:03:49.753 +0000 -  ->
+[INFO] 2025-07-29 08:13:22.551 +0000 -  ->
 	   🔗 JOIN完成，用户数: 1000
 	   🎯 并行计算 1 个标签...
 	      🏷️  计算标签 44...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 44: 1000 个用户
+	         🔍 标签 44 SQL条件: (`tag_system.user_basic_info`.`user_level` IN ('VIP2','VIP3') OR `tag_system.user_asset_summary`.`total_asset_value` >= 100000) AND (`tag_system.user_basic_info`.`kyc_status` = 'verified' AND `tag_system.user_basic_info`.`is_banned` = FALSE)
+	         ✅ 标签 44: 183 个用户
 	   🔀 聚合用户标签...
-	   ✅ 用户标签聚合完成: 1000 个用户
-	✅ 标签组计算完成: 1000 个用户
+	   ✅ 用户标签聚合完成: 183 个用户
+	✅ 标签组计算完成: 183 个用户
 	   📦 计算标签组 8/10: Group_1tags_2tables
 	🚀 开始计算标签组: Group_1tags_2tables
 	   📋 该组标签规则数: 1
 	🔍 TagRuleParser初始化完成
 	🔍 分析字段依赖关系...
+[INFO] 2025-07-29 08:13:23.551 +0000 -  ->
 	✅ 字段依赖分析完成: 2 个表
 	   📊 tag_system.user_basic_info: ['account_status', 'user_id']
 	   📊 tag_system.user_activity_summary: ['last_login_date', 'user_id']
@@ -624,11 +882,12 @@ ${SPARK_HOME}/bin/spark-submit --master local --conf spark.driver.cores=1 --conf
 	   🎯 并行计算 1 个标签...
 	      🏷️  计算标签 46...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 46: 1000 个用户
+	         🔍 标签 46 SQL条件: (`tag_system.user_basic_info`.`account_status` IN ('suspended','banned') OR `tag_system.user_activity_summary`.`last_login_date` NOT BETWEEN '2024-01-01' AND '2025-07-26')
+	         ✅ 标签 46: 517 个用户
 	   🔀 聚合用户标签...
-[INFO] 2025-07-29 04:03:50.753 +0000 -  ->
-	   ✅ 用户标签聚合完成: 1000 个用户
-	✅ 标签组计算完成: 1000 个用户
+	   ✅ 用户标签聚合完成: 517 个用户
+[INFO] 2025-07-29 08:13:24.552 +0000 -  ->
+	✅ 标签组计算完成: 517 个用户
 	   📦 计算标签组 9/10: Group_1tags_3tables
 	🚀 开始计算标签组: Group_1tags_3tables
 	   📋 该组标签规则数: 1
@@ -652,13 +911,14 @@ ${SPARK_HOME}/bin/spark-submit --master local --conf spark.driver.cores=1 --conf
 	   🎯 并行计算 1 个标签...
 	      🏷️  计算标签 48...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 48: 1000 个用户
+	         🔍 标签 48 SQL条件: (`tag_system.user_basic_info`.`age` BETWEEN 25 AND 45 AND `tag_system.user_asset_summary`.`total_asset_value` NOT BETWEEN 0 AND 1000) AND (`tag_system.user_basic_info`.`user_level` IN ('VIP3','VIP4','VIP5') OR (array_contains(`tag_system.user_preferences`.`owned_products`, 'premium') OR array_contains(`tag_system.user_preferences`.`owned_products`, 'platinum')))
+[INFO] 2025-07-29 08:13:25.552 +0000 -  ->
+	         ✅ 标签 48: 143 个用户
 	   🔀 聚合用户标签...
-	   ✅ 用户标签聚合完成: 1000 个用户
-	✅ 标签组计算完成: 1000 个用户
+	   ✅ 用户标签聚合完成: 143 个用户
+	✅ 标签组计算完成: 143 个用户
 	   📦 计算标签组 10/10: Group_2tags_2tables
 	🚀 开始计算标签组: Group_2tags_2tables
-[INFO] 2025-07-29 04:03:51.753 +0000 -  ->
 	   📋 该组标签规则数: 2
 	🔍 TagRuleParser初始化完成
 	🔍 分析字段依赖关系...
@@ -674,34 +934,35 @@ ${SPARK_HOME}/bin/spark-submit --master local --conf spark.driver.cores=1 --conf
 	   📋 基础表: tag_system.user_basic_info
 	   🔗 LEFT JOIN: tag_system.user_preferences
 	✅ JOIN完成，涉及 2 个表
+[INFO] 2025-07-29 08:13:26.554 +0000 -  ->
 	   🔗 JOIN完成，用户数: 1000
 	   🎯 并行计算 2 个标签...
 	      🏷️  计算标签 49...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 49: 1000 个用户
+	         🔍 标签 49 SQL条件: ((array_contains(`tag_system.user_preferences`.`interested_products`, 'high_risk') AND array_contains(`tag_system.user_preferences`.`interested_products`, 'speculative')) AND `tag_system.user_basic_info`.`is_vip` = FALSE)
+	         ✅ 标签 49: 0 个用户
 	      🏷️  计算标签 50...
 	🔍 TagRuleParser初始化完成
-	         ✅ 标签 50: 1000 个用户
+	         🔍 标签 50 SQL条件: (`tag_system.user_basic_info`.`first_name` IS NOT NULL AND `tag_system.user_basic_info`.`last_name` IS NOT NULL AND `tag_system.user_basic_info`.`birthday` IS NOT NULL) AND (`tag_system.user_basic_info`.`middle_name` IS NULL OR `tag_system.user_preferences`.`optional_services` IS NULL)
+	         ✅ 标签 50: 386 个用户
 	   🔀 聚合用户标签...
-	   ✅ 用户标签聚合完成: 1000 个用户
-[INFO] 2025-07-29 04:03:52.756 +0000 -  ->
-	✅ 标签组计算完成: 1000 个用户
+	   ✅ 用户标签聚合完成: 386 个用户
+	✅ 标签组计算完成: 386 个用户
 	✅ 所有标签组计算完成，成功: 10 个
 	🔀 合并所有标签组结果...
-[INFO] 2025-07-29 04:03:55.757 +0000 -  ->
-	   ✅ 标签结果合并完成: 1000 个用户
+[INFO] 2025-07-29 08:13:28.555 +0000 -  ->
+	   ✅ 标签结果合并完成: 941 个用户
 	💾 与现有标签合并并保存...
 	📖 加载现有用户标签数据...
-	✅ 现有标签数据加载完成: 0 个用户
+	✅ 现有标签数据加载完成: 1000 个用户
 	💾 开始写入标签结果到MySQL...
-[INFO] 2025-07-29 04:03:58.757 +0000 -  ->
-	📤 准备写入 1000 条标签记录...
-[INFO] 2025-07-29 04:03:59.758 +0000 -  ->
-	✅ 标签结果写入成功: 1000 条记录
-[INFO] 2025-07-29 04:04:01.758 +0000 -  ->
-	   ✅ 标签结果保存成功: 1000 个用户
+[INFO] 2025-07-29 08:13:30.555 +0000 -  ->
+	📤 准备写入 941 条标签记录...
+	✅ 标签结果写入成功: 941 条记录
+[INFO] 2025-07-29 08:13:31.556 +0000 -  ->
+	   ✅ 标签结果保存成功: 941 个用户
 	✅ 标签计算完成
-	❌ 获取标签统计失败: [NOT_COLUMN_OR_STR] Argument `col` should be a Column or str, got Decimal.
+	❌ 获取标签统计失败: [NOT_COLUMN_OR_STR] Argument `col` should be a Column or str, got float.
 
 	============================================================
 	✅ 任务执行成功
@@ -709,17 +970,18 @@ ${SPARK_HOME}/bin/spark-submit --master local --conf spark.driver.cores=1 --conf
 	🧹 HiveMeta缓存已清理
 	🧹 TagEngine资源清理完成
 	🧹 关闭Spark会话...
+[INFO] 2025-07-29 08:13:32.556 +0000 -  ->
 	👋 程序退出
 	🧹 HiveMeta缓存已清理
 	🧹 TagEngine资源清理完成
-[INFO] 2025-07-29 04:04:02.758 +0000 - process has exited. execute path:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447, processId:755295 ,exitStatusCode:0 ,processWaitForStatus:true ,processExitValue:0
-[INFO] 2025-07-29 04:04:02.759 +0000 - Start finding appId in /usr/local/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250729/18466477060960/8/892/3447.log, fetch way: log
-[INFO] 2025-07-29 04:04:02.760 +0000 - ***********************************************************************************************
-[INFO] 2025-07-29 04:04:02.760 +0000 - *********************************  Finalize task instance  ************************************
-[INFO] 2025-07-29 04:04:02.760 +0000 - ***********************************************************************************************
-[INFO] 2025-07-29 04:04:02.760 +0000 - Upload output files: [] successfully
-[INFO] 2025-07-29 04:04:02.760 +0000 - Send task execute status: SUCCESS to master : 172.31.9.77:1234
-[INFO] 2025-07-29 04:04:02.760 +0000 - Remove the current task execute context from worker cache
-[INFO] 2025-07-29 04:04:02.760 +0000 - The current execute mode isn't develop mode, will clear the task execute file: /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447
-[INFO] 2025-07-29 04:04:02.761 +0000 - Success clear the task execute file: /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/892/3447
-[INFO] 2025-07-29 04:04:02.761 +0000 - FINALIZE_SESSION
+[INFO] 2025-07-29 08:13:32.557 +0000 - process has exited. execute path:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/895/3450, processId:759483 ,exitStatusCode:0 ,processWaitForStatus:true ,processExitValue:0
+[INFO] 2025-07-29 08:13:32.557 +0000 - Start finding appId in /usr/local/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250729/18466477060960/8/895/3450.log, fetch way: log
+[INFO] 2025-07-29 08:13:32.558 +0000 - ***********************************************************************************************
+[INFO] 2025-07-29 08:13:32.558 +0000 - *********************************  Finalize task instance  ************************************
+[INFO] 2025-07-29 08:13:32.558 +0000 - ***********************************************************************************************
+[INFO] 2025-07-29 08:13:32.558 +0000 - Upload output files: [] successfully
+[INFO] 2025-07-29 08:13:32.558 +0000 - Send task execute status: SUCCESS to master : 172.31.9.77:1234
+[INFO] 2025-07-29 08:13:32.559 +0000 - Remove the current task execute context from worker cache
+[INFO] 2025-07-29 08:13:32.559 +0000 - The current execute mode isn't develop mode, will clear the task execute file: /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/895/3450
+[INFO] 2025-07-29 08:13:32.560 +0000 - Success clear the task execute file: /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_8/895/3450
+[INFO] 2025-07-29 08:13:32.560 +0000 - FINALIZE_SESSION

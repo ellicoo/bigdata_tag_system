@@ -210,6 +210,11 @@ class MysqlMeta:
                     cursor.execute("SELECT SUM(JSON_LENGTH(tag_ids)) FROM user_tags WHERE tag_ids IS NOT NULL")
                     totalTagCount = cursor.fetchone()[0] or 0
                     
+                    # 确保所有数值都是Python原生int类型，避免Decimal和float问题
+                    activeTagCount = int(float(activeTagCount)) if activeTagCount is not None else 0
+                    taggedUserCount = int(float(taggedUserCount)) if taggedUserCount is not None else 0
+                    totalTagCount = int(float(totalTagCount)) if totalTagCount is not None else 0
+                    
                     return {
                         "activeTagCount": activeTagCount,
                         "taggedUserCount": taggedUserCount,

@@ -104,7 +104,10 @@ class TagGroup:
             # 使用TagRuleParser解析规则为SQL条件
             from ..parser.TagRuleParser import TagRuleParser
             parser = TagRuleParser()
-            sqlCondition = parser.parseRuleToSql(ruleConditions)
+            sqlCondition = parser.parseRuleToSql(ruleConditions, self.requiredTables)
+            
+            # 🔍 调试：显示生成的SQL条件
+            print(f"         🔍 标签 {tagId} SQL条件: {sqlCondition}")
             
             # 应用规则筛选用户
             try:
@@ -115,12 +118,14 @@ class TagGroup:
                                    .withColumn("tag_id", lit(tagId))
                 else:
                     # 空规则或无效规则返回空结果
+                    print(f"         ⚠️  标签 {tagId} 无有效规则条件")
                     tagDF = joinedDF.select("user_id") \
                                    .withColumn("tag_id", lit(tagId)) \
                                    .limit(0)
                 
                 tagResults.append(tagDF)
-                print(f"         ✅ 标签 {tagId}: {tagDF.count()} 个用户")
+                userCount = tagDF.count()
+                print(f"         ✅ 标签 {tagId}: {userCount} 个用户")
                 
             except Exception as e:
                 print(f"         ❌ 标签 {tagId} 计算失败: {e}")

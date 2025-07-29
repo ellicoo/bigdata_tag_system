@@ -124,11 +124,12 @@ class TagRuleParser:
         print(f"✅ 分组完成: {len(groups)} 个计算组")
         return groups
     
-    def parseRuleToSql(self, ruleJson: str) -> str:
+    def parseRuleToSql(self, ruleJson: str, requiredTables: List[str] = None) -> str:
         """将JSON规则解析为SQL WHERE条件
         
         Args:
             ruleJson: JSON格式的规则字符串
+            requiredTables: 标签组依赖的表列表，用于判断是否为单表场景
             
         Returns:
             str: SQL WHERE条件
@@ -138,7 +139,9 @@ class TagRuleParser:
         
         try:
             rule = json.loads(ruleJson)
-            return self._parseRuleToSqlLogic(rule)
+            # 判断是否为单表场景
+            isSingleTable = requiredTables is not None and len(requiredTables) == 1
+            return self._parseRuleToSqlLogic(rule, isSingleTable)
         except Exception as e:
             print(f"❌ 规则解析失败: {e}")
             return "1=0"
@@ -223,25 +226,44 @@ class TagRuleParser:
                             tableFields[tableName] = set()
                         tableFields[tableName].add(fieldName)
     
-    def _parseRuleToSqlLogic(self, rule: dict) -> str:
+    def _parseRuleToSqlLogic(self, rule: dict, isSingleTable: bool = False) -> str:
         """核心：将JSON规则解析为SQL逻辑"""
         logic = rule.get("logic", "AND")
         conditions = rule.get("conditions", [])
-        
-        if not conditions:
-            return "1=1"
+        fields = rule.get("fields", [])
         
         sqlParts = []
+        
+        # 处理直接的fields（当logic为None或其他情况）
+        if fields:
+            fieldSqls = []
+            for field in fields:
+                fieldSql = self._parseFieldToSql(field, isSingleTable)
+                fieldSqls.append(fieldSql)
+            
+            if fieldSqls:
+                if logic == "None" or logic is None:
+                    # 当logic为None时，字段之间用AND连接
+                    fieldsSql = ' AND '.join(fieldSqls)
+                elif logic == "OR":
+                    fieldsSql = ' OR '.join(fieldSqls)
+                else:  # AND
+                    fieldsSql = ' AND '.join(fieldSqls)
+                
+                sqlParts.append(fieldsSql)
+        
+        # 处理conditions数组
         for condition in conditions:
             if "condition" in condition:
                 # 嵌套条件
-                nestedSql = self._parseRuleToSqlLogic(condition["condition"])
-                sqlParts.append(f"({nestedSql})")
+                nestedSql = self._parseRuleToSqlLogic(condition["condition"], isSingleTable)
+                if nestedSql != "1=1":  # 只有非默认值才添加
+                    sqlParts.append(f"({nestedSql})")
             elif "fields" in condition:
                 # 字段条件
                 fieldSqls = []
                 for field in condition["fields"]:
-                    fieldSql = self._parseFieldToSql(field)
+                    fieldSql = self._parseFieldToSql(field, isSingleTable)
                     fieldSqls.append(fieldSql)
                 if fieldSqls:
                     sqlParts.append(f"({' AND '.join(fieldSqls)})")
@@ -249,10 +271,13 @@ class TagRuleParser:
         if not sqlParts:
             return "1=1"
         
-        connector = f" {logic} "
-        return connector.join(sqlParts)
+        if len(sqlParts) == 1:
+            return sqlParts[0]
+        else:
+            connector = f" {logic} " if logic not in ["None", None] else " AND "
+            return connector.join(sqlParts)
     
-    def _parseFieldToSql(self, field: dict) -> str:
+    def _parseFieldToSql(self, field: dict, isSingleTable: bool = False) -> str:
         """解析单个字段条件为SQL"""
         table = field.get("table", "")
         fieldName = field.get("field", "")
@@ -263,8 +288,18 @@ class TagRuleParser:
         if not fieldName:
             return "1=1"
         
-        # 构建完整字段名
-        fullField = f"`{table}`.`{fieldName}`" if table else f"`{fieldName}`"
+        # 构建完整字段名 - 根据单表/多表情况使用不同的命名策略
+        if table:
+            if isSingleTable:
+                # 单表情况：HiveMeta.py不使用alias，直接使用表名作为前缀
+                # 需要去掉tag_system前缀，只使用短表名
+                shortTableName = table.split(".")[-1] if "." in table else table
+                fullField = f"`{shortTableName}`.`{fieldName}`"
+            else:
+                # 多表JOIN情况：HiveMeta.py使用完整表名作为alias
+                fullField = f"`{table}`.`{fieldName}`"
+        else:
+            fullField = f"`{fieldName}`"
         
         # 根据操作符生成SQL
         if operator == "=":
@@ -282,7 +317,22 @@ class TagRuleParser:
         elif operator == "in_range":
             if isinstance(value, list) and len(value) == 2:
                 minVal, maxVal = value
-                return f"{fullField} BETWEEN {minVal} AND {maxVal}"
+                return f"{fullField} BETWEEN {self._formatValue(minVal, fieldType)} AND {self._formatValue(maxVal, fieldType)}"
+            return "1=1"
+        elif operator == "not_in_range":
+            if isinstance(value, list) and len(value) == 2:
+                minVal, maxVal = value
+                return f"{fullField} NOT BETWEEN {self._formatValue(minVal, fieldType)} AND {self._formatValue(maxVal, fieldType)}"
+            return "1=1"
+        elif operator == "date_in_range":
+            if isinstance(value, list) and len(value) == 2:
+                minVal, maxVal = value
+                return f"{fullField} BETWEEN {self._formatValue(minVal, fieldType)} AND {self._formatValue(maxVal, fieldType)}"
+            return "1=1"
+        elif operator == "date_not_in_range":
+            if isinstance(value, list) and len(value) == 2:
+                minVal, maxVal = value
+                return f"{fullField} NOT BETWEEN {self._formatValue(minVal, fieldType)} AND {self._formatValue(maxVal, fieldType)}"
             return "1=1"
         elif operator == "contains":
             return f"{fullField} LIKE '%{value}%'"
@@ -308,6 +358,52 @@ class TagRuleParser:
             return f"{fullField} = TRUE"
         elif operator == "is_false":
             return f"{fullField} = FALSE"
+        elif operator == "not_contains":
+            # 检查字段类型，如果是数组则使用array_contains，否则使用LIKE
+            if "array" in fieldType.lower() or "list" in fieldType.lower():
+                # 数组字段使用array_contains
+                if isinstance(value, list) and len(value) > 0:
+                    conditions = []
+                    for v in value:
+                        conditions.append(f"NOT array_contains({fullField}, {self._formatValue(v, 'string')})")
+                    return "(" + " AND ".join(conditions) + ")"
+                return f"NOT array_contains({fullField}, {self._formatValue(value, 'string')})"
+            else:
+                # 字符串字段使用LIKE
+                if isinstance(value, list) and len(value) > 0:
+                    conditions = []
+                    for v in value:
+                        conditions.append(f"{fullField} NOT LIKE '%{v}%'")
+                    return " AND ".join(conditions)
+                return f"{fullField} NOT LIKE '%{value}%'"
+        elif operator == "contains_any":
+            if isinstance(value, list) and len(value) > 0:
+                conditions = []
+                for v in value:
+                    conditions.append(f"array_contains({fullField}, {self._formatValue(v, fieldType)})")
+                return "(" + " OR ".join(conditions) + ")"
+            return "1=1"  
+        elif operator == "contains_all":
+            if isinstance(value, list) and len(value) > 0:
+                conditions = []
+                for v in value:
+                    conditions.append(f"array_contains({fullField}, {self._formatValue(v, fieldType)})")
+                return "(" + " AND ".join(conditions) + ")"
+            return "1=1"
+        elif operator == "intersects":
+            if isinstance(value, list) and len(value) > 0:
+                conditions = []
+                for v in value:
+                    conditions.append(f"array_contains({fullField}, {self._formatValue(v, fieldType)})")
+                return "(" + " OR ".join(conditions) + ")"
+            return "1=1"
+        elif operator == "no_intersection":
+            if isinstance(value, list) and len(value) > 0:
+                conditions = []
+                for v in value:
+                    conditions.append(f"NOT array_contains({fullField}, {self._formatValue(v, fieldType)})")
+                return "(" + " AND ".join(conditions) + ")"
+            return "1=1"
         else:
             return "1=1"
     
