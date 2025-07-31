@@ -6,7 +6,9 @@
 """
 
 from . import SparkUdfs
+from . import tagExpressionUtils
 
 __all__ = [
-    "SparkUdfs"
+    "SparkUdfs",
+    "tagExpressionUtils"
 ]

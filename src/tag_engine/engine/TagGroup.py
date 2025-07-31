@@ -8,6 +8,8 @@ from typing import List, Dict
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import *
 
+from ..parser.TagRuleParser import TagRuleParser
+
 
 class TagGroup:
     """标签计算组
@@ -72,8 +74,6 @@ class TagGroup:
     
     def _analyzeFieldDependencies(self, rulesDF: DataFrame) -> Dict[str, List[str]]:
         """分析该组标签的字段依赖关系"""
-        from ..parser.TagRuleParser import TagRuleParser
-        
         parser = TagRuleParser()
         fieldDependencies = parser.analyzeFieldDependencies(rulesDF)
         
@@ -87,7 +87,6 @@ class TagGroup:
         rules = groupRulesDF.select("tag_id", "rule_conditions").collect()
         
         # 解析所有规则为SQL条件
-        from ..parser.TagRuleParser import TagRuleParser
         parser = TagRuleParser()
         
         # 构建所有标签的并行计算表达式
@@ -114,25 +113,14 @@ class TagGroup:
         
         if not tag_conditions:
             print("         ⚠️  没有有效的标签规则")
-            return self._createEmptyResult(joinedDF.sql_ctx.sparkSession)
+            return self._createEmptyResult(joinedDF.sparkSession)
         
-        # 🚀 关键改进：使用Spark DataFrame原生并行处理 + 直接聚合
-        print(f"   ⚡ 使用Spark原生并行处理并聚合 {len(tag_conditions)} 个标签条件...")
+        # 🚀 关键改进：使用独立工具模块构建并行表达式
+        print(f"   ⚡ 使用并行表达式工具构建 {len(tag_conditions)} 个标签条件...")
         
-        # 构建tag_id数组表达式：根据条件判断用户是否匹配每个标签
-        tag_array_expressions = []
-        
-        for tag_info in tag_conditions:
-            tag_id = tag_info['tag_id']
-            condition = tag_info['condition']
-            
-            # 对每个标签：如果满足条件则包含tag_id，否则包含null
-            tag_expr = when(expr(condition), lit(tag_id)).otherwise(lit(None))
-            tag_array_expressions.append(tag_expr)
-        
-        # 🚀 关键优化：直接构建最终的tag_ids_array，无需中间步骤
-        # 使用array()函数将所有标签条件组合成一个数组，然后过滤掉null值并排序
-        combined_tags_expr = array_distinct(array_sort(array_remove(array(*tag_array_expressions), None)))
+        # 使用独立工具模块构建并行标签表达式
+        from ..utils.tagExpressionUtils import buildParallelTagExpression
+        combined_tags_expr = buildParallelTagExpression(tag_conditions)
         
         # 一次性为所有用户计算其匹配的标签数组，并过滤掉空数组用户
         userTagsDF = joinedDF.select("user_id") \
@@ -159,25 +147,6 @@ class TagGroup:
         
         return spark.createDataFrame([], schema)
     
-    def _createEmptyTagResult(self, baseDF: DataFrame) -> DataFrame:
-        """创建空的标签结果DataFrame"""
-        return baseDF.select("user_id") \
-                    .withColumn("tag_id", lit(0)) \
-                    .limit(0)
-    
-    def getGroupInfo(self) -> Dict[str, any]:
-        """获取标签组信息
-        
-        Returns:
-            Dict: 标签组信息
-        """
-        return {
-            "name": self.name,
-            "tagIds": self.tagIds,
-            "tagCount": len(self.tagIds),
-            "requiredTables": self.requiredTables,
-            "tableCount": len(self.requiredTables)
-        }
     
     def __str__(self) -> str:
         """字符串表示"""

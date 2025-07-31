@@ -45,7 +45,7 @@ class TagEngine:
         print("🚀 TagEngine初始化完成")
     
     def computeTags(self, mode: str = "full", tagIds: Optional[List[int]] = None) -> bool:
-        """执行标签计算 - 流水线架构
+        """执行标签计算 - 简化的主流程编排
         
         Args:
             mode: 计算模式（full/specific）
@@ -63,20 +63,18 @@ class TagEngine:
                 print("⚠️  没有找到活跃的标签规则")
                 return True
             
-            # 2. 分析依赖关系并智能分组
+            # 2. 智能分组（基于表依赖）
             tagGroups = self._analyzeAndGroupTags(rulesDF)
             if not tagGroups:
                 print("⚠️  没有找到可计算的标签组")
                 return True
             
-            # 🚀 关键改进：组间流水线处理，每组计算完立即写入MySQL并清理资源
-            success = self._computeAllTagGroupsPipeline(tagGroups, rulesDF)
+            # 3. 流水线处理所有标签组
+            success = self._processTagGroupsPipeline(tagGroups, rulesDF)
             
             if success:
-                print("✅ 标签计算完成（流水线模式）")
+                print("✅ 标签计算完成")
                 self._printStatistics()
-            else:
-                print("❌ 标签计算失败")
             
             return success
             
@@ -87,36 +85,26 @@ class TagEngine:
             return False
     
     def healthCheck(self) -> bool:
-        """健康检查
+        """系统健康检查 - 计算前的必要验证
         
         Returns:
             bool: 系统是否健康
         """
-        print("🔍 执行标签系统健康检查...")
+        print("🔍 执行系统健康检查...")
         
         try:
-            # 1. 测试MySQL连接
-            mysqlOk = self.mysqlMeta.testConnection()
+            checks = {
+                "MySQL连接": self.mysqlMeta.testConnection(),
+                "Hive访问": self._testHiveAccess(),
+                "UDF功能": self._testUdfFunctions(),
+                "标签规则": self._checkTagRules()
+            }
             
-            # 2. 测试Hive表访问（使用简单表测试）
-            hiveOk = self._testHiveAccess()
+            allOk = all(checks.values())
             
-            # 3. 测试UDF功能
-            udfOk = self._testUdfFunctions()
-            
-            # 4. 检查标签规则
-            rulesOk = self._checkTagRules()
-            
-            allOk = mysqlOk and hiveOk and udfOk and rulesOk
-            
-            if allOk:
-                print("✅ 系统健康检查通过")
-            else:
-                print("❌ 系统健康检查失败")
-                print(f"   MySQL: {'✅' if mysqlOk else '❌'}")
-                print(f"   Hive: {'✅' if hiveOk else '❌'}")
-                print(f"   UDF: {'✅' if udfOk else '❌'}")
-                print(f"   Rules: {'✅' if rulesOk else '❌'}")
+            print("📋 健康检查结果:")
+            for check, result in checks.items():
+                print(f"   {check}: {'✅' if result else '❌'}")
             
             return allOk
             
@@ -143,54 +131,42 @@ class TagEngine:
         
         return tagGroups
     
-    def _computeAllTagGroupsPipeline(self, tagGroups: List[TagGroup], rulesDF: DataFrame) -> bool:
-        """流水线处理所有标签组：每组计算完立即写入MySQL并清理资源"""
+    def _processTagGroupsPipeline(self, tagGroups: List[TagGroup], rulesDF: DataFrame) -> bool:
+        """简化的流水线处理：计算标签组并写入MySQL"""
         print(f"🚀 流水线处理 {len(tagGroups)} 个标签组...")
         
         successCount = 0
-        totalGroups = len(tagGroups)
         
         for i, group in enumerate(tagGroups):
-            print(f"\n📦 处理标签组 {i+1}/{totalGroups}: {group.name}")
+            print(f"\n📦 处理标签组 {i+1}/{len(tagGroups)}: {group.name}")
             
             try:
-                # 第1步：过滤该组相关的标签规则（每组只加载自己的规则）
+                # 过滤该组相关的标签规则
                 groupRulesDF = rulesDF.filter(col("tag_id").isin(group.tagIds))
-                print(f"   📋 该组标签规则数: {groupRulesDF.count()}")
                 
-                # 第2步：计算该组标签
-                print(f"   ⚡ 计算阶段：并行执行标签 {group.tagIds}")
+                # 计算该组标签
                 groupResult = group.computeTags(self.hiveMeta, groupRulesDF)
                 
                 if groupResult.count() == 0:
-                    print(f"   ⚠️  标签组 {group.name} 无匹配用户，跳过写入")
+                    print(f"   ⚠️  标签组 {group.name} 无匹配用户，跳过")
                     successCount += 1
                     continue
                 
-                # 第3步：立即与MySQL现有标签合并并写入
-                print(f"   💾 写入阶段：立即写入MySQL")
-                writeSuccess = self._mergeWithExistingAndSaveGroup(groupResult, group.name)
-                
-                if writeSuccess:
+                # 合并并写入MySQL
+                if self._mergeAndSaveGroup(groupResult, group.name):
                     print(f"   ✅ 标签组 {group.name} 处理完成")
                     successCount += 1
-                else:
-                    print(f"   ❌ 标签组 {group.name} 写入失败")
                 
-                # 第4步：清理该组相关缓存（释放内存）
-                print(f"   🧹 清理阶段：释放{group.name}相关缓存")
-                self._clearGroupCache(group.requiredTables)
+                # 清理缓存
+                self.hiveMeta.clearGroupCache(group.requiredTables)
                 
             except Exception as e:
                 print(f"   ❌ 标签组 {group.name} 处理失败: {e}")
-                import traceback
-                traceback.print_exc()
         
-        print(f"\n✅ 流水线处理完成: {successCount}/{totalGroups} 个组成功")
-        return successCount == totalGroups
+        return successCount == len(tagGroups)
     
-    def _mergeWithExistingAndSaveGroup(self, groupResult: DataFrame, groupName: str) -> bool:
-        """为单个标签组与MySQL现有标签合并并保存"""
+    def _mergeAndSaveGroup(self, groupResult: DataFrame, groupName: str) -> bool:
+        """合并标签并保存到MySQL"""
         try:
             # 加载现有标签
             existingTagsDF = self.mysqlMeta.loadExistingTags()
@@ -203,6 +179,7 @@ class TagEngine:
             )
             
             # 使用SparkUdfs模块合并标签
+            from ..utils.SparkUdfs import array_to_json
             finalDF = joinedDF.withColumn(
                 "final_tag_ids",
                 merge_with_existing_tags(
@@ -211,7 +188,7 @@ class TagEngine:
                 )
             ).withColumn(
                 "final_tag_ids_json",
-                to_json(col("final_tag_ids"))
+                array_to_json(col("final_tag_ids"))
             ).select(
                 col("new.user_id").alias("user_id"),
                 col("final_tag_ids_json")
@@ -222,21 +199,14 @@ class TagEngine:
             
             if success:
                 userCount = finalDF.count()
-                print(f"   ✅ {groupName} 标签结果保存成功: {userCount} 个用户")
+                print(f"   ✅ {groupName}: {userCount} 个用户")
             
             return success
             
         except Exception as e:
-            print(f"   ❌ {groupName} 标签合并保存失败: {e}")
+            print(f"   ❌ {groupName} 保存失败: {e}")
             return False
     
-    def _clearGroupCache(self, groupTables: List[str]):
-        """清理特定标签组的缓存"""
-        try:
-            self.hiveMeta.clearGroupCache(groupTables)
-            print(f"   🧹 已清理表缓存: {groupTables}")
-        except Exception as e:
-            print(f"   ⚠️  缓存清理异常: {e}")
     
     def _testHiveAccess(self) -> bool:
         """测试Hive表访问"""
@@ -301,27 +271,6 @@ class TagEngine:
         except:
             print("   ⚠️  无法获取统计信息")
     
-    def _createEmptyGroupResult(self) -> DataFrame:
-        """创建空的标签组结果"""
-        from pyspark.sql.types import StructType, StructField, StringType, ArrayType, IntegerType
-        
-        schema = StructType([
-            StructField("user_id", StringType(), False),
-            StructField("tag_ids_array", ArrayType(IntegerType()), True)
-        ])
-        
-        return self.spark.createDataFrame([], schema)
-    
-    def _createEmptyUserTagsResult(self) -> DataFrame:
-        """创建空的用户标签结果"""
-        from pyspark.sql.types import StructType, StructField, StringType, ArrayType, IntegerType
-        
-        schema = StructType([
-            StructField("user_id", StringType(), False),
-            StructField("merged_tag_ids", ArrayType(IntegerType()), True)
-        ])
-        
-        return self.spark.createDataFrame([], schema)
     
     def cleanup(self):
         """清理资源"""
@@ -330,7 +279,3 @@ class TagEngine:
             print("🧹 TagEngine资源清理完成")
         except Exception as e:
             print(f"⚠️  资源清理异常: {e}")
-    
-    def __del__(self):
-        """析构函数"""
-        self.cleanup()

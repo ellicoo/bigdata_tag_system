@@ -95,16 +95,3 @@ def json_to_array(json_col):
     return coalesce(from_json(json_col, array_schema), array())
 
 
-def aggregate_user_tags(tag_results_df):
-    """聚合用户标签 - 常用组合操作
-    
-    Args:
-        tag_results_df: DataFrame with columns [user_id, tag_id]
-        
-    Returns:
-        DataFrame with columns [user_id, tag_ids_array]
-    """
-    return tag_results_df.groupBy("user_id").agg(
-        merge_user_tags(collect_list("tag_id")).alias("tag_ids_array")
-    )
-

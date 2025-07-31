@@ -75,22 +75,68 @@ python dolphin_deploy_package.py
 
 ## 核心功能
 
-### 1. 智能标签分组 (TagGroup.py)
+### 1. 智能标签分组与并行计算 (TagGroup.py)
 
 系统根据标签规则的表依赖关系进行智能分组，实现最优并行计算：
 
+#### **分组策略示例**
 ```python
-# 示例分组策略:
 # 组1: 标签[1,2,3] → 依赖表[user_basic_info, user_asset_summary]  
 # 组2: 标签[4,5] → 依赖表[user_activity_summary]
 # 组3: 标签[6] → 依赖表[user_basic_info, user_activity_summary]
-
-def computeTagGroup(self, tagGroup):
-    # 1. 获取组内所有标签依赖的表
-    # 2. 执行一次性JOIN操作
-    # 3. 并行计算组内所有标签
-    # 4. 返回用户标签结果
 ```
+
+#### **组内并行计算执行流程可视化**
+
+```
+第1步：JOIN后的用户数据 (组内共享)
+┌─────────┬─────┬────────┬─────────────┐
+│ user_id │ age │ assets │ trade_count │
+├─────────┼─────┼────────┼─────────────┤
+│ user001 │ 35  │ 15000  │ 8           │
+│ user002 │ 25  │ 5000   │ 2           │
+│ user003 │ 40  │ 8000   │ 12          │
+└─────────┴─────┴────────┴─────────────┘
+
+第2步：标签规则并行解析
+- 标签1: age >= 30      (高龄用户)
+- 标签2: assets >= 10000 (高净值用户) 
+- 标签3: trade_count > 5 (活跃交易用户)
+
+第3步：Spark原生函数并行计算 (关键优化)
+# 一次withColumn操作，所有标签条件并行评估：
+combined_tags_expr = array_distinct(array_sort(array_remove(
+    array(
+        when(expr("age >= 30"), lit(1)).otherwise(lit(None)),        # 标签1
+        when(expr("assets >= 10000"), lit(2)).otherwise(lit(None)),  # 标签2
+        when(expr("trade_count > 5"), lit(3)).otherwise(lit(None))   # 标签3
+    ), None
+)))
+
+第4步：每行并行计算结果
+user001: [when(35>=30,1)→1, when(15000>=10000,2)→2, when(8>5,3)→3] 
+         → array_remove([1,2,3], null) → [1,2,3]
+
+user002: [when(25>=30,1)→null, when(5000>=10000,2)→null, when(2>5,3)→null]
+         → array_remove([null,null,null], null) → [] (被过滤)
+
+user003: [when(40>=30,1)→1, when(8000>=10000,2)→null, when(12>5,3)→3]
+         → array_remove([1,null,3], null) → [1,3]
+
+第5步：最终聚合结果 (一步到位)
+┌─────────┬───────────────┐
+│ user_id │ tag_ids_array │
+├─────────┼───────────────┤
+│ user001 │ [1, 2, 3]     │  ← 匹配3个标签
+│ user003 │ [1, 3]        │  ← 匹配2个标签  
+└─────────┴───────────────┘
+```
+
+#### **性能优势**
+- ⚡ **真正并行**：所有标签条件在同一DataFrame操作中并行评估
+- 🔄 **一次扫描**：避免重复读取JOIN后的数据，显著提升I/O效率
+- 🎯 **直接聚合**：无需中间结果收集，一步生成用户标签数组
+- 🚀 **Spark原生优化**：充分利用Catalyst查询优化器和集群并行能力
 
 ### 2. PySpark DSL应用
 
