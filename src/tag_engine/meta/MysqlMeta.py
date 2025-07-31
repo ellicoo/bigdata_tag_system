@@ -9,6 +9,7 @@ from typing import List, Dict, Optional
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
+from ..utils.SparkUdfs import json_to_array
 
 
 class MysqlMeta:
@@ -105,13 +106,10 @@ class MysqlMeta:
                 .option("driver", "com.mysql.cj.jdbc.Driver") \
                 .load()
             
-            # 导入UDF
-            from ..utils.TagUdfs import tagUdfs
-            
-            # 将JSON字符串转换为数组
+            # 使用SparkUdfs模块转换JSON为Array
             existingDF = existingDF.withColumn(
                 "existing_tag_ids",
-                tagUdfs.jsonToArray(col("tag_ids"))
+                json_to_array(col("tag_ids"))
             ).select("user_id", "existing_tag_ids")
             
             print(f"✅ 现有标签数据加载完成: {existingDF.count()} 个用户")

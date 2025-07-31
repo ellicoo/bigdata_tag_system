@@ -12,7 +12,7 @@ from ..meta.HiveMeta import HiveMeta
 from ..meta.MysqlMeta import MysqlMeta
 from ..parser.TagRuleParser import TagRuleParser
 from .TagGroup import TagGroup
-from ..utils.TagUdfs import tagUdfs
+from ..utils.SparkUdfs import merge_with_existing_tags
 
 
 class TagEngine:
@@ -45,7 +45,7 @@ class TagEngine:
         print("🚀 TagEngine初始化完成")
     
     def computeTags(self, mode: str = "full", tagIds: Optional[List[int]] = None) -> bool:
-        """执行标签计算
+        """执行标签计算 - 流水线架构
         
         Args:
             mode: 计算模式（full/specific）
@@ -69,17 +69,11 @@ class TagEngine:
                 print("⚠️  没有找到可计算的标签组")
                 return True
             
-            # 3. 并行计算所有标签组
-            allResults = self._computeAllTagGroups(tagGroups, rulesDF)
-            
-            # 4. 合并标签结果
-            finalResults = self._mergeAllTagResults(allResults)
-            
-            # 5. 与MySQL现有标签合并并写入
-            success = self._mergeWithExistingAndSave(finalResults)
+            # 🚀 关键改进：组间流水线处理，每组计算完立即写入MySQL并清理资源
+            success = self._computeAllTagGroupsPipeline(tagGroups, rulesDF)
             
             if success:
-                print("✅ 标签计算完成")
+                print("✅ 标签计算完成（流水线模式）")
                 self._printStatistics()
             else:
                 print("❌ 标签计算失败")
@@ -149,89 +143,75 @@ class TagEngine:
         
         return tagGroups
     
-    def _computeAllTagGroups(self, tagGroups: List[TagGroup], rulesDF: DataFrame) -> List[DataFrame]:
-        """并行计算所有标签组"""
-        print(f"🚀 并行计算 {len(tagGroups)} 个标签组...")
+    def _computeAllTagGroupsPipeline(self, tagGroups: List[TagGroup], rulesDF: DataFrame) -> bool:
+        """流水线处理所有标签组：每组计算完立即写入MySQL并清理资源"""
+        print(f"🚀 流水线处理 {len(tagGroups)} 个标签组...")
         
-        allResults = []
+        successCount = 0
+        totalGroups = len(tagGroups)
         
         for i, group in enumerate(tagGroups):
-            print(f"   📦 计算标签组 {i+1}/{len(tagGroups)}: {group.name}")
+            print(f"\n📦 处理标签组 {i+1}/{totalGroups}: {group.name}")
             
             try:
-                groupResult = group.computeTags(self.hiveMeta, self.mysqlMeta, rulesDF)
-                allResults.append(groupResult)
+                # 第1步：过滤该组相关的标签规则（每组只加载自己的规则）
+                groupRulesDF = rulesDF.filter(col("tag_id").isin(group.tagIds))
+                print(f"   📋 该组标签规则数: {groupRulesDF.count()}")
+                
+                # 第2步：计算该组标签
+                print(f"   ⚡ 计算阶段：并行执行标签 {group.tagIds}")
+                groupResult = group.computeTags(self.hiveMeta, groupRulesDF)
+                
+                if groupResult.count() == 0:
+                    print(f"   ⚠️  标签组 {group.name} 无匹配用户，跳过写入")
+                    successCount += 1
+                    continue
+                
+                # 第3步：立即与MySQL现有标签合并并写入
+                print(f"   💾 写入阶段：立即写入MySQL")
+                writeSuccess = self._mergeWithExistingAndSaveGroup(groupResult, group.name)
+                
+                if writeSuccess:
+                    print(f"   ✅ 标签组 {group.name} 处理完成")
+                    successCount += 1
+                else:
+                    print(f"   ❌ 标签组 {group.name} 写入失败")
+                
+                # 第4步：清理该组相关缓存（释放内存）
+                print(f"   🧹 清理阶段：释放{group.name}相关缓存")
+                self._clearGroupCache(group.requiredTables)
                 
             except Exception as e:
-                print(f"   ❌ 标签组 {group.name} 计算失败: {e}")
-                # 添加空结果，避免影响其他组
-                emptyResult = self._createEmptyGroupResult()
-                allResults.append(emptyResult)
+                print(f"   ❌ 标签组 {group.name} 处理失败: {e}")
+                import traceback
+                traceback.print_exc()
         
-        print(f"✅ 所有标签组计算完成，成功: {len(allResults)} 个")
-        return allResults
+        print(f"\n✅ 流水线处理完成: {successCount}/{totalGroups} 个组成功")
+        return successCount == totalGroups
     
-    def _mergeAllTagResults(self, allResults: List[DataFrame]) -> DataFrame:
-        """合并所有标签组的结果"""
-        print("🔀 合并所有标签组结果...")
-        
-        if not allResults:
-            return self._createEmptyUserTagsResult()
-        
-        # 尝试合并，如果合并后为空再处理
-        try:
-            mergedDF = allResults[0]
-            for resultDF in allResults[1:]:
-                mergedDF = mergedDF.union(resultDF)
-            
-            # 只在最后检查一次
-            finalCount = mergedDF.count()
-            if finalCount == 0:
-                print("   ⚠️  所有标签组结果都为空")
-                return self._createEmptyUserTagsResult()
-                
-            # 按用户重新聚合所有标签
-            # 使用flatten将嵌套数组展平，然后去重排序
-            finalDF = mergedDF.groupBy("user_id").agg(
-                array_distinct(
-                    array_sort(
-                        flatten(collect_list("tag_ids_array"))
-                    )
-                ).alias("merged_tag_ids")
-            )
-            
-            print(f"   ✅ 标签结果合并完成: {finalDF.count()} 个用户")
-            return finalDF
-            
-        except Exception as e:
-            print(f"   ❌ 合并过程异常: {e}")
-            return self._createEmptyUserTagsResult()
-    
-    def _mergeWithExistingAndSave(self, newTagsDF: DataFrame) -> bool:
-        """与MySQL现有标签合并并保存"""
-        print("💾 与现有标签合并并保存...")
-        
+    def _mergeWithExistingAndSaveGroup(self, groupResult: DataFrame, groupName: str) -> bool:
+        """为单个标签组与MySQL现有标签合并并保存"""
         try:
             # 加载现有标签
             existingTagsDF = self.mysqlMeta.loadExistingTags()
             
             # LEFT JOIN 合并
-            joinedDF = newTagsDF.alias("new").join(
+            joinedDF = groupResult.alias("new").join(
                 existingTagsDF.alias("existing"),
                 col("new.user_id") == col("existing.user_id"),
                 "left"
             )
             
-            # 使用UDF合并标签
+            # 使用SparkUdfs模块合并标签
             finalDF = joinedDF.withColumn(
                 "final_tag_ids",
-                tagUdfs.mergeWithExistingTags(
-                    col("new.merged_tag_ids"),
+                merge_with_existing_tags(
+                    col("new.tag_ids_array"),
                     col("existing.existing_tag_ids")
                 )
             ).withColumn(
                 "final_tag_ids_json",
-                tagUdfs.arrayToJson(col("final_tag_ids"))
+                to_json(col("final_tag_ids"))
             ).select(
                 col("new.user_id").alias("user_id"),
                 col("final_tag_ids_json")
@@ -241,13 +221,22 @@ class TagEngine:
             success = self.mysqlMeta.writeTagResults(finalDF)
             
             if success:
-                print(f"   ✅ 标签结果保存成功: {finalDF.count()} 个用户")
+                userCount = finalDF.count()
+                print(f"   ✅ {groupName} 标签结果保存成功: {userCount} 个用户")
             
             return success
             
         except Exception as e:
-            print(f"   ❌ 标签合并保存失败: {e}")
+            print(f"   ❌ {groupName} 标签合并保存失败: {e}")
             return False
+    
+    def _clearGroupCache(self, groupTables: List[str]):
+        """清理特定标签组的缓存"""
+        try:
+            self.hiveMeta.clearGroupCache(groupTables)
+            print(f"   🧹 已清理表缓存: {groupTables}")
+        except Exception as e:
+            print(f"   ⚠️  缓存清理异常: {e}")
     
     def _testHiveAccess(self) -> bool:
         """测试Hive表访问"""
@@ -267,10 +256,11 @@ class TagEngine:
             testData = [("user1", [1, 2, 3]), ("user2", [2, 3, 4])]
             testDF = self.spark.createDataFrame(testData, ["user_id", "tags"])
             
-            # 测试UDF
+            # 测试SparkUdfs模块函数
+            from ..utils.SparkUdfs import merge_user_tags
             resultDF = testDF.withColumn(
                 "merged_tags",
-                tagUdfs.mergeUserTags(col("tags"))
+                merge_user_tags(col("tags"))
             )
             
             resultCount = resultDF.count()

@@ -32,7 +32,7 @@ src/tag_engine/
 ├── parser/                # 规则解析与SQL生成
 │   └── TagRuleParser.py   # JSON规则转SQL条件
 └── utils/                 # 用户自定义函数
-    └── TagUdfs.py         # PySpark UDF函数集合
+    └── SparkUdfs.py       # PySpark UDF函数集合（模块级函数）
 ```
 
 ## 快速开始
@@ -314,6 +314,169 @@ python src/tag_engine/main.py --mode health
 - 内存效率：智能缓存 + 分区优化，内存使用率 < 70%
 - 准确性：标签合并零丢失，支持幂等操作
 
+## 测试框架
+
+### 测试架构
+项目采用 **pytest + PySpark** 测试框架，提供完整的单元测试和集成测试能力。
+
+### 测试运行
+
+#### 1. 运行全部测试
+```bash
+# 运行所有测试（推荐）
+python -m pytest tests/ -v
+
+# 带覆盖率报告
+python -m pytest tests/ -v --cov=src/tag_engine --cov-report=html
+```
+
+#### 2. 运行特定模块测试
+```bash
+# 规则解析器测试
+python -m pytest tests/test_rule_parser.py -v
+
+# 标签分组测试  
+python -m pytest tests/test_tag_grouping.py -v
+
+# 运行特定测试用例
+python -m pytest tests/test_rule_parser.py::TestTagRuleParser::test_not_logic -v
+```
+
+#### 3. 测试结果示例
+```
+======================== test session starts ========================
+tests/test_rule_parser.py::TestTagRuleParser::test_init PASSED [  4%]
+tests/test_rule_parser.py::TestTagRuleParser::test_simple_number_condition_sql_generation PASSED [  9%]
+tests/test_rule_parser.py::TestTagRuleParser::test_complex_multi_condition_and_logic PASSED [ 36%]
+tests/test_rule_parser.py::TestTagRuleParser::test_not_logic PASSED [ 45%]
+tests/test_tag_grouping.py::TestTagGrouping::test_analyze_dependencies_single_table PASSED [ 68%]
+tests/test_tag_grouping.py::TestTagGrouping::test_group_tags_complex_scenario PASSED [ 90%]
+======================== 22 passed, 1 warning in 13.07s ========================
+```
+
+### 测试覆盖范围
+
+#### **规则解析器测试** (14个测试用例)
+- ✅ **基础功能**: 初始化、SQL生成、条件解析
+- ✅ **数据类型**: 数值、字符串、枚举、日期、布尔条件
+- ✅ **操作符支持**: `=`, `!=`, `>=`, `<=`, `LIKE`, `IN`, `BETWEEN`, `IS NULL` 等
+- ✅ **复杂逻辑**: AND/OR/NOT 嵌套条件、字段逻辑优先级
+- ✅ **字符串匹配**: `contains`, `starts_with`, `ends_with` 模式
+- ✅ **列表操作**: `contains_any`, `contains_all`, `array_contains`
+- ✅ **异常处理**: 无效JSON、空规则、边界情况
+
+#### **标签分组测试** (8个测试用例)  
+- ✅ **依赖分析**: 单表依赖、多表依赖、字段依赖分析
+- ✅ **智能分组**: 相同表分组、不同表分组、复杂场景组合
+- ✅ **分组优化**: 依赖表组合的准确性和效率验证
+- ✅ **边界处理**: 空规则、无效规则的健壮性测试
+
+### 测试数据模型
+
+#### **测试环境配置** (`tests/conftest.py`)
+```python
+@pytest.fixture(scope="session")
+def spark():
+    """本地Spark会话 - 测试优化配置"""
+    return SparkSession.builder \
+        .appName("TagSystem_Test") \
+        .master("local[2]") \
+        .config("spark.sql.adaptive.enabled", "false") \
+        .getOrCreate()
+
+@pytest.fixture  
+def sample_user_data():
+    """真实业务场景测试数据"""
+    return {
+        "user_basic_info": [
+            ("user001", 30, "VIP2", "verified", True),
+            ("user002", 25, "VIP1", "verified", False),
+            # ... 更多测试用户
+        ],
+        "user_asset_summary": [...],
+        "user_activity_summary": [...]
+    }
+```
+
+#### **复杂规则测试用例**
+```python
+# 测试高净值用户标签（多条件AND）
+{
+    "logic": "AND",
+    "conditions": [
+        {
+            "condition": {
+                "logic": "OR", 
+                "fields": [
+                    {"table": "user_basic_info", "field": "user_level", "operator": "belongs_to", "value": ["VIP2", "VIP3"]},
+                    {"table": "user_asset_summary", "field": "total_asset_value", "operator": ">=", "value": "100000"}
+                ]
+            }
+        },
+        {
+            "condition": {
+                "logic": "AND",
+                "fields": [
+                    {"table": "user_basic_info", "field": "kyc_status", "operator": "=", "value": "verified"},
+                    {"table": "user_activity_summary", "field": "trade_count_30d", "operator": ">", "value": "5"}
+                ]
+            }
+        }
+    ]
+}
+```
+
+### 测试最佳实践
+
+#### **单元测试原则**
+```python
+def test_simple_number_condition_sql_generation(self):
+    """测试数值条件SQL生成 - 覆盖单表和多表场景"""
+    parser = TagRuleParser()
+    
+    # 测试多表场景
+    sql = parser.parseRuleToSql(rule_json, ["user_asset_summary", "user_basic_info"])
+    expected = "`tag_system.user_asset_summary`.`total_asset_value` >= 100000"
+    assert expected in sql
+    
+    # 测试单表场景  
+    sql_single = parser.parseRuleToSql(rule_json, ["user_asset_summary"])
+    expected_single = "`user_asset_summary`.`total_asset_value` >= 100000"
+    assert expected_single in sql_single
+```
+
+#### **集成测试策略**
+- **依赖隔离**: 使用内存DataFrame模拟Hive表，避免外部依赖
+- **数据驱动**: 参数化测试覆盖多种业务场景
+- **断言完整**: 验证SQL语法、逻辑结构、边界情况
+
+### 持续集成支持
+
+#### **GitHub Actions配置**
+```yaml
+# .github/workflows/test.yml
+name: Test Suite
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.12
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run tests
+        run: python -m pytest tests/ -v --cov=src/tag_engine
+```
+
+#### **测试性能基准**
+- **测试速度**: 22个测试用例 ≈ 13秒
+- **覆盖率目标**: > 85% 代码覆盖
+- **测试稳定性**: 100% 通过率，无随机失败
+
 ## 开发指南
 
 ### 新增标签步骤
@@ -326,6 +489,10 @@ INSERT INTO tag_rules (tag_id, rule_content, status) VALUES
 
 2. 测试验证:
 ```bash
+# 先运行相关测试验证规则解析
+python -m pytest tests/test_rule_parser.py -v
+
+# 再测试标签计算
 python src/tag_engine/main.py --mode task-tags --tag-ids 新标签ID
 ```
 
@@ -338,18 +505,48 @@ python dolphin_deploy_package.py
 ### 自定义UDF开发
 
 ```python
-# 在TagUdfs.py中添加新的UDF
-@udf(returnType=ArrayType(IntegerType()))
-def customTagLogic(inputData):
-    """自定义标签逻辑
-    确保类型安全和None值处理
+# 在SparkUdfs.py中添加新的模块级函数
+def custom_tag_logic(input_column):
+    """自定义标签逻辑 - 使用Spark原生函数
+    避免UDF序列化开销，优先使用Column表达式
     """
-    if not inputData:
+    return when(input_column.isNotNull() & (input_column > 0), lit(True)).otherwise(lit(False))
+
+# 复杂逻辑才使用UDF
+@udf(returnType=ArrayType(IntegerType()))  
+def complex_tag_udf(input_data):
+    """仅在必要时使用UDF，确保类型安全"""
+    if not input_data:
         return []
-    
-    # 实现业务逻辑
-    result = process_custom_logic(inputData)
-    return result if result else []
+    return process_complex_logic(input_data)
+```
+
+### 测试驱动开发流程
+
+1. **编写测试用例**:
+```python
+def test_new_feature_logic(self):
+    """新功能测试 - 先写测试，再写实现"""
+    parser = TagRuleParser()
+    result = parser.new_feature_method(test_input)
+    assert result == expected_output
+```
+
+2. **运行测试验证**:
+```bash
+python -m pytest tests/test_new_feature.py::test_new_feature_logic -v
+```
+
+3. **实现功能代码**:
+```python
+def new_feature_method(self, input_data):
+    """实现新功能，确保测试通过"""
+    return processed_result
+```
+
+4. **完整测试验证**:
+```bash
+python -m pytest tests/ -v  # 确保不破坏现有功能
 ```
 
 ## 🔧 技术亮点总结

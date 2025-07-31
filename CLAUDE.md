@@ -28,7 +28,7 @@ src/tag_engine/                    # Core tag engine
 ├── parser/                      # Rule parsing and SQL generation
 │   └── TagRuleParser.py        # JSON rule to SQL condition converter
 └── utils/                       # User defined functions
-    └── TagUdfs.py              # PySpark UDF function collection
+    └── SparkUdfs.py            # PySpark UDF function collection (module-level functions)
 
 dolphin_gui_deploy/               # DolphinScheduler deployment package
 ├── main.py                      # Deployment entry (wrapper)
@@ -58,36 +58,38 @@ dolphin_gui_deploy/               # DolphinScheduler deployment package
 - Execute one JOIN operation per group, compute all tags in group in parallel
 - Maximize resource utilization, reduce duplicate data reading
 
-### 3. TagUdfs.py - Type-Safe UDF Functions
-**Responsibilities**: Provide type-safe tag processing UDFs
-- `mergeUserTags()`: Merge tags for single user, supports multiple input types
-- `mergeWithExistingTags()`: Smart merging of new and existing tags
-- `arrayToJson()` / `jsonToArray()`: Array and JSON mutual conversion
+### 3. SparkUdfs.py - Type-Safe Module Functions
+**Responsibilities**: Provide type-safe tag processing functions using module-level approach
+- `merge_user_tags()`: Merge tags using Spark native functions (array_distinct + array_sort)
+- `merge_with_existing_tags()`: Smart merging with array_union for performance
+- `json_to_array()` / `array_to_json()`: Type-safe JSON conversions
 
-**Type Safety Features**:
+**Design Philosophy**: Module-level functions avoid Python object serialization issues in YARN cluster environments.
+
+**Core Functions**:
 ```python
-@udf(returnType=ArrayType(IntegerType()))
-def mergeUserTags(tagList):
-    """Supports List[int], Array[int], nested arrays and other input types"""
-    if not tagList:
-        return []
+def merge_user_tags(tag_column):
+    """Merge single user's multiple tags using Spark native functions
     
-    # Handle different input types and nested arrays
-    if isinstance(tagList, list):
-        flatTags = tagList
-    else:
-        flatTags = []
-        for item in tagList:
-            if isinstance(item, (list, tuple)):
-                flatTags.extend(item)
-            else:
-                flatTags.append(item)
+    Uses Spark native functions: array_distinct + array_sort
+    Avoids UDF serialization overhead
+    """
+    return array_distinct(array_sort(tag_column))
+
+def merge_with_existing_tags(new_tags_col, existing_tags_col):
+    """Smart merging of new and existing tags
     
-    # Filter None values, deduplicate and sort
-    validTags = [tag for tag in flatTags if tag is not None]
-    uniqueTags = list(set(validTags))
-    uniqueTags.sort()
-    return uniqueTags
+    Uses Spark native functions: array_union + array_distinct + array_sort
+    Handles null values automatically with coalesce()
+    """
+    new_tags = coalesce(new_tags_col, array())
+    existing_tags = coalesce(existing_tags_col, array())
+    
+    return array_distinct(
+        array_sort(
+            array_union(new_tags, existing_tags)
+        )
+    )
 ```
 
 ### 4. MysqlMeta.py - MySQL Data Management
@@ -276,14 +278,250 @@ spark = SparkSession.builder \
 3. **Deployment update**: Use `dolphin_deploy_package.py` to generate new deployment package
 
 ### Custom UDF Development
-Add new UDF functions in `TagUdfs.py`, ensure:
-- Type safety and None value handling
-- Support for multiple input types
-- Clear return type definition
+Add new functions in `SparkUdfs.py`, prioritize module-level functions:
+- **Spark native functions first**: Use Column expressions when possible
+- **Type safety**: Explicit type definitions with comprehensive null handling
+- **Module-level approach**: Avoid UDF classes to prevent serialization issues
 
 ### Test Data Generation
 - DolphinScheduler environment: Use `dolphin_gui_deploy/generate_test_data.py`
 - Local development environment: Use `environments/local/test_data_generator.py`
+
+## Testing Framework
+
+### Test Architecture Overview  
+The project employs a comprehensive **pytest + PySpark** testing framework providing complete unit and integration test coverage.
+
+**Test Structure**:
+```
+tests/
+├── conftest.py              # Pytest fixtures and test configuration
+├── test_rule_parser.py      # JSON rule parsing and SQL generation tests (14 tests)
+└── test_tag_grouping.py     # Tag grouping algorithm validation tests (8 tests)
+```
+
+### Running Tests
+
+#### **Complete Test Suite**
+```bash
+# Run all tests (recommended)
+python -m pytest tests/ -v
+
+# Run with coverage report
+python -m pytest tests/ -v --cov=src/tag_engine --cov-report=html
+
+# Test results overview
+======================== test session starts ========================
+tests/test_rule_parser.py::TestTagRuleParser::test_init PASSED [  4%]
+tests/test_rule_parser.py::TestTagRuleParser::test_not_logic PASSED [ 45%]  
+tests/test_tag_grouping.py::TestTagGrouping::test_group_tags_complex_scenario PASSED [ 90%]
+======================== 22 passed, 1 warning in 13.07s ========================
+```
+
+#### **Module-Specific Testing**
+```bash
+# Rule parser tests only
+python -m pytest tests/test_rule_parser.py -v
+
+# Tag grouping tests only  
+python -m pytest tests/test_tag_grouping.py -v
+
+# Single test case
+python -m pytest tests/test_rule_parser.py::TestTagRuleParser::test_not_logic -v
+```
+
+### Test Coverage Analysis
+
+#### **TagRuleParser Tests (14 test cases)**
+- ✅ **Initialization**: Basic component setup and configuration
+- ✅ **SQL Generation**: Number, string, enum, date, boolean condition parsing
+- ✅ **Operator Support**: `=`, `!=`, `>=`, `<=`, `LIKE`, `IN`, `BETWEEN`, `IS NULL`, `IS NOT NULL`
+- ✅ **Complex Logic**: Nested AND/OR/NOT conditions with unlimited depth
+- ✅ **String Patterns**: `contains`, `starts_with`, `ends_with`, `not_contains`
+- ✅ **Array Operations**: `contains_any`, `contains_all`, `array_contains` for list fields
+- ✅ **Edge Cases**: Invalid JSON, empty rules, malformed conditions
+- ✅ **Logic Precedence**: Field-level vs condition-level logic handling
+
+#### **TagGrouping Tests (8 test cases)**
+- ✅ **Dependency Analysis**: Single-table and multi-table dependency extraction
+- ✅ **Field Dependency**: Required field identification with user_id auto-addition
+- ✅ **Smart Grouping**: Same-table grouping, different-table grouping strategies
+- ✅ **Complex Scenarios**: Multi-level grouping with overlapping dependencies
+- ✅ **Edge Handling**: Empty rules, invalid JSON rule processing
+- ✅ **Optimization Validation**: Group efficiency and resource sharing verification
+
+### Test Data Model
+
+#### **Test Environment Configuration**
+```python
+# tests/conftest.py
+@pytest.fixture(scope="session")  
+def spark():
+    """Local Spark session optimized for testing"""
+    return SparkSession.builder \
+        .appName("TagSystem_Test") \
+        .master("local[2]") \
+        .config("spark.sql.adaptive.enabled", "false") \
+        .getOrCreate()
+
+@pytest.fixture
+def sample_rules_data():
+    """Comprehensive business rule test cases"""
+    return [
+        {
+            "tag_id": 1,
+            "tag_name": "高净值用户", 
+            "rule_conditions": json.dumps({...})  # Complex multi-condition rules
+        },
+        # ... more test scenarios
+    ]
+```
+
+#### **Realistic Test Data**
+```python
+@pytest.fixture
+def sample_user_data():
+    """Production-like user data for testing"""
+    return {
+        "user_basic_info": [
+            ("user001", 30, "VIP2", "verified", True),
+            ("user002", 25, "VIP1", "verified", False),
+            ("user003", 35, "VIP3", "pending", True)
+        ],
+        "user_asset_summary": [
+            ("user001", 150000.00, 50000.00),
+            ("user002", 80000.00, 20000.00)  
+        ],
+        "user_activity_summary": [
+            ("user001", 15, "2025-07-30"),
+            ("user002", 8, "2025-07-29")
+        ]
+    }
+```
+
+### Test Quality Assurance
+
+#### **Comprehensive Rule Testing**
+```python
+def test_complex_multi_condition_and_logic(self):
+    """Test complex nested AND/OR logic with multiple tables"""
+    rule_json = json.dumps({
+        "logic": "AND",
+        "conditions": [
+            {
+                "condition": {
+                    "logic": "OR",  # Inner OR logic
+                    "fields": [
+                        {"table": "user_basic_info", "field": "user_level", "operator": "belongs_to", "value": ["VIP2", "VIP3"]},
+                        {"table": "user_asset_summary", "field": "total_asset_value", "operator": ">=", "value": "100000"}
+                    ]
+                }
+            },
+            {
+                "condition": {
+                    "logic": "AND",  # Inner AND logic
+                    "fields": [
+                        {"table": "user_basic_info", "field": "kyc_status", "operator": "=", "value": "verified"},
+                        {"table": "user_activity_summary", "field": "trade_count_30d", "operator": ">", "value": "5"}
+                    ]
+                }
+            }
+        ]
+    })
+    
+    sql = parser.parseRuleToSql(rule_json, ["user_basic_info", "user_asset_summary", "user_activity_summary"])
+    
+    # Comprehensive SQL validation
+    assert "`tag_system.user_basic_info`.`user_level` IN ('VIP2','VIP3')" in sql
+    assert "`tag_system.user_asset_summary`.`total_asset_value` >= 100000" in sql
+    assert " AND " in sql and " OR " in sql
+```
+
+#### **Edge Case Validation**
+```python
+def test_invalid_rule_handling(self):
+    """Test system robustness with invalid inputs"""
+    parser = TagRuleParser()
+    
+    # Empty rule handling
+    assert parser.parseRuleToSql("", ["user_basic_info"]) == "1=0"
+    
+    # Invalid JSON handling
+    assert parser.parseRuleToSql("invalid json", ["user_basic_info"]) == "1=0"
+    
+    # None rule handling
+    assert parser.parseRuleToSql(None, ["user_basic_info"]) == "1=0"
+```
+
+### Testing Best Practices
+
+#### **Test Design Principles**
+- **Isolation**: Each test is independent with no shared state
+- **Realistic**: Test data mirrors production scenarios  
+- **Comprehensive**: Cover normal flows, edge cases, and error conditions
+- **Performance**: Tests complete in ~13 seconds for 22 test cases
+- **Maintainable**: Clear test names and structured assertions
+
+#### **Continuous Integration**
+```yaml
+# GitHub Actions example
+name: Test Suite
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.12
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run tests
+        run: python -m pytest tests/ -v --cov=src/tag_engine
+```
+
+### Test-Driven Development Workflow
+
+#### **Development Process**
+1. **Write Test First**: Define expected behavior in test cases
+2. **Run Test (Should Fail)**: Verify test correctly identifies missing functionality  
+3. **Implement Feature**: Write minimal code to make test pass
+4. **Refactor**: Improve code quality while maintaining test coverage
+5. **Integration Test**: Run full test suite to ensure no regressions
+
+#### **Example TDD Cycle**
+```python
+# 1. Write failing test
+def test_new_operator_support(self):
+    """Test new 'regex_match' operator"""
+    rule_json = json.dumps({
+        "logic": "AND",
+        "conditions": [{
+            "fields": [{
+                "table": "user_basic_info",
+                "field": "email", 
+                "operator": "regex_match",
+                "value": ".*@company\\.com$",
+                "type": "string"
+            }]
+        }]
+    })
+    
+    sql = parser.parseRuleToSql(rule_json, ["user_basic_info"])
+    expected = "`user_basic_info`.`email` RLIKE '.*@company\\.com$'"
+    assert expected in sql
+
+# 2. Implement feature in TagRuleParser.py
+def _parseFieldToSql(self, field, isSingleTable=False):
+    # ... existing operators ...
+    elif operator == "regex_match":
+        return f"{fullField} RLIKE '{value}'"
+
+# 3. Run test to verify implementation
+python -m pytest tests/test_rule_parser.py::TestTagRuleParser::test_new_operator_support -v
+```
 
 ## Troubleshooting
 

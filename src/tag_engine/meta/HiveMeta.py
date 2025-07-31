@@ -30,42 +30,34 @@ class HiveMeta:
         print("🗄️  HiveMeta初始化完成")
     
     def loadTable(self, tableName: str, selectFields: Optional[List[str]] = None) -> DataFrame:
-        """加载单个Hive表
+        """纯粹加载单个Hive表，不缓存
         
         Args:
             tableName: 表名
             selectFields: 需要选择的字段列表，None表示选择所有字段
             
         Returns:
-            DataFrame: 加载的表DataFrame
+            DataFrame: 加载的表DataFrame（未缓存）
         """
-        cacheKey = f"{tableName}:{','.join(selectFields) if selectFields else 'ALL'}"
+        print(f"📖 加载Hive表: {tableName}")
         
-        if cacheKey not in self.cachedTables:
-            print(f"📖 加载Hive表: {tableName}")
+        try:
+            df = self.spark.table(tableName)
             
-            try:
-                df = self.spark.table(tableName)
-                
-                # 字段选择优化
-                if selectFields:
-                    # 确保user_id在选择字段中（JOIN需要）
-                    if "user_id" not in selectFields:
-                        selectFields = ["user_id"] + selectFields
-                    df = df.select(*selectFields)
-                
-                # 缓存DataFrame
-                df.cache()
-                self.cachedTables[cacheKey] = df
-                
-                print(f"✅ 表 {tableName} 加载完成，字段: {selectFields or 'ALL'}")
-                
-            except Exception as e:
-                print(f"❌ 加载表 {tableName} 失败: {e}")
-                # 返回空DataFrame，避免程序崩溃
-                return self._createEmptyDataFrame()
-        
-        return self.cachedTables[cacheKey]
+            # 字段选择优化
+            if selectFields:
+                # 确保user_id在选择字段中（JOIN需要）
+                if "user_id" not in selectFields:
+                    selectFields = ["user_id"] + selectFields
+                df = df.select(*selectFields)
+            
+            print(f"✅ 表 {tableName} 加载完成，字段: {selectFields or 'ALL'}")
+            return df
+            
+        except Exception as e:
+            print(f"❌ 加载表 {tableName} 失败: {e}")
+            # 返回空DataFrame，避免程序崩溃
+            return self._createEmptyDataFrame()
     
     def loadTables(self, tableNames: List[str], fieldMapping: Optional[Dict[str, List[str]]] = None) -> Dict[str, DataFrame]:
         """批量加载多个Hive表
@@ -89,7 +81,11 @@ class HiveMeta:
     def loadAndJoinTables(self, tableNames: List[str], 
                          fieldMapping: Optional[Dict[str, List[str]]] = None,
                          joinKey: str = "user_id") -> DataFrame:
-        """加载并JOIN多个表
+        """加载并JOIN多个表，统一控制缓存策略
+        
+        策略：
+        - 单表情况：缓存单表
+        - 多表情况：缓存JOIN结果
         
         Args:
             tableNames: 需要JOIN的表名列表
@@ -97,25 +93,57 @@ class HiveMeta:
             joinKey: JOIN的键，默认为user_id
             
         Returns:
-            DataFrame: JOIN后的结果DataFrame
+            DataFrame: JOIN后的结果DataFrame（已缓存）
         """
         if not tableNames:
             return self._createEmptyDataFrame()
         
         if len(tableNames) == 1:
-            # 只有一个表，直接返回
-            return self.loadTable(tableNames[0], fieldMapping.get(tableNames[0]) if fieldMapping else None)
+            # 🚀 单表情况：缓存单表
+            tableName = tableNames[0]
+            selectFields = fieldMapping.get(tableName) if fieldMapping else None
+            
+            # 生成单表缓存key
+            fieldKey = str(sorted(selectFields)) if selectFields else "ALL"
+            singleTableCacheKey = f"{tableName}:{fieldKey}"
+            
+            # 检查是否已缓存
+            if singleTableCacheKey in self.cachedTables:
+                print(f"🚀 复用单表缓存: {tableName}")
+                return self.cachedTables[singleTableCacheKey]
+            
+            # 加载并缓存单表
+            resultDF = self.loadTable(tableName, selectFields)
+            from pyspark import StorageLevel
+            resultDF.persist(StorageLevel.MEMORY_AND_DISK)
+            self.cachedTables[singleTableCacheKey] = resultDF
+            
+            print(f"✅ 单表加载并缓存完成: {tableName}")
+            return resultDF
+        
+        # 🚀 多表情况：缓存JOIN结果
+        # 为JOIN结果生成缓存key，确保相同的JOIN操作复用结果
+        sortedTables = sorted(tableNames)
+        fieldKey = ""
+        if fieldMapping:
+            fieldItems = sorted([(t, sorted(fields)) for t, fields in fieldMapping.items() if t in tableNames])
+            fieldKey = str(fieldItems)
+        joinCacheKey = f"JOIN:{','.join(sortedTables)}:{fieldKey}:{joinKey}"
+        
+        # 检查是否已缓存JOIN结果
+        if joinCacheKey in self.cachedTables:
+            print(f"🚀 复用JOIN缓存: {tableNames}")
+            return self.cachedTables[joinCacheKey]
         
         print(f"🔗 开始JOIN表: {tableNames}")
         
-        # 加载所有表
-        tables = self.loadTables(tableNames, fieldMapping)
-        
-        # 开始JOIN操作
+        # 🚀 关键优化：多表情况直接JOIN，不缓存中间子表，只缓存最终JOIN结果
         resultDF = None
         
         for i, tableName in enumerate(tableNames):
-            currentDF = tables[tableName]
+            # 直接加载表，不缓存子表
+            selectFields = fieldMapping.get(tableName) if fieldMapping else None
+            currentDF = self.loadTable(tableName, selectFields)
             
             if resultDF is None:
                 # 第一个表作为基础
@@ -130,30 +158,13 @@ class HiveMeta:
                 )
                 print(f"   🔗 LEFT JOIN: {tableName}")
         
-        print(f"✅ JOIN完成，涉及 {len(tableNames)} 个表")
-        return resultDF
-    
-    def getTableInfo(self, tableName: str) -> Dict[str, str]:
-        """获取表信息
+        # 🚀 关键策略：只缓存最终JOIN结果，不缓存中间子表
+        from pyspark import StorageLevel
+        resultDF.persist(StorageLevel.MEMORY_AND_DISK)
+        self.cachedTables[joinCacheKey] = resultDF
         
-        Args:
-            tableName: 表名
-            
-        Returns:
-            Dict: 表信息字典
-        """
-        try:
-            df = self.spark.table(tableName)
-            
-            return {
-                "tableName": tableName,
-                "columnCount": len(df.columns),
-                "columns": df.columns,
-                "rowCount": df.count()
-            }
-        except Exception as e:
-            print(f"❌ 获取表 {tableName} 信息失败: {e}")
-            return {}
+        print(f"✅ JOIN完成并缓存最终结果，涉及 {len(tableNames)} 个表")
+        return resultDF
     
     def clearCache(self):
         """清理所有缓存的表"""
@@ -166,25 +177,57 @@ class HiveMeta:
         self.cachedTables.clear()
         print("🧹 HiveMeta缓存已清理")
     
-    def getCacheStats(self) -> Dict[str, Dict]:
-        """获取缓存统计信息
+    def clearGroupCache(self, groupTables: List[str]):
+        """清理特定标签组的表缓存（智能缓存管理）
         
-        Returns:
-            Dict: 缓存统计信息
+        Args:
+            groupTables: 该标签组依赖的表名列表
         """
-        stats = {}
+        if not groupTables:
+            return
+        
+        clearedTables = []
+        
+        # 遍历所有缓存的表，检查是否属于该组
+        cachesToRemove = []
         
         for cacheKey, df in self.cachedTables.items():
-            try:
-                stats[cacheKey] = {
-                    "columns": len(df.columns),
-                    "isCached": df.is_cached,
-                    "storageLevel": str(df.storageLevel) if hasattr(df, 'storageLevel') else "UNKNOWN"
-                }
-            except Exception as e:
-                stats[cacheKey] = {"error": str(e)}
+            # 检查缓存key是否属于该组
+            shouldClear = False
+            cacheDescription = cacheKey  # 用于显示的描述
+            
+            if cacheKey.startswith("JOIN:"):
+                # JOIN缓存格式: "JOIN:table1,table2:fieldKey:joinKey"
+                joinTables = cacheKey.split(":")[1].split(",")
+                # 如果JOIN中包含该组的任何表，则清理
+                if any(table in groupTables for table in joinTables):
+                    shouldClear = True
+                    cacheDescription = f"JOIN({','.join(joinTables)})"
+            else:
+                # 单表缓存格式: "tableName:fields" 或 "tableName:ALL"  
+                tableName = cacheKey.split(":")[0]
+                if tableName in groupTables:
+                    shouldClear = True
+                    cacheDescription = tableName
+            
+            if shouldClear:
+                try:
+                    df.unpersist()
+                    cachesToRemove.append(cacheKey)
+                    clearedTables.append(cacheDescription)
+                except Exception as e:
+                    print(f"   ⚠️  清理缓存 {cacheDescription} 失败: {e}")
         
-        return stats
+        # 从缓存字典中移除
+        for cacheKey in cachesToRemove:
+            del self.cachedTables[cacheKey]
+        
+        if clearedTables:
+            # 去重显示清理的表
+            uniqueTables = list(set(clearedTables))
+            print(f"   🧹 已清理 {len(uniqueTables)} 个表的缓存: {uniqueTables}")
+        else:
+            print(f"   ℹ️  组 {groupTables} 无需清理缓存")
     
     def _createEmptyDataFrame(self) -> DataFrame:
         """创建空的DataFrame（包含user_id字段）"""
@@ -195,21 +238,3 @@ class HiveMeta:
         ])
         
         return self.spark.createDataFrame([], schema)
-    
-    def optimizeForTagComputation(self, df: DataFrame) -> DataFrame:
-        """为标签计算优化DataFrame
-        
-        Args:
-            df: 输入DataFrame
-            
-        Returns:
-            DataFrame: 优化后的DataFrame
-        """
-        # 去重（确保每个用户只有一条记录）
-        df = df.dropDuplicates(["user_id"])
-        
-        # 缓存（标签计算会多次使用）
-        df.cache()
-        
-        print(f"🚀 DataFrame优化完成，用户数: {df.count()}")
-        return df

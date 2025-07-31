@@ -272,10 +272,16 @@ class TagRuleParser:
             return "1=1"
         
         if len(sqlParts) == 1:
-            return sqlParts[0]
+            result = sqlParts[0]
         else:
             connector = f" {logic} " if logic not in ["None", None] else " AND "
-            return connector.join(sqlParts)
+            result = connector.join(sqlParts)
+        
+        # 处理NOT逻辑
+        if logic == "NOT":
+            return f"NOT ({result})"
+        else:
+            return result
     
     def _parseFieldToSql(self, field: dict, isSingleTable: bool = False) -> str:
         """解析单个字段条件为SQL"""
