@@ -43,13 +43,13 @@ class TestTagRuleParser:
         })
         
         # 测试多表场景
-        sql = parser.parseRuleToSql(rule_json, ["user_asset_summary", "user_basic_info"])
-        expected = "`tag_system.user_asset_summary`.`total_asset_value` >= 100000"
+        sql = parser.parseRuleToSql(rule_json, ["tag_system.user_asset_summary", "tag_system.user_basic_info"])
+        expected = "user_asset_summary.total_asset_value >= 100000"
         assert expected in sql
         
         # 测试单表场景
-        sql_single = parser.parseRuleToSql(rule_json, ["user_asset_summary"])
-        expected_single = "`user_asset_summary`.`total_asset_value` >= 100000"
+        sql_single = parser.parseRuleToSql(rule_json, ["tag_system.user_asset_summary"])
+        expected_single = "user_asset_summary.total_asset_value >= 100000"
         assert expected_single in sql_single
     
     def test_string_condition_sql_generation(self):
@@ -76,8 +76,8 @@ class TestTagRuleParser:
             ]
         })
         
-        sql = parser.parseRuleToSql(rule_json, ["user_basic_info"])
-        expected = "`user_basic_info`.`user_level` = 'VIP3'"
+        sql = parser.parseRuleToSql(rule_json, ["tag_system.user_basic_info"])
+        expected = "user_basic_info.user_level = 'VIP3'"
         assert expected in sql
     
     def test_enum_belongs_to_condition(self):
@@ -104,8 +104,8 @@ class TestTagRuleParser:
             ]
         })
         
-        sql = parser.parseRuleToSql(rule_json, ["user_basic_info"])
-        expected = "`user_basic_info`.`user_level` IN ('VIP2','VIP3','VIP4')"
+        sql = parser.parseRuleToSql(rule_json, ["tag_system.user_basic_info"])
+        expected = "user_basic_info.user_level IN ('VIP2','VIP3','VIP4')"
         assert expected in sql
     
     def test_date_range_condition(self):
@@ -133,7 +133,7 @@ class TestTagRuleParser:
         })
         
         sql = parser.parseRuleToSql(rule_json, ["user_basic_info"])
-        expected = "`user_basic_info`.`registration_date` BETWEEN '2024-01-01' AND '2024-12-31'"
+        expected = "user_basic_info.registration_date BETWEEN '2024-01-01' AND '2024-12-31'"
         assert expected in sql
     
     def test_boolean_condition(self):
@@ -161,7 +161,7 @@ class TestTagRuleParser:
         })
         
         sql = parser.parseRuleToSql(rule_json, ["user_basic_info"])
-        expected = "`user_basic_info`.`is_vip` = TRUE"
+        expected = "tag_system.user_basic_info.is_vip = TRUE"
         assert expected in sql
     
     def test_null_conditions(self):
@@ -190,7 +190,7 @@ class TestTagRuleParser:
         })
         
         sql = parser.parseRuleToSql(rule_json_null, ["user_basic_info"])
-        expected = "`user_basic_info`.`middle_name` IS NULL"
+        expected = "tag_system.user_basic_info.middle_name IS NULL"
         assert expected in sql
         
         # is_not_null条件
@@ -215,7 +215,7 @@ class TestTagRuleParser:
         })
         
         sql = parser.parseRuleToSql(rule_json_not_null, ["user_basic_info"])
-        expected = "`user_basic_info`.`first_name` IS NOT NULL"
+        expected = "tag_system.user_basic_info.first_name IS NOT NULL"
         assert expected in sql
     
     def test_complex_multi_condition_and_logic(self):
@@ -273,10 +273,10 @@ class TestTagRuleParser:
         sql = parser.parseRuleToSql(rule_json, ["user_basic_info", "user_asset_summary", "user_activity_summary"])
         
         # 验证包含各个条件部分
-        assert "`tag_system.user_basic_info`.`user_level` IN ('VIP2','VIP3')" in sql
-        assert "`tag_system.user_asset_summary`.`total_asset_value` >= 100000" in sql
-        assert "`tag_system.user_basic_info`.`kyc_status` = 'verified'" in sql
-        assert "`tag_system.user_activity_summary`.`trade_count_30d` > 5" in sql
+        assert "tag_system.user_basic_info.user_level IN ('VIP2','VIP3')" in sql
+        assert "tag_system.user_asset_summary.total_asset_value >= 100000" in sql
+        assert "tag_system.user_basic_info.kyc_status = 'verified'" in sql
+        assert "tag_system.user_activity_summary.trade_count_30d > 5" in sql
         
         # 验证逻辑结构：外层AND，内层有OR和AND
         assert " AND " in sql
@@ -331,8 +331,8 @@ class TestTagRuleParser:
         
         # 验证包含各个条件部分
         assert "BETWEEN '2025-01-01' AND '2025-07-26'" in sql
-        assert "`tag_system.user_activity_summary`.`trade_count_30d` > 5" in sql
-        assert "`tag_system.user_asset_summary`.`cash_balance` >= 50000" in sql
+        assert "tag_system.user_activity_summary.trade_count_30d > 5" in sql
+        assert "tag_system.user_asset_summary.cash_balance >= 50000" in sql
         
         # 验证逻辑结构：外层OR，内层AND
         assert " OR " in sql
@@ -367,7 +367,7 @@ class TestTagRuleParser:
         
         # NOT逻辑应该在最外层
         assert sql.startswith("NOT") or "NOT (" in sql
-        assert "`user_basic_info`.`user_level` = 'VIP1'" in sql
+        assert "tag_system.user_basic_info.user_level = 'VIP1'" in sql
     
     def test_string_pattern_matching(self):
         """测试字符串模式匹配"""
@@ -395,7 +395,7 @@ class TestTagRuleParser:
         })
         
         sql = parser.parseRuleToSql(rule_json_contains, ["user_basic_info"])
-        expected = "`user_basic_info`.`phone_number` LIKE '%138%'"
+        expected = "tag_system.user_basic_info.phone_number LIKE '%138%'"
         assert expected in sql
         
         # starts_with操作符
@@ -420,7 +420,7 @@ class TestTagRuleParser:
         })
         
         sql = parser.parseRuleToSql(rule_json_starts, ["user_basic_info"])
-        expected = "`user_basic_info`.`phone_number` LIKE '+86%'"
+        expected = "tag_system.user_basic_info.phone_number LIKE '+86%'"
         assert expected in sql
         
         # ends_with操作符
@@ -445,7 +445,7 @@ class TestTagRuleParser:
         })
         
         sql = parser.parseRuleToSql(rule_json_ends, ["user_basic_info"])
-        expected = "`user_basic_info`.`email` LIKE '%gmail.com'"
+        expected = "tag_system.user_basic_info.email LIKE '%gmail.com'"
         assert expected in sql
     
     def test_list_operations(self):
@@ -553,6 +553,6 @@ class TestTagRuleParser:
         sql = parser.parseRuleToSql(rule_json, ["user_basic_info"])
         
         # 验证字段间的OR逻辑被正确解析
-        assert "`user_basic_info`.`user_level` = 'VIP2'" in sql
-        assert "`user_basic_info`.`user_level` = 'VIP3'" in sql
+        assert "tag_system.user_basic_info.user_level = 'VIP2'" in sql
+        assert "tag_system.user_basic_info.user_level = 'VIP3'" in sql
         assert " OR " in sql

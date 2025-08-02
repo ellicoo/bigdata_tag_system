@@ -294,18 +294,15 @@ class TagRuleParser:
         if not fieldName:
             return "1=1"
         
-        # 构建完整字段名 - 根据单表/多表情况使用不同的命名策略
+        # 构建完整字段名 - 生成与DataFrame列名匹配的格式
         if table:
-            if isSingleTable:
-                # 单表情况：HiveMeta.py不使用alias，直接使用表名作为前缀
-                # 需要去掉tag_system前缀，只使用短表名
-                shortTableName = table.split(".")[-1] if "." in table else table
-                fullField = f"`{shortTableName}`.`{fieldName}`"
-            else:
-                # 多表JOIN情况：HiveMeta.py使用完整表名作为alias
-                fullField = f"`{table}`.`{fieldName}`"
+            # 🔧 关键修正：使用简化的表名格式，匹配HiveMeta的alias设置
+            # 例如：tag_system.user_asset_summary -> user_asset_summary
+            # 生成格式：user_asset_summary.total_asset_value
+            simplifiedTable = table.split('.')[-1]
+            fullField = f"{simplifiedTable}.{fieldName}"
         else:
-            fullField = f"`{fieldName}`"
+            fullField = fieldName
         
         # 根据操作符生成SQL
         if operator == "=":

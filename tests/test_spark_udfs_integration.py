@@ -8,7 +8,6 @@ import pytest
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
 from src.tag_engine.utils.SparkUdfs import (
-    merge_user_tags, 
     merge_with_existing_tags, 
     array_to_json, 
     json_to_array
@@ -17,39 +16,6 @@ from src.tag_engine.utils.SparkUdfs import (
 
 class TestSparkUdfsIntegration:
     """SparkUdfs集成测试类"""
-    
-    def test_merge_user_tags_basic(self, spark):
-        """测试merge_user_tags基础功能"""
-        # 创建测试数据
-        testData = [
-            ("user001", [3, 1, 2, 1]),  # 有重复
-            ("user002", [2, 4, 3]),     # 无重复
-            ("user003", [1]),           # 单个元素
-            ("user004", [])             # 空数组
-        ]
-        
-        testDF = spark.createDataFrame(testData, ["user_id", "tags"])
-        
-        # 应用merge_user_tags函数
-        resultDF = testDF.withColumn("merged_tags", merge_user_tags(col("tags")))
-        
-        results = resultDF.collect()
-        
-        # 验证结果
-        assert len(results) == 4
-        
-        # 验证去重和排序
-        user001_tags = [row.merged_tags for row in results if row.user_id == "user001"][0]
-        assert user001_tags == [1, 2, 3]  # 去重并排序
-        
-        user002_tags = [row.merged_tags for row in results if row.user_id == "user002"][0]
-        assert user002_tags == [2, 3, 4]  # 排序
-        
-        user003_tags = [row.merged_tags for row in results if row.user_id == "user003"][0]
-        assert user003_tags == [1]
-        
-        user004_tags = [row.merged_tags for row in results if row.user_id == "user004"][0]
-        assert user004_tags == []
     
     def test_merge_with_existing_tags_basic(self, spark):
         """测试merge_with_existing_tags基础功能"""
@@ -260,24 +226,24 @@ class TestSparkUdfsIntegration:
         
         schema = StructType([
             StructField("user_id", StringType(), False),
-            StructField("tags", ArrayType(IntegerType()), True)
+            StructField("new_tags", ArrayType(IntegerType()), True),
+            StructField("existing_tags", ArrayType(IntegerType()), True)
         ])
         
         # 包含None、空数组、正常数组的测试数据
         testData = [
-            ("user001", [1, 2, 3]),
-            ("user002", []),
-            ("user003", None)
+            ("user001", [1, 2, 3], [2, 3, 4]),
+            ("user002", [], [1]),
+            ("user003", None, None)
         ]
         
         testDF = spark.createDataFrame(testData, schema)
         
         # 测试所有UDF函数的类型安全性
         resultDF = testDF \
-            .withColumn("merged_tags", merge_user_tags(col("tags"))) \
-            .withColumn("tags_json", array_to_json(col("tags"))) \
-            .withColumn("parsed_tags", json_to_array(col("tags_json"))) \
-            .withColumn("final_merge", merge_with_existing_tags(col("merged_tags"), col("parsed_tags")))
+            .withColumn("new_tags_json", array_to_json(col("new_tags"))) \
+            .withColumn("parsed_tags", json_to_array(col("new_tags_json"))) \
+            .withColumn("final_merge", merge_with_existing_tags(col("new_tags"), col("existing_tags")))
         
         # 收集结果（不应该抛出异常）
         results = resultDF.collect()
@@ -286,9 +252,8 @@ class TestSparkUdfsIntegration:
         assert len(results) == 3
         
         for row in results:
-            # 所有数组字段都应该是list类型或None（对于输入为None的情况）
-            assert row.merged_tags is None or isinstance(row.merged_tags, list)
+            # 所有数组字段都应该是list类型
             assert isinstance(row.parsed_tags, list)  # json_to_array应该总是返回list
             assert isinstance(row.final_merge, list)  # merge_with_existing_tags应该总是返回list
             # JSON字段应该是字符串类型
-            assert isinstance(row.tags_json, str)
+            assert isinstance(row.new_tags_json, str)

@@ -114,11 +114,17 @@ class HiveMeta:
             
             # 加载并缓存单表
             resultDF = self.loadTable(tableName, selectFields)
+            
+            # 🔧 关键修复：使用简化的表名作为alias，避免点号导致的反引号问题
+            # 例如：tag_system.user_asset_summary -> user_asset_summary
+            aliasName = tableName.split('.')[-1]
+            resultDF = resultDF.alias(aliasName)
+            
             from pyspark import StorageLevel
             resultDF.persist(StorageLevel.MEMORY_AND_DISK)
             self.cachedTables[singleTableCacheKey] = resultDF
             
-            print(f"✅ 单表加载并缓存完成: {tableName}")
+            print(f"✅ 单表加载并缓存完成: {tableName} (alias: {aliasName})")
             return resultDF
         
         # 🚀 多表情况：缓存JOIN结果
@@ -145,18 +151,22 @@ class HiveMeta:
             selectFields = fieldMapping.get(tableName) if fieldMapping else None
             currentDF = self.loadTable(tableName, selectFields)
             
+            # 🔧 关键修复：使用简化的表名作为alias，避免点号导致的反引号问题
+            # 例如：tag_system.user_asset_summary -> user_asset_summary
+            aliasName = tableName.split('.')[-1]
+            
             if resultDF is None:
                 # 第一个表作为基础
-                resultDF = currentDF.alias(tableName)
-                print(f"   📋 基础表: {tableName}")
+                resultDF = currentDF.alias(aliasName)
+                print(f"   📋 基础表: {tableName} (alias: {aliasName})")
             else:
                 # LEFT JOIN后续表
                 resultDF = resultDF.join(
-                    currentDF.alias(tableName),
+                    currentDF.alias(aliasName),
                     joinKey,
                     "left"
                 )
-                print(f"   🔗 LEFT JOIN: {tableName}")
+                print(f"   🔗 LEFT JOIN: {tableName} (alias: {aliasName})")
         
         # 🚀 关键策略：只缓存最终JOIN结果，不缓存中间子表
         from pyspark import StorageLevel

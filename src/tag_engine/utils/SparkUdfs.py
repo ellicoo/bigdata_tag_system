@@ -32,19 +32,6 @@ from pyspark.sql.functions import *
 from pyspark.sql.types import *
 
 
-def merge_user_tags(tag_column):
-    """合并单个用户的多个标签：去重+排序
-    
-    使用Spark原生函数：array_distinct + array_sort
-    
-    Args:
-        tag_column: Column - 标签列，ARRAY<INT>类型
-        
-    Returns:
-        Column - 去重排序后的标签数组
-    """
-    return array_distinct(array_sort(tag_column))
-
 
 def merge_with_existing_tags(new_tags_col, existing_tags_col):
     """新标签与MySQL现有标签合并

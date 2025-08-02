@@ -185,48 +185,6 @@ class MysqlMeta:
             traceback.print_exc()
             return False
     
-    def getTagStatistics(self) -> Dict[str, int]:
-        """获取标签统计信息
-        
-        Returns:
-            Dict: 统计信息字典
-        """
-        try:
-            connection = pymysql.connect(**self.mysqlConfig)
-            
-            try:
-                with connection.cursor() as cursor:
-                    # 统计活跃标签数
-                    cursor.execute("SELECT COUNT(*) FROM tag_rules WHERE is_active = 1")
-                    activeTagCount = cursor.fetchone()[0]
-                    
-                    # 统计有标签的用户数
-                    cursor.execute("SELECT COUNT(*) FROM user_tags WHERE tag_ids IS NOT NULL")
-                    taggedUserCount = cursor.fetchone()[0]
-                    
-                    # 统计总用户标签数
-                    cursor.execute("SELECT SUM(JSON_LENGTH(tag_ids)) FROM user_tags WHERE tag_ids IS NOT NULL")
-                    totalTagCount = cursor.fetchone()[0] or 0
-                    
-                    # 确保所有数值都是Python原生int类型，避免Decimal和float问题
-                    activeTagCount = int(float(activeTagCount)) if activeTagCount is not None else 0
-                    taggedUserCount = int(float(taggedUserCount)) if taggedUserCount is not None else 0
-                    totalTagCount = int(float(totalTagCount)) if totalTagCount is not None else 0
-                    
-                    return {
-                        "activeTagCount": activeTagCount,
-                        "taggedUserCount": taggedUserCount,
-                        "totalTagCount": totalTagCount,
-                        "avgTagsPerUser": round(totalTagCount / taggedUserCount, 2) if taggedUserCount > 0 else 0
-                    }
-                    
-            finally:
-                connection.close()
-                
-        except Exception as e:
-            print(f"❌ 获取标签统计失败: {e}")
-            return {}
-    
     def testConnection(self) -> bool:
         """测试MySQL连接
         

@@ -74,7 +74,6 @@ class TagEngine:
             
             if success:
                 print("✅ 标签计算完成")
-                self._printStatistics()
             
             return success
             
@@ -220,25 +219,38 @@ class TagEngine:
             return False
     
     def _testUdfFunctions(self) -> bool:
-        """测试UDF函数"""
+        """测试工具函数"""
         try:
-            # 创建测试DataFrame
-            testData = [("user1", [1, 2, 3]), ("user2", [2, 3, 4])]
-            testDF = self.spark.createDataFrame(testData, ["user_id", "tags"])
+            # 创建测试DataFrame - 测试新老标签合并
+            testData = [
+                ("user1", [1, 2, 3], [2, 3, 4]),
+                ("user2", [5, 6], [6, 7, 8])
+            ]
+            testDF = self.spark.createDataFrame(testData, ["user_id", "new_tags", "existing_tags"])
             
-            # 测试SparkUdfs模块函数
-            from ..utils.SparkUdfs import merge_user_tags
+            # 测试merge_with_existing_tags函数
+            from ..utils.SparkUdfs import merge_with_existing_tags
             resultDF = testDF.withColumn(
                 "merged_tags",
-                merge_user_tags(col("tags"))
+                merge_with_existing_tags(col("new_tags"), col("existing_tags"))
             )
             
             resultCount = resultDF.count()
-            print(f"   ✅ UDF函数测试通过，处理 {resultCount} 条数据")
+            print(f"   ✅ 工具函数测试通过，处理 {resultCount} 条数据")
+            
+            # 测试tagExpressionUtils工具
+            from ..utils.tagExpressionUtils import buildParallelTagExpression
+            tag_conditions = [
+                {'tag_id': 1, 'condition': 'new_tags is not null'},
+                {'tag_id': 2, 'condition': 'existing_tags is not null'}
+            ]
+            expr = buildParallelTagExpression(tag_conditions)
+            print(f"   ✅ 并行标签表达式工具测试通过")
+            
             return True
             
         except Exception as e:
-            print(f"   ❌ UDF函数测试失败: {e}")
+            print(f"   ❌ 工具函数测试失败: {e}")
             return False
     
     def _checkTagRules(self) -> bool:
@@ -257,19 +269,6 @@ class TagEngine:
         except Exception as e:
             print(f"   ❌ 标签规则检查失败: {e}")
             return False
-    
-    def _printStatistics(self):
-        """打印统计信息"""
-        try:
-            stats = self.mysqlMeta.getTagStatistics()
-            if stats:
-                print("\n📊 标签系统统计信息:")
-                print(f"   活跃标签数: {stats.get('activeTagCount', 0)}")
-                print(f"   有标签用户数: {stats.get('taggedUserCount', 0)}")
-                print(f"   总标签数: {stats.get('totalTagCount', 0)}")
-                print(f"   平均每用户标签数: {stats.get('avgTagsPerUser', 0)}")
-        except:
-            print("   ⚠️  无法获取统计信息")
     
     
     def cleanup(self):

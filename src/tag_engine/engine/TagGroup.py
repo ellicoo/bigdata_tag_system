@@ -123,8 +123,9 @@ class TagGroup:
         combined_tags_expr = buildParallelTagExpression(tag_conditions)
         
         # 一次性为所有用户计算其匹配的标签数组，并过滤掉空数组用户
-        userTagsDF = joinedDF.select("user_id") \
-                           .withColumn("tag_ids_array", combined_tags_expr) \
+        # 🔧 关键修复：先计算标签，再选择需要的字段，避免过早丢弃业务字段
+        userTagsDF = joinedDF.withColumn("tag_ids_array", combined_tags_expr) \
+                           .select("user_id", "tag_ids_array") \
                            .filter(size(col("tag_ids_array")) > 0)
         
         # 统计结果

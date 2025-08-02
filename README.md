@@ -1,11 +1,11 @@
 # 大数据标签系统
 
-基于PySpark的分布式标签计算系统，使用DSL和UDF从S3 Hive表读取用户数据，结合MySQL规则进行标签计算，专为海豚调度器部署设计。
+基于PySpark的分布式标签计算系统，使用DSL和Spark内置函数从S3 Hive表读取用户数据，结合MySQL规则进行标签计算，专为海豚调度器部署设计。
 
 ## 项目架构
 
 ### 核心特性
-- PySpark DSL + UDF：充分利用Spark DataFrame API和自定义用户函数
+- PySpark DSL + Spark内置函数：充分利用Spark DataFrame API和内置函数，避免集群版本兼容问题
 - 智能并行处理：基于表依赖关系的智能分组和并发计算  
 - 标签合并机制：支持新老标签智能合并，避免数据丢失
 - 海豚调度器集成：原生支持DolphinScheduler部署和调度
@@ -31,8 +31,9 @@ src/tag_engine/
 │   └── MysqlMeta.py       # MySQL规则和结果管理
 ├── parser/                # 规则解析与SQL生成
 │   └── TagRuleParser.py   # JSON规则转SQL条件
-└── utils/                 # 用户自定义函数
-    └── SparkUdfs.py       # PySpark UDF函数集合（模块级函数）
+└── utils/                 # 工具函数和Spark内置函数封装
+    ├── SparkUdfs.py       # Spark内置函数工具化封装（避免集群版本问题）
+    └── tagExpressionUtils.py  # 并行标签表达式构建工具
 ```
 
 ## 快速开始
@@ -65,12 +66,12 @@ python src/tag_engine/main.py --mode task-tags --tag-ids 1,2,3
 python dolphin_deploy_package.py
 
 # 2. 上传到DolphinScheduler资源中心
-# 将生成的ZIP包上传到海豚调度器资源管理
+# 将生成的 dolphin_gui_deploy/tag_system_dolphin.zip 上传到海豚调度器资源管理
 
 # 3. 创建Spark任务
-# 主类: src.tag_engine.main
+# 主程序: /dolphinscheduler/default/resources/bigdata_tag_system/main.py
 # 程序参数: --mode task-all
-# 资源文件: bigdata_tag_system.zip
+# 说明: main.py是由dolphin_deploy_package.py从src/tag_engine/main.py自动生成
 ```
 
 ## 核心功能
@@ -103,15 +104,18 @@ python dolphin_deploy_package.py
 - 标签2: assets >= 10000 (高净值用户) 
 - 标签3: trade_count > 5 (活跃交易用户)
 
-第3步：Spark原生函数并行计算 (关键优化)
-# 一次withColumn操作，所有标签条件并行评估：
-combined_tags_expr = array_distinct(array_sort(array_remove(
-    array(
-        when(expr("age >= 30"), lit(1)).otherwise(lit(None)),        # 标签1
-        when(expr("assets >= 10000"), lit(2)).otherwise(lit(None)),  # 标签2
-        when(expr("trade_count > 5"), lit(3)).otherwise(lit(None))   # 标签3
-    ), None
-)))
+第3步：并行标签表达式构建 (关键优化)
+# 使用tagExpressionUtils工具构建并行表达式：
+from ..utils.tagExpressionUtils import buildParallelTagExpression
+
+tagConditions = [
+    {'tag_id': 1, 'condition': 'age >= 30'},
+    {'tag_id': 2, 'condition': 'assets >= 10000'}, 
+    {'tag_id': 3, 'condition': 'trade_count > 5'}
+]
+combined_tags_expr = buildParallelTagExpression(tagConditions)
+
+# 内部使用SQL表达式和filter高阶函数确保返回空数组而非null
 
 第4步：每行并行计算结果
 user001: [when(35>=30,1)→1, when(15000>=10000,2)→2, when(8>5,3)→3] 
@@ -152,15 +156,25 @@ tagDF = joinedDF.filter(expr(sqlCondition)) \
                .select("user_id") \
                .withColumn("tag_id", lit(tagId))
 
-# 用户标签聚合
-userTagsDF = tagResultsDF.groupBy("user_id").agg(
-    tagUdfs.mergeUserTags(collect_list("tag_id")).alias("tag_ids")
-)
+# 🚀 关键优化：使用并行标签表达式工具，一次性生成标签数组
+from src.tag_engine.utils.tagExpressionUtils import buildParallelTagExpression
+
+# 构建并行标签条件
+tag_conditions = [
+    {'tag_id': 1, 'condition': 'age >= 30'},
+    {'tag_id': 2, 'condition': 'assets >= 10000'}
+]
+
+# 一次性并行计算所有标签
+combined_expr = buildParallelTagExpression(tag_conditions)
+userTagsDF = joinedDF.select("user_id") \
+                   .withColumn("tag_ids_array", combined_expr) \
+                   .filter(size(col("tag_ids_array")) > 0)
 ```
 
 ### 3. 智能标签合并机制
 
-系统采用**Spark内置函数 + UDF**的混合策略，确保类型安全和高性能：
+系统采用**Spark内置函数工具化包装**策略，避免集群多版本问题，确保类型安全和高性能：
 
 #### 内存标签合并（性能优化）
 ```python
@@ -174,46 +188,31 @@ finalDF = mergedDF.groupBy("user_id").agg(
 )
 ```
 
-#### 自定义UDF函数（类型安全）
+#### Spark内置函数工具化包装（避免集群多版本问题）
 ```python
-@udf(returnType=ArrayType(IntegerType()))
-def mergeUserTags(tagList):
-    """合并单个用户的多个标签：去重+排序
-    支持多种输入类型：List[int]、Array[int]、嵌套数组
-    """
-    if not tagList:
-        return []
-    
-    # 处理不同的输入类型和嵌套数组
-    if isinstance(tagList, list):
-        flatTags = tagList
-    else:
-        flatTags = []
-        for item in tagList:
-            if isinstance(item, (list, tuple)):
-                flatTags.extend(item)
-            else:
-                flatTags.append(item)
-    
-    # 过滤None值，去重并排序
-    validTags = [tag for tag in flatTags if tag is not None]
-    uniqueTags = list(set(validTags))
-    uniqueTags.sort()
-    return uniqueTags
 
-@udf(returnType=ArrayType(IntegerType()))
-def mergeWithExistingTags(newTags, existingTags):
-    """新老标签智能合并"""
-    if not newTags:
-        newTags = []
-    if not existingTags:
-        existingTags = []
-    
-    # 合并、去重、排序
-    allTags = list(set(newTags + existingTags))
-    allTags.sort()
-    return allTags
+def merge_with_existing_tags(new_tags_col, existing_tags_col):
+    """新老标签智能合并 - 使用Spark内置函数
+    自动处理null值，避免集群环境下的Python对象序列化问题
+    """
+    new_tags = coalesce(new_tags_col, array())
+    existing_tags = coalesce(existing_tags_col, array())
+    return array_distinct(array_sort(array_union(new_tags, existing_tags)))
+
+def array_to_json(array_col):
+    """数组转JSON - 使用Spark内置函数"""
+    return coalesce(to_json(array_col), lit('[]'))
+
+def json_to_array(json_col):
+    """JSON转数组 - 使用Spark内置函数"""
+    return coalesce(from_json(json_col, ArrayType(IntegerType())), array())
 ```
+
+**关键优势**：
+- ✅ **避免集群版本问题**：不使用传统@udf装饰器，避免Driver和Executor的Python版本冲突
+- ✅ **无序列化开销**：Spark内置函数直接在JVM中执行，无Python对象序列化
+- ✅ **集群兼容性**：适用于异构集群环境，不依赖特定Python版本
+- ✅ **性能优化**：充分利用Spark Catalyst优化器和向量化执行
 
 ### 4. JSON规则系统
 
@@ -253,9 +252,9 @@ def mergeWithExistingTags(newTags, existingTags):
 - **字段投影**：只加载必要字段减少I/O，使用`select()`精确选择字段
 
 ### 2. 类型安全与性能并重
-- **Spark内置函数优先**：使用`array_distinct`、`array_sort`、`flatten`等原生函数
-- **UDF备用策略**：复杂逻辑使用类型安全的UDF，支持多种输入类型
-- **序列化优化**：减少UDF调用，避免Python-JVM序列化开销
+- **Spark内置函数优先**：使用`array_distinct`、`array_sort`、`array_union`、`coalesce`等原生函数
+- **工具化包装策略**：将Spark内置函数封装为工具函数，提供统一接口
+- **序列化优化**：完全避免传统UDF，消除Python-JVM序列化开销和集群版本冲突
 
 ### 3. 并行处理优化  
 - **依赖分析**：基于表依赖关系的智能分组，最小化JOIN操作
@@ -314,12 +313,14 @@ class DolphinschedulerConfig(BaseConfig):
 
 ```bash
 # 海豚调度器Spark任务配置
-主类: src.tag_engine.main
+主程序: /dolphinscheduler/default/resources/bigdata_tag_system/main.py
 程序参数: --mode task-all
 部署模式: cluster  
 驱动程序内存: 2g
 执行器内存: 4g
 执行器数量: 10
+
+# 注意: main.py是从src/tag_engine/main.py动态生成的统一入口
 ```
 
 ## 数据流架构
@@ -416,6 +417,20 @@ tests/test_tag_grouping.py::TestTagGrouping::test_group_tags_complex_scenario PA
 - ✅ **智能分组**: 相同表分组、不同表分组、复杂场景组合
 - ✅ **分组优化**: 依赖表组合的准确性和效率验证
 - ✅ **边界处理**: 空规则、无效规则的健壮性测试
+
+#### **标签表达式工具测试** (7个测试用例)
+- ✅ **并行表达式构建**: 基础功能、复杂条件、业务集成测试
+- ✅ **空值处理**: 空条件列表、None条件的边界情况
+- ✅ **去重排序**: 重复标签去重、标签ID自动排序
+- ✅ **SQL解析**: JOIN后DataFrame的SQL条件正确解析
+- ✅ **类型安全**: 确保返回空数组而非null，支持业务过滤逻辑
+
+#### **SparkUdfs集成测试** (7个测试用例)
+- ✅ **标签合并功能**: merge_with_existing_tags新老标签合并测试
+- ✅ **JSON转换**: array_to_json、json_to_array双向转换测试
+- ✅ **往返转换**: JSON和数组的完整往返转换验证
+- ✅ **TagEngine集成**: 模拟实际TagEngine使用场景
+- ✅ **类型安全**: 多种输入类型的兼容性和错误处理
 
 ### 测试数据模型
 
@@ -519,7 +534,7 @@ jobs:
 ```
 
 #### **测试性能基准**
-- **测试速度**: 22个测试用例 ≈ 13秒
+- **测试速度**: 35个测试用例 ≈ 18秒 (优化后的tagExpressionUtils和SparkUdfs测试)
 - **覆盖率目标**: > 85% 代码覆盖
 - **测试稳定性**: 100% 通过率，无随机失败
 
@@ -548,23 +563,43 @@ python dolphin_deploy_package.py
 # 上传新的部署包到资源中心
 ```
 
-### 自定义UDF开发
+### 自定义工具开发
 
+#### **1. 并行表达式工具 (tagExpressionUtils.py)**
 ```python
-# 在SparkUdfs.py中添加新的模块级函数
-def custom_tag_logic(input_column):
-    """自定义标签逻辑 - 使用Spark原生函数
-    避免UDF序列化开销，优先使用Column表达式
+# 添加新的并行计算表达式构建函数
+def buildCustomParallelExpression(conditions):
+    """自定义并行表达式构建 - 使用模块级函数避免序列化
+    适用于复杂的多条件并行计算场景
     """
-    return when(input_column.isNotNull() & (input_column > 0), lit(True)).otherwise(lit(False))
+    if not conditions:
+        return array()
+    
+    # 构建SQL表达式，使用filter高阶函数确保类型安全
+    case_expressions = []
+    for condition in conditions:
+        case_expressions.append(f"case when {condition['sql']} then {condition['result']} else null end")
+    
+    sql_expr = f"array_distinct(array_sort(filter(array({', '.join(case_expressions)}), x -> x is not null)))"
+    return expr(sql_expr)
+```
 
-# 复杂逻辑才使用UDF
-@udf(returnType=ArrayType(IntegerType()))  
-def complex_tag_udf(input_data):
-    """仅在必要时使用UDF，确保类型安全"""
-    if not input_data:
-        return []
-    return process_complex_logic(input_data)
+#### **2. Spark内置函数工具开发 (SparkUdfs.py)**
+```python
+# 推荐：使用Spark内置函数封装，避免集群版本问题
+def custom_tag_merge(tag_arrays):
+    """自定义标签合并逻辑 - 使用Spark内置函数
+    避免传统UDF的集群Python版本兼容性问题
+    """
+    # 使用flatten + array_distinct + array_sort组合
+    return array_distinct(array_sort(flatten(tag_arrays)))
+
+def conditional_tag_assignment(condition_col, tag_id):
+    """条件标签分配 - 使用Spark内置函数"""
+    return when(condition_col, array(lit(tag_id))).otherwise(array())
+
+# 仅在极其复杂且无法用Spark内置函数实现时才考虑UDF
+# 注意：需要确保集群所有节点Python版本一致
 ```
 
 ### 测试驱动开发流程
@@ -608,9 +643,10 @@ python -m pytest tests/ -v  # 确保不破坏现有功能
 - ⚡ **并行计算优化**：表依赖分组 + 批量计算，最大化资源利用
 
 ### 架构设计亮点
-- 🏗️ **模块化设计**：TagEngine、TagGroup、UDFs职责清晰分离
+- 🏗️ **模块化设计**：TagEngine、TagGroup、工具函数职责清晰分离
 - 🏗️ **统一入口管理**：`src/tag_engine/main.py`作为唯一真实来源
 - 🏗️ **多环境支持**：本地开发、海豚调度器部署无缝切换
+- 🏗️ **集群兼容性**：完全避免传统UDF，解决异构集群Python版本兼容问题
 
 ### 生产就绪特性
 - 🚀 **海豚调度器集成**：原生支持YARN集群部署
@@ -621,4 +657,4 @@ python -m pytest tests/ -v  # 确保不破坏现有功能
 
 ## 🎯 让数据驱动业务，让标签创造价值！
 
-**基于PySpark DSL + UDF的企业级标签计算系统，助力精准营销和用户洞察**
+**基于PySpark DSL + Spark内置函数的企业级标签计算系统，助力精准营销和用户洞察**
