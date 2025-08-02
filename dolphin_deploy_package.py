@@ -426,8 +426,8 @@ echo "✅ 标签系统部署包解压完成到: {extract_path}"
 ### 3. 创建标签计算工作流
 1. 创建新工作流："标签计算任务"
 2. 添加Spark节点：
-   - **主程序**: `{extract_path}main.py`
-   - **主程序参数**: `--mode health`
+   - **主程序**: `{extract_path}src/tag_engine/main.py`
+   - **主程序参数**: `--mode health --verbose`
    - **Spark任务名称**: BigDataTagSystem-Dolphin
 
 ### 4. Spark任务配置
@@ -643,13 +643,9 @@ client.triggerWorkflow("tag_system_compute", Map.of(
                     zip_file.write(file_path, arc_name)
                     print(f"  ✅ 添加源码: {arc_name}")
             
-            # 直接使用核心引擎作为主程序入口
-            core_main_path = self.project_root / "src" / "tag_engine" / "main.py"
-            if core_main_path.exists():
-                zip_file.write(core_main_path, "main.py")
-                print("  ✅ 添加主程序: main.py (来自 src/tag_engine/main.py)")
-            else:
-                print("  ❌ 核心引擎文件不存在: src/tag_engine/main.py")
+            # 不创建重复的main.py，保持原有的src目录结构
+            # 用户应该直接使用: bigdata_tag_system/src/tag_engine/main.py
+            print("  ✅ 保持原有目录结构，main.py位置: src/tag_engine/main.py")
             
             # 添加测试数据生成器
             test_generator = self.create_test_data_generator()
@@ -682,7 +678,7 @@ def main():
     print(f"1. 上传 {zip_path} 到海豚调度器资源中心")
     print(f"2. 直接在资源中心解压到 /dolphinscheduler/default/resources/")
     print(f"3. 按照 dolphin_gui_deploy/部署说明.md 进行配置")
-    print(f"4. 创建Spark任务，主程序路径：/dolphinscheduler/default/resources/main.py")
+    print(f"4. 创建Spark任务，主程序路径：/dolphinscheduler/default/resources/src/tag_engine/main.py")
 
 if __name__ == "__main__":
     main()

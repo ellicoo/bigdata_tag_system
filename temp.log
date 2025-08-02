@@ -1,23 +1,23 @@
-[LOG-PATH]: /usr/local/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250801/18466477060960/21/945/3517.log, [HOST]:  Host(ip=172.31.9.77, port=1234)
-[INFO] 2025-08-01 13:40:21.990 +0000 - ***********************************************************************************************
-[INFO] 2025-08-01 13:40:21.991 +0000 - *********************************  Initialize task context  ***********************************
-[INFO] 2025-08-01 13:40:21.991 +0000 - ***********************************************************************************************
-[INFO] 2025-08-01 13:40:21.991 +0000 - Begin to initialize task
-[INFO] 2025-08-01 13:40:21.991 +0000 - Set task startTime: 1754055621991
-[INFO] 2025-08-01 13:40:21.991 +0000 - Set task appId: 945_3517
-[INFO] 2025-08-01 13:40:21.991 +0000 - End initialize task {
-  "taskInstanceId" : 3517,
+[LOG-PATH]: /usr/local/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250802/18466477060960/25/954/3526.log, [HOST]:  Host(ip=172.31.9.77, port=1234)
+[INFO] 2025-08-02 05:48:15.215 +0000 - ***********************************************************************************************
+[INFO] 2025-08-02 05:48:15.217 +0000 - *********************************  Initialize task context  ***********************************
+[INFO] 2025-08-02 05:48:15.217 +0000 - ***********************************************************************************************
+[INFO] 2025-08-02 05:48:15.217 +0000 - Begin to initialize task
+[INFO] 2025-08-02 05:48:15.217 +0000 - Set task startTime: 1754113695217
+[INFO] 2025-08-02 05:48:15.217 +0000 - Set task appId: 954_3526
+[INFO] 2025-08-02 05:48:15.217 +0000 - End initialize task {
+  "taskInstanceId" : 3526,
   "taskName" : "specific_compute_tags",
-  "firstSubmitTime" : 1754055621974,
-  "startTime" : 1754055621991,
+  "firstSubmitTime" : 1754113695198,
+  "startTime" : 1754113695217,
   "taskType" : "SPARK",
   "workflowInstanceHost" : "172.31.9.77:5678",
   "host" : "172.31.9.77:1234",
-  "logPath" : "/usr/local/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250801/18466477060960/21/945/3517.log",
+  "logPath" : "/usr/local/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250802/18466477060960/25/954/3526.log",
   "processId" : 0,
   "processDefineCode" : 18466477060960,
-  "processDefineVersion" : 21,
-  "processInstanceId" : 945,
+  "processDefineVersion" : 25,
+  "processInstanceId" : 954,
   "scheduleTime" : 0,
   "executorId" : 1,
   "cmdTypeIfComplement" : 0,
@@ -25,7 +25,7 @@
   "processDefineId" : 0,
   "projectId" : 0,
   "projectCode" : 18466461502048,
-  "taskParams" : "{\"localParams\":[],\"rawScript\":\"\",\"resourceList\":[],\"programType\":\"PYTHON\",\"mainClass\":\"\",\"mainJar\":{\"id\":-1,\"resourceName\":\"file:/dolphinscheduler/default/resources/bigdata_tag_system/main.py\",\"res\":null},\"deployMode\":\"client\",\"appName\":\"specific_compute_tags\",\"mainArgs\":\"--mode task-tags --tag-ids 1,2,3,4,5,6,7,8,9\",\"others\":\"--jars /dolphinscheduler/default/resources/mysql-connector-j-8.0.33.jar\",\"yarnQueue\":\"\",\"driverCores\":1,\"driverMemory\":\"512M\",\"numExecutors\":2,\"executorMemory\":\"2G\",\"executorCores\":2,\"sqlExecutionType\":\"SCRIPT\"}",
+  "taskParams" : "{\"localParams\":[],\"rawScript\":\"\",\"resourceList\":[],\"programType\":\"PYTHON\",\"mainClass\":\"\",\"mainJar\":{\"id\":-1,\"resourceName\":\"file:/dolphinscheduler/default/resources/bigdata_tag_system/src/tag_engine/main.py\",\"res\":null},\"deployMode\":\"cluster\",\"appName\":\"specific_compute_tags\",\"mainArgs\":\"--mode task-tags --tag-ids 1,2,3,4,5,6,7,8,9\",\"others\":\"--jars /dolphinscheduler/default/resources/mysql-connector-j-8.0.33.jar\",\"yarnQueue\":\"\",\"driverCores\":1,\"driverMemory\":\"512M\",\"numExecutors\":2,\"executorMemory\":\"2G\",\"executorCores\":2,\"sqlExecutionType\":\"SCRIPT\"}",
   "prepareParamsMap" : {
     "system.task.definition.name" : {
       "prop" : "system.task.definition.name",
@@ -49,25 +49,25 @@
       "prop" : "system.workflow.instance.id",
       "direct" : "IN",
       "type" : "VARCHAR",
-      "value" : "945"
+      "value" : "954"
     },
     "system.biz.curdate" : {
       "prop" : "system.biz.curdate",
       "direct" : "IN",
       "type" : "VARCHAR",
-      "value" : "20250801"
+      "value" : "20250802"
     },
     "system.biz.date" : {
       "prop" : "system.biz.date",
       "direct" : "IN",
       "type" : "VARCHAR",
-      "value" : "20250731"
+      "value" : "20250801"
     },
     "system.task.instance.id" : {
       "prop" : "system.task.instance.id",
       "direct" : "IN",
       "type" : "VARCHAR",
-      "value" : "3517"
+      "value" : "3526"
     },
     "system.workflow.definition.name" : {
       "prop" : "system.workflow.definition.name",
@@ -97,17 +97,17 @@
       "prop" : "system.datetime",
       "direct" : "IN",
       "type" : "VARCHAR",
-      "value" : "20250801134021"
+      "value" : "20250802054815"
     }
   },
-  "taskAppId" : "945_3517",
+  "taskAppId" : "954_3526",
   "taskTimeout" : 2147483647,
   "workerGroup" : "default",
   "delayTime" : 0,
   "currentExecutionStatus" : "SUBMITTED_SUCCESS",
   "endTime" : 0,
   "resources" : {
-    "file:/dolphinscheduler/default/resources/bigdata_tag_system/main.py" : ""
+    "file:/dolphinscheduler/default/resources/bigdata_tag_system/src/tag_engine/main.py" : ""
   },
   "dryRun" : 0,
   "paramsMap" : { },
@@ -117,27 +117,27 @@
   "logBufferEnable" : false,
   "dispatchFailTimes" : 0
 }
-[INFO] 2025-08-01 13:40:21.991 +0000 - ***********************************************************************************************
-[INFO] 2025-08-01 13:40:21.991 +0000 - *********************************  Load task instance plugin  *********************************
-[INFO] 2025-08-01 13:40:21.992 +0000 - ***********************************************************************************************
-[INFO] 2025-08-01 13:40:21.992 +0000 - Send task status RUNNING_EXECUTION master: 172.31.9.77:1234
-[WARN] 2025-08-01 13:40:21.992 +0000 - Current tenant is default tenant, will use root to execute the task
-[INFO] 2025-08-01 13:40:21.992 +0000 - TenantCode: default check successfully
-[INFO] 2025-08-01 13:40:21.992 +0000 - WorkflowInstanceExecDir: /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_21/945/3517 check successfully
-[INFO] 2025-08-01 13:40:21.992 +0000 - get resource file from path:file:/dolphinscheduler/default/resources/bigdata_tag_system/main.py
-[INFO] 2025-08-01 13:40:21.994 +0000 - Download resources: {file:/dolphinscheduler/default/resources/bigdata_tag_system/main.py=file:/dolphinscheduler/default/resources/bigdata_tag_system/main.py} successfully
-[INFO] 2025-08-01 13:40:21.994 +0000 - Download upstream files: [] successfully
-[INFO] 2025-08-01 13:40:21.994 +0000 - Task plugin instance: SPARK create successfully
-[INFO] 2025-08-01 13:40:21.994 +0000 - Initialize spark task params {
+[INFO] 2025-08-02 05:48:15.217 +0000 - ***********************************************************************************************
+[INFO] 2025-08-02 05:48:15.217 +0000 - *********************************  Load task instance plugin  *********************************
+[INFO] 2025-08-02 05:48:15.217 +0000 - ***********************************************************************************************
+[INFO] 2025-08-02 05:48:15.218 +0000 - Send task status RUNNING_EXECUTION master: 172.31.9.77:1234
+[WARN] 2025-08-02 05:48:15.218 +0000 - Current tenant is default tenant, will use root to execute the task
+[INFO] 2025-08-02 05:48:15.218 +0000 - TenantCode: default check successfully
+[INFO] 2025-08-02 05:48:15.218 +0000 - WorkflowInstanceExecDir: /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_25/954/3526 check successfully
+[INFO] 2025-08-02 05:48:15.218 +0000 - get resource file from path:file:/dolphinscheduler/default/resources/bigdata_tag_system/src/tag_engine/main.py
+[INFO] 2025-08-02 05:48:15.220 +0000 - Download resources: {file:/dolphinscheduler/default/resources/bigdata_tag_system/src/tag_engine/main.py=file:/dolphinscheduler/default/resources/bigdata_tag_system/src/tag_engine/main.py} successfully
+[INFO] 2025-08-02 05:48:15.220 +0000 - Download upstream files: [] successfully
+[INFO] 2025-08-02 05:48:15.220 +0000 - Task plugin instance: SPARK create successfully
+[INFO] 2025-08-02 05:48:15.220 +0000 - Initialize spark task params {
   "localParams" : [ ],
   "varPool" : null,
   "mainJar" : {
     "id" : -1,
-    "resourceName" : "file:/dolphinscheduler/default/resources/bigdata_tag_system/main.py",
+    "resourceName" : "file:/dolphinscheduler/default/resources/bigdata_tag_system/src/tag_engine/main.py",
     "res" : null
   },
   "mainClass" : "",
-  "deployMode" : "client",
+  "deployMode" : "cluster",
   "mainArgs" : "--mode task-tags --tag-ids 1,2,3,4,5,6,7,8,9",
   "driverCores" : 1,
   "driverMemory" : "512M",
@@ -153,433 +153,804 @@
   "resourceList" : [ ],
   "sqlExecutionType" : "SCRIPT"
 }
-[INFO] 2025-08-01 13:40:21.994 +0000 - Success initialized task plugin instance successfully
-[INFO] 2025-08-01 13:40:21.994 +0000 - Set taskVarPool: null successfully
-[INFO] 2025-08-01 13:40:21.994 +0000 - ***********************************************************************************************
-[INFO] 2025-08-01 13:40:21.994 +0000 - *********************************  Execute task instance  *************************************
-[INFO] 2025-08-01 13:40:21.994 +0000 - ***********************************************************************************************
-[INFO] 2025-08-01 13:40:21.994 +0000 - Final Shell file is :
+[INFO] 2025-08-02 05:48:15.220 +0000 - Success initialized task plugin instance successfully
+[INFO] 2025-08-02 05:48:15.220 +0000 - Set taskVarPool: null successfully
+[INFO] 2025-08-02 05:48:15.220 +0000 - ***********************************************************************************************
+[INFO] 2025-08-02 05:48:15.220 +0000 - *********************************  Execute task instance  *************************************
+[INFO] 2025-08-02 05:48:15.220 +0000 - ***********************************************************************************************
+[INFO] 2025-08-02 05:48:15.221 +0000 - Final Shell file is :
 #!/bin/bash
 BASEDIR=$(cd `dirname $0`; pwd)
 cd $BASEDIR
-${SPARK_HOME}/bin/spark-submit --master yarn --deploy-mode client --conf spark.driver.cores=1 --conf spark.driver.memory=512M --conf spark.executor.instances=2 --conf spark.executor.cores=2 --conf spark.executor.memory=2G --name specific_compute_tags --jars /dolphinscheduler/default/resources/mysql-connector-j-8.0.33.jar file:/dolphinscheduler/default/resources/bigdata_tag_system/main.py --mode task-tags --tag-ids 1,2,3,4,5,6,7,8,9
-[INFO] 2025-08-01 13:40:21.995 +0000 - Executing shell command : sudo -u root -i /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_21/945/3517/945_3517.sh
-[INFO] 2025-08-01 13:40:21.998 +0000 - process start, process id is: 849301
-[INFO] 2025-08-01 13:40:23.998 +0000 -  ->
-	25/08/01 13:40:23 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
-[INFO] 2025-08-01 13:40:24.999 +0000 -  ->
-	============================================================
-	🏷️  大数据标签计算系统
-	============================================================
-	执行模式: task-tags
-	当前工作目录: /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_21/945/3517
-	脚本目录: /dolphinscheduler/default/resources/bigdata_tag_system
-	项目根目录: /dolphinscheduler/default
-	Python路径前3项: ['/dolphinscheduler/default', '/dolphinscheduler/default/resources/bigdata_tag_system', '/mnt/spark/python/lib/pyspark.zip']
-	指定标签: 1,2,3,4,5,6,7,8,9
-	🚀 创建Spark会话: TagComputeEngine
-	25/08/01 13:40:24 INFO EMRParamSideChannel: Setting FGAC mode to false
-	25/08/01 13:40:24 INFO SparkContext: Running Spark version 3.5.2-amzn-1
-	25/08/01 13:40:24 INFO SparkContext: OS info Linux, 6.8.0-1029-aws, amd64
-	25/08/01 13:40:24 INFO SparkContext: Java version 17.0.15
-	25/08/01 13:40:24 INFO ResourceUtils: ==============================================================
-	25/08/01 13:40:24 INFO ResourceUtils: No custom resources configured for spark.driver.
-	25/08/01 13:40:24 INFO ResourceUtils: ==============================================================
-	25/08/01 13:40:24 INFO SparkContext: Submitted application: TagComputeEngine
-	25/08/01 13:40:24 INFO ResourceProfile: Default ResourceProfile created, executor resources: Map(executorType -> name: executorType, amount: 1, script: , vendor: , cores -> name: cores, amount: 2, script: , vendor: , memory -> name: memory, amount: 2048, script: , vendor: , offHeap -> name: offHeap, amount: 0, script: , vendor: ), task resources: Map(cpus -> name: cpus, amount: 1.0)
-	25/08/01 13:40:24 INFO ResourceProfile: Limiting resource is cpus at 2 tasks per executor
-	25/08/01 13:40:24 INFO ResourceProfileManager: Added ResourceProfile id: 0
-	25/08/01 13:40:24 INFO ResourceProfile: User executor ResourceProfile created, executor resources: Map(executorType -> name: executorType, amount: 1, script: , vendor: , cores -> name: cores, amount: 2, script: , vendor: , memory -> name: memory, amount: 2048, script: , vendor: , offHeap -> name: offHeap, amount: 0, script: , vendor: ), task resources: Map(cpus -> name: cpus, amount: 1.0)
-	25/08/01 13:40:24 INFO ResourceProfile: Limiting resource is cpus at 2 tasks per executor
-	25/08/01 13:40:24 INFO ResourceProfileManager: Added ResourceProfile id: 1
-	25/08/01 13:40:24 INFO SecurityManager: Changing view acls to: root
-	25/08/01 13:40:24 INFO SecurityManager: Changing modify acls to: root
-	25/08/01 13:40:24 INFO SecurityManager: Changing view acls groups to:
-	25/08/01 13:40:24 INFO SecurityManager: Changing modify acls groups to:
-	25/08/01 13:40:24 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users with view permissions: root; groups with view permissions: EMPTY; users with modify permissions: root; groups with modify permissions: EMPTY
-	25/08/01 13:40:24 INFO Utils: Successfully started service 'sparkDriver' on port 21479.
-	25/08/01 13:40:24 INFO SparkEnv: Registering MapOutputTracker
-	25/08/01 13:40:24 INFO SparkEnv: Registering BlockManagerMaster
-	25/08/01 13:40:24 INFO BlockManagerMasterEndpoint: Using org.apache.spark.storage.DefaultTopologyMapper for getting topology information
-	25/08/01 13:40:24 INFO BlockManagerMasterEndpoint: BlockManagerMasterEndpoint up
-	25/08/01 13:40:24 INFO SparkEnv: Registering BlockManagerMasterHeartbeat
-	25/08/01 13:40:24 INFO DiskBlockManager: Created local directory at /tmp/blockmgr-6e985438-8b49-4dd8-9c61-08576dbe6dcd
-	25/08/01 13:40:24 INFO MemoryStore: MemoryStore started with capacity 127.2 MiB
-	25/08/01 13:40:24 INFO SparkEnv: Registering OutputCommitCoordinator
-	25/08/01 13:40:24 INFO SubResultCacheManager: Sub-result caches are disabled.
-	25/08/01 13:40:24 INFO JettyUtils: Start Jetty 0.0.0.0:4040 for SparkUI
-	25/08/01 13:40:24 INFO Utils: Successfully started service 'SparkUI' on port 4040.
-	25/08/01 13:40:24 INFO Utils: Using 100 preallocated executors (minExecutors: 0). Set spark.dynamicAllocation.preallocateExecutors to `false` disable executor preallocation.
-[INFO] 2025-08-01 13:40:25.999 +0000 -  ->
-	25/08/01 13:40:25 INFO Configuration: resource-types.xml not found
-	25/08/01 13:40:25 INFO ResourceUtils: Unable to find 'resource-types.xml'.
-	25/08/01 13:40:25 INFO Client: Verifying our application has not requested more than the maximum memory capability of the cluster (23424 MB per container)
-	25/08/01 13:40:25 INFO Client: Will allocate AM container, with 896 MB memory including 384 MB overhead
-	25/08/01 13:40:25 INFO Client: Setting up container launch context for our AM
-	25/08/01 13:40:25 INFO Client: Setting up the launch environment for our AM container
-	25/08/01 13:40:25 INFO Client: Preparing resources for our AM container
-	25/08/01 13:40:25 INFO PlatformInfo: Unable to read clusterId from http://localhost:8321/configuration, trying extra instance data file: /var/lib/instance-controller/extraInstanceData.json
-	25/08/01 13:40:25 INFO PlatformInfo: Unable to read clusterId from /var/lib/instance-controller/extraInstanceData.json, trying EMR job-flow data file: /var/lib/info/job-flow.json
-	25/08/01 13:40:25 INFO PlatformInfo: Unable to read clusterId from /var/lib/info/job-flow.json, out of places to look
-	25/08/01 13:40:25 INFO ClientConfigurationFactory: Set initial getObject socket timeout to 2000 ms.
-[INFO] 2025-08-01 13:40:27.000 +0000 -  ->
-	25/08/01 13:40:26 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/HikariCP-2.5.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/HikariCP-2.5.1.jar
-	25/08/01 13:40:26 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/HikariCP-2.5.1.jar' for reading
-	25/08/01 13:40:26 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/JLargeArrays-1.5.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/JLargeArrays-1.5.jar
-	25/08/01 13:40:26 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/JLargeArrays-1.5.jar' for reading
-	25/08/01 13:40:26 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/JTransforms-3.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/JTransforms-3.1.jar
-	25/08/01 13:40:26 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/JTransforms-3.1.jar' for reading
-	25/08/01 13:40:26 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/RoaringBitmap-0.9.45.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/RoaringBitmap-0.9.45.jar
-	25/08/01 13:40:26 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/RoaringBitmap-0.9.45.jar' for reading
-	25/08/01 13:40:26 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/ST4-4.0.4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/ST4-4.0.4.jar
-	25/08/01 13:40:26 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/ST4-4.0.4.jar' for reading
-	25/08/01 13:40:26 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/activation-1.1.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/activation-1.1.1.jar
-	25/08/01 13:40:26 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/activation-1.1.1.jar' for reading
-	25/08/01 13:40:26 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/aggdesigner-algorithm-6.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/aggdesigner-algorithm-6.0.jar
-	25/08/01 13:40:26 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/aggdesigner-algorithm-6.0.jar' for reading
-[INFO] 2025-08-01 13:40:28.000 +0000 -  ->
-	25/08/01 13:40:27 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/aircompressor-0.27.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/aircompressor-0.27.jar
-	25/08/01 13:40:27 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/aircompressor-0.27.jar' for reading
-	25/08/01 13:40:27 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/algebra_2.12-2.0.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/algebra_2.12-2.0.1.jar
-	25/08/01 13:40:27 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/algebra_2.12-2.0.1.jar' for reading
-	25/08/01 13:40:27 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/animal-sniffer-annotations-1.14.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/animal-sniffer-annotations-1.14.jar
-	25/08/01 13:40:27 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/animal-sniffer-annotations-1.14.jar' for reading
-	25/08/01 13:40:27 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/animal-sniffer-annotations-1.23.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/animal-sniffer-annotations-1.23.jar
-	25/08/01 13:40:27 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/animal-sniffer-annotations-1.23.jar' for reading
-	25/08/01 13:40:27 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/annotations-16.0.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/annotations-16.0.2.jar
-	25/08/01 13:40:27 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/annotations-16.0.2.jar' for reading
-	25/08/01 13:40:27 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/annotations-17.0.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/annotations-17.0.0.jar
-	25/08/01 13:40:27 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/annotations-17.0.0.jar' for reading
-	25/08/01 13:40:27 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/annotations-4.1.1.4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/annotations-4.1.1.4.jar
-	25/08/01 13:40:27 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/annotations-4.1.1.4.jar' for reading
-	25/08/01 13:40:27 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/antlr-runtime-3.5.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/antlr-runtime-3.5.2.jar
-	25/08/01 13:40:27 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/antlr-runtime-3.5.2.jar' for reading
-	25/08/01 13:40:27 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/antlr4-runtime-4.9.3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/antlr4-runtime-4.9.3.jar
-	25/08/01 13:40:27 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/antlr4-runtime-4.9.3.jar' for reading
-	25/08/01 13:40:27 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/aopalliance-1.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/aopalliance-1.0.jar
-	25/08/01 13:40:27 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/aopalliance-1.0.jar' for reading
-	25/08/01 13:40:27 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/aopalliance-repackaged-2.6.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/aopalliance-repackaged-2.6.1.jar
-	25/08/01 13:40:27 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/aopalliance-repackaged-2.6.1.jar' for reading
-[INFO] 2025-08-01 13:40:29.001 +0000 -  ->
-	25/08/01 13:40:28 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/arpack-3.0.3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/arpack-3.0.3.jar
-	25/08/01 13:40:28 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/arpack-3.0.3.jar' for reading
-	25/08/01 13:40:28 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/arpack_combined_all-0.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/arpack_combined_all-0.1.jar
-	25/08/01 13:40:28 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/arpack_combined_all-0.1.jar' for reading
-	25/08/01 13:40:28 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/arrow-format-12.0.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/arrow-format-12.0.1.jar
-	25/08/01 13:40:28 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/arrow-format-12.0.1.jar' for reading
-	25/08/01 13:40:28 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/arrow-memory-core-12.0.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/arrow-memory-core-12.0.1.jar
-	25/08/01 13:40:28 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/arrow-memory-core-12.0.1.jar' for reading
-	25/08/01 13:40:28 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/arrow-memory-netty-12.0.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/arrow-memory-netty-12.0.1.jar
-	25/08/01 13:40:28 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/arrow-memory-netty-12.0.1.jar' for reading
-	25/08/01 13:40:28 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/arrow-vector-12.0.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/arrow-vector-12.0.1.jar
-	25/08/01 13:40:28 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/arrow-vector-12.0.1.jar' for reading
-	25/08/01 13:40:28 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/audience-annotations-0.12.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/audience-annotations-0.12.0.jar
-	25/08/01 13:40:28 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/audience-annotations-0.12.0.jar' for reading
-	25/08/01 13:40:28 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/avro-1.11.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/avro-1.11.2.jar
-	25/08/01 13:40:28 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/avro-1.11.2.jar' for reading
-	25/08/01 13:40:28 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/avro-ipc-1.11.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/avro-ipc-1.11.2.jar
-	25/08/01 13:40:28 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/avro-ipc-1.11.2.jar' for reading
-	25/08/01 13:40:28 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/avro-mapred-1.11.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/avro-mapred-1.11.2.jar
-	25/08/01 13:40:28 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/avro-mapred-1.11.2.jar' for reading
-	25/08/01 13:40:28 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/bcprov-ext-jdk15on-1.66.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/bcprov-ext-jdk15on-1.66.jar
-	25/08/01 13:40:28 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/bcprov-ext-jdk15on-1.66.jar' for reading
-[INFO] 2025-08-01 13:40:30.002 +0000 -  ->
-	25/08/01 13:40:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/blas-3.0.3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/blas-3.0.3.jar
-	25/08/01 13:40:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/blas-3.0.3.jar' for reading
-	25/08/01 13:40:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/bonecp-0.8.0.RELEASE.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/bonecp-0.8.0.RELEASE.jar
-	25/08/01 13:40:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/bonecp-0.8.0.RELEASE.jar' for reading
-	25/08/01 13:40:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/breeze-macros_2.12-2.1.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/breeze-macros_2.12-2.1.0.jar
-	25/08/01 13:40:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/breeze-macros_2.12-2.1.0.jar' for reading
-	25/08/01 13:40:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/breeze_2.12-2.1.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/breeze_2.12-2.1.0.jar
-	25/08/01 13:40:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/breeze_2.12-2.1.0.jar' for reading
-	25/08/01 13:40:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/cats-kernel_2.12-2.1.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/cats-kernel_2.12-2.1.1.jar
-	25/08/01 13:40:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/cats-kernel_2.12-2.1.1.jar' for reading
-	25/08/01 13:40:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/checker-qual-2.5.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/checker-qual-2.5.2.jar
-	25/08/01 13:40:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/checker-qual-2.5.2.jar' for reading
-	25/08/01 13:40:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/chill-java-0.10.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/chill-java-0.10.0.jar
-	25/08/01 13:40:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/chill-java-0.10.0.jar' for reading
-	25/08/01 13:40:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/chill_2.12-0.10.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/chill_2.12-0.10.0.jar
-	25/08/01 13:40:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/chill_2.12-0.10.0.jar' for reading
-	25/08/01 13:40:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-cli-1.5.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/commons-cli-1.5.0.jar
-	25/08/01 13:40:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-cli-1.5.0.jar' for reading
-	25/08/01 13:40:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-codec-1.16.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/commons-codec-1.16.1.jar
-	25/08/01 13:40:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-codec-1.16.1.jar' for reading
-	25/08/01 13:40:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-collections-3.2.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/commons-collections-3.2.2.jar
-	25/08/01 13:40:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-collections-3.2.2.jar' for reading
-[INFO] 2025-08-01 13:40:31.003 +0000 -  ->
-	25/08/01 13:40:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-collections4-4.4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/commons-collections4-4.4.jar
-	25/08/01 13:40:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-collections4-4.4.jar' for reading
-	25/08/01 13:40:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-compiler-3.1.9.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/commons-compiler-3.1.9.jar
-	25/08/01 13:40:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-compiler-3.1.9.jar' for reading
-	25/08/01 13:40:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-compress-1.23.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/commons-compress-1.23.0.jar
-	25/08/01 13:40:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-compress-1.23.0.jar' for reading
-	25/08/01 13:40:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-crypto-1.1.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/commons-crypto-1.1.0.jar
-	25/08/01 13:40:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-crypto-1.1.0.jar' for reading
-	25/08/01 13:40:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-dbcp-1.4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/commons-dbcp-1.4.jar
-	25/08/01 13:40:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-dbcp-1.4.jar' for reading
-	25/08/01 13:40:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-io-2.16.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/commons-io-2.16.1.jar
-	25/08/01 13:40:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-io-2.16.1.jar' for reading
-	25/08/01 13:40:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-lang-2.6.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/commons-lang-2.6.jar
-	25/08/01 13:40:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-lang-2.6.jar' for reading
-	25/08/01 13:40:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-lang3-3.12.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/commons-lang3-3.12.0.jar
-	25/08/01 13:40:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-lang3-3.12.0.jar' for reading
-	25/08/01 13:40:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-logging-1.1.3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/commons-logging-1.1.3.jar
-	25/08/01 13:40:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-logging-1.1.3.jar' for reading
-	25/08/01 13:40:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-math3-3.6.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/commons-math3-3.6.1.jar
-	25/08/01 13:40:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-math3-3.6.1.jar' for reading
-	25/08/01 13:40:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-pool-1.5.4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/commons-pool-1.5.4.jar
-	25/08/01 13:40:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-pool-1.5.4.jar' for reading
-	25/08/01 13:40:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-text-1.10.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/commons-text-1.10.0.jar
-	25/08/01 13:40:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-text-1.10.0.jar' for reading
-	25/08/01 13:40:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/compress-lzf-1.1.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/compress-lzf-1.1.2.jar
-	25/08/01 13:40:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/compress-lzf-1.1.2.jar' for reading
-	25/08/01 13:40:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/curator-client-2.13.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/curator-client-2.13.0.jar
-[INFO] 2025-08-01 13:40:32.003 +0000 -  ->
-	25/08/01 13:40:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/curator-client-2.13.0.jar' for reading
-	25/08/01 13:40:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/curator-framework-2.13.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/curator-framework-2.13.0.jar
-	25/08/01 13:40:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/curator-framework-2.13.0.jar' for reading
-	25/08/01 13:40:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/curator-recipes-2.13.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/curator-recipes-2.13.0.jar
-	25/08/01 13:40:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/curator-recipes-2.13.0.jar' for reading
-	25/08/01 13:40:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/datanucleus-api-jdo-4.2.4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/datanucleus-api-jdo-4.2.4.jar
-	25/08/01 13:40:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/datanucleus-api-jdo-4.2.4.jar' for reading
-	25/08/01 13:40:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/datanucleus-core-4.1.17.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/datanucleus-core-4.1.17.jar
-	25/08/01 13:40:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/datanucleus-core-4.1.17.jar' for reading
-	25/08/01 13:40:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/datanucleus-rdbms-4.1.19.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/datanucleus-rdbms-4.1.19.jar
-	25/08/01 13:40:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/datanucleus-rdbms-4.1.19.jar' for reading
-	25/08/01 13:40:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/datasketches-java-3.3.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/datasketches-java-3.3.0.jar
-	25/08/01 13:40:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/datasketches-java-3.3.0.jar' for reading
-	25/08/01 13:40:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/datasketches-memory-2.1.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/datasketches-memory-2.1.0.jar
-	25/08/01 13:40:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/datasketches-memory-2.1.0.jar' for reading
-	25/08/01 13:40:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/derby-10.14.2.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/derby-10.14.2.0.jar
-	25/08/01 13:40:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/derby-10.14.2.0.jar' for reading
-	25/08/01 13:40:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/disruptor-3.3.7.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/disruptor-3.3.7.jar
-	25/08/01 13:40:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/disruptor-3.3.7.jar' for reading
-	25/08/01 13:40:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/dropwizard-metrics-hadoop-metrics2-reporter-0.1.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/dropwizard-metrics-hadoop-metrics2-reporter-0.1.2.jar
-	25/08/01 13:40:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/dropwizard-metrics-hadoop-metrics2-reporter-0.1.2.jar' for reading
-	25/08/01 13:40:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/emr-spark-goodies.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/emr-spark-goodies.jar
-	25/08/01 13:40:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/emr-spark-goodies.jar' for reading
-	25/08/01 13:40:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/emrfs-hadoop-assembly-2.66.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/emrfs-hadoop-assembly-2.66.0.jar
-	25/08/01 13:40:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/emrfs-hadoop-assembly-2.66.0.jar' for reading
-[INFO] 2025-08-01 13:40:33.004 +0000 -  ->
-	25/08/01 13:40:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/error_prone_annotations-2.1.3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/error_prone_annotations-2.1.3.jar
-	25/08/01 13:40:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/error_prone_annotations-2.1.3.jar' for reading
-	25/08/01 13:40:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/error_prone_annotations-2.18.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/error_prone_annotations-2.18.0.jar
-	25/08/01 13:40:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/error_prone_annotations-2.18.0.jar' for reading
-	25/08/01 13:40:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/findbugs-annotations-3.0.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/findbugs-annotations-3.0.1.jar
-	25/08/01 13:40:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/findbugs-annotations-3.0.1.jar' for reading
-	25/08/01 13:40:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/flatbuffers-java-1.12.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/flatbuffers-java-1.12.0.jar
-	25/08/01 13:40:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/flatbuffers-java-1.12.0.jar' for reading
-	25/08/01 13:40:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/gmetric4j-1.0.10.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/gmetric4j-1.0.10.jar
-	25/08/01 13:40:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/gmetric4j-1.0.10.jar' for reading
-	25/08/01 13:40:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/grpc-api-1.56.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/grpc-api-1.56.0.jar
-	25/08/01 13:40:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/grpc-api-1.56.0.jar' for reading
-	25/08/01 13:40:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/grpc-context-1.56.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/grpc-context-1.56.0.jar
-	25/08/01 13:40:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/grpc-context-1.56.0.jar' for reading
-	25/08/01 13:40:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/grpc-core-1.56.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/grpc-core-1.56.0.jar
-	25/08/01 13:40:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/grpc-core-1.56.0.jar' for reading
-	25/08/01 13:40:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/grpc-netty-1.56.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/grpc-netty-1.56.0.jar
-	25/08/01 13:40:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/grpc-netty-1.56.0.jar' for reading
-	25/08/01 13:40:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/grpc-protobuf-1.56.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/grpc-protobuf-1.56.0.jar
-	25/08/01 13:40:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/grpc-protobuf-1.56.0.jar' for reading
-	25/08/01 13:40:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/grpc-protobuf-lite-1.56.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/grpc-protobuf-lite-1.56.0.jar
-	25/08/01 13:40:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/grpc-protobuf-lite-1.56.0.jar' for reading
-	25/08/01 13:40:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/grpc-services-1.56.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/grpc-services-1.56.0.jar
-	25/08/01 13:40:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/grpc-services-1.56.0.jar' for reading
-[INFO] 2025-08-01 13:40:34.005 +0000 -  ->
-	25/08/01 13:40:33 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/grpc-stub-1.56.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/grpc-stub-1.56.0.jar
-	25/08/01 13:40:33 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/grpc-stub-1.56.0.jar' for reading
-	25/08/01 13:40:33 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/gson-2.10.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/gson-2.10.1.jar
-	25/08/01 13:40:33 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/gson-2.10.1.jar' for reading
-	25/08/01 13:40:33 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/guava-14.0.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/guava-14.0.1.jar
-	25/08/01 13:40:33 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/guava-14.0.1.jar' for reading
-	25/08/01 13:40:33 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hadoop-client-api-3.4.0-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/hadoop-client-api-3.4.0-amzn-1.jar
-	25/08/01 13:40:33 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hadoop-client-api-3.4.0-amzn-1.jar' for reading
-	25/08/01 13:40:33 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hadoop-client-runtime-3.4.0-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/hadoop-client-runtime-3.4.0-amzn-1.jar
-	25/08/01 13:40:33 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hadoop-client-runtime-3.4.0-amzn-1.jar' for reading
-	25/08/01 13:40:33 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hadoop-shaded-guava-1.2.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/hadoop-shaded-guava-1.2.0.jar
-	25/08/01 13:40:33 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hadoop-shaded-guava-1.2.0.jar' for reading
-[INFO] 2025-08-01 13:40:35.005 +0000 -  ->
-	25/08/01 13:40:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hadoop-yarn-server-web-proxy-3.4.0-amzn-1.jar' for reading
-	25/08/01 13:40:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-beeline-2.3.9-amzn-4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/hive-beeline-2.3.9-amzn-4.jar
-	25/08/01 13:40:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-beeline-2.3.9-amzn-4.jar' for reading
-	25/08/01 13:40:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-cli-2.3.9-amzn-4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/hive-cli-2.3.9-amzn-4.jar
-	25/08/01 13:40:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-cli-2.3.9-amzn-4.jar' for reading
-	25/08/01 13:40:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-common-2.3.9-amzn-4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/hive-common-2.3.9-amzn-4.jar
-	25/08/01 13:40:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-common-2.3.9-amzn-4.jar' for reading
-	25/08/01 13:40:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-exec-2.3.9-amzn-4-core.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/hive-exec-2.3.9-amzn-4-core.jar
-	25/08/01 13:40:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-exec-2.3.9-amzn-4-core.jar' for reading
-	25/08/01 13:40:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-jdbc-2.3.9-amzn-4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/hive-jdbc-2.3.9-amzn-4.jar
-	25/08/01 13:40:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-jdbc-2.3.9-amzn-4.jar' for reading
-	25/08/01 13:40:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-llap-common-2.3.9-amzn-4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/hive-llap-common-2.3.9-amzn-4.jar
-	25/08/01 13:40:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-llap-common-2.3.9-amzn-4.jar' for reading
-	25/08/01 13:40:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-metastore-2.3.9-amzn-4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/hive-metastore-2.3.9-amzn-4.jar
-	25/08/01 13:40:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-metastore-2.3.9-amzn-4.jar' for reading
-	25/08/01 13:40:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-serde-2.3.9-amzn-4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/hive-serde-2.3.9-amzn-4.jar
-	25/08/01 13:40:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-serde-2.3.9-amzn-4.jar' for reading
-	25/08/01 13:40:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-service-rpc-3.1.3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/hive-service-rpc-3.1.3.jar
-	25/08/01 13:40:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-service-rpc-3.1.3.jar' for reading
-	25/08/01 13:40:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-shims-0.23-2.3.9-amzn-4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/hive-shims-0.23-2.3.9-amzn-4.jar
-	25/08/01 13:40:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-shims-0.23-2.3.9-amzn-4.jar' for reading
-	25/08/01 13:40:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-shims-2.3.9-amzn-4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/hive-shims-2.3.9-amzn-4.jar
-	25/08/01 13:40:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-shims-2.3.9-amzn-4.jar' for reading
-	25/08/01 13:40:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-shims-common-2.3.9-amzn-4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/hive-shims-common-2.3.9-amzn-4.jar
-[INFO] 2025-08-01 13:40:36.006 +0000 -  ->
-	25/08/01 13:40:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-shims-common-2.3.9-amzn-4.jar' for reading
-	25/08/01 13:40:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-shims-scheduler-2.3.9-amzn-4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/hive-shims-scheduler-2.3.9-amzn-4.jar
-	25/08/01 13:40:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-shims-scheduler-2.3.9-amzn-4.jar' for reading
-	25/08/01 13:40:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-storage-api-2.8.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/hive-storage-api-2.8.1.jar
-	25/08/01 13:40:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-storage-api-2.8.1.jar' for reading
-	25/08/01 13:40:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hk2-api-2.6.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/hk2-api-2.6.1.jar
-	25/08/01 13:40:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hk2-api-2.6.1.jar' for reading
-	25/08/01 13:40:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hk2-locator-2.6.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/hk2-locator-2.6.1.jar
-	25/08/01 13:40:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hk2-locator-2.6.1.jar' for reading
-	25/08/01 13:40:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hk2-utils-2.6.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/hk2-utils-2.6.1.jar
-	25/08/01 13:40:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hk2-utils-2.6.1.jar' for reading
-	25/08/01 13:40:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/httpclient-4.5.13.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/httpclient-4.5.13.jar
-	25/08/01 13:40:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/httpclient-4.5.13.jar' for reading
-	25/08/01 13:40:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/httpcore-4.4.13.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/httpcore-4.4.13.jar
-	25/08/01 13:40:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/httpcore-4.4.13.jar' for reading
-	25/08/01 13:40:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/istack-commons-runtime-3.0.8.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/istack-commons-runtime-3.0.8.jar
-	25/08/01 13:40:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/istack-commons-runtime-3.0.8.jar' for reading
-	25/08/01 13:40:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/ivy-2.5.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/ivy-2.5.1.jar
-	25/08/01 13:40:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/ivy-2.5.1.jar' for reading
-	25/08/01 13:40:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/j2objc-annotations-1.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/j2objc-annotations-1.1.jar
-	25/08/01 13:40:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/j2objc-annotations-1.1.jar' for reading
-	25/08/01 13:40:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jackson-annotations-2.15.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jackson-annotations-2.15.2.jar
-	25/08/01 13:40:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jackson-annotations-2.15.2.jar' for reading
-	25/08/01 13:40:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jackson-core-2.15.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jackson-core-2.15.2.jar
-	25/08/01 13:40:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jackson-core-2.15.2.jar' for reading
-	25/08/01 13:40:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jackson-core-asl-1.9.13.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jackson-core-asl-1.9.13.jar
-	25/08/01 13:40:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jackson-core-asl-1.9.13.jar' for reading
-[INFO] 2025-08-01 13:40:37.007 +0000 -  ->
-	25/08/01 13:40:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jackson-databind-2.15.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jackson-databind-2.15.2.jar
-	25/08/01 13:40:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jackson-databind-2.15.2.jar' for reading
-	25/08/01 13:40:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jackson-dataformat-yaml-2.15.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jackson-dataformat-yaml-2.15.2.jar
-	25/08/01 13:40:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jackson-dataformat-yaml-2.15.2.jar' for reading
-	25/08/01 13:40:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jackson-datatype-jsr310-2.15.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jackson-datatype-jsr310-2.15.2.jar
-	25/08/01 13:40:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jackson-datatype-jsr310-2.15.2.jar' for reading
-	25/08/01 13:40:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jackson-mapper-asl-1.9.13.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jackson-mapper-asl-1.9.13.jar
-	25/08/01 13:40:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jackson-mapper-asl-1.9.13.jar' for reading
-	25/08/01 13:40:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jackson-module-scala_2.12-2.15.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jackson-module-scala_2.12-2.15.2.jar
-	25/08/01 13:40:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jackson-module-scala_2.12-2.15.2.jar' for reading
-	25/08/01 13:40:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jakarta.annotation-api-1.3.5.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jakarta.annotation-api-1.3.5.jar
-	25/08/01 13:40:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jakarta.annotation-api-1.3.5.jar' for reading
-	25/08/01 13:40:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jakarta.inject-2.6.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jakarta.inject-2.6.1.jar
-	25/08/01 13:40:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jakarta.inject-2.6.1.jar' for reading
-	25/08/01 13:40:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jakarta.servlet-api-4.0.3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jakarta.servlet-api-4.0.3.jar
-	25/08/01 13:40:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jakarta.servlet-api-4.0.3.jar' for reading
-	25/08/01 13:40:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jakarta.validation-api-2.0.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jakarta.validation-api-2.0.2.jar
-	25/08/01 13:40:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jakarta.validation-api-2.0.2.jar' for reading
-	25/08/01 13:40:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jakarta.ws.rs-api-2.1.6.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jakarta.ws.rs-api-2.1.6.jar
-	25/08/01 13:40:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jakarta.ws.rs-api-2.1.6.jar' for reading
-	25/08/01 13:40:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jakarta.xml.bind-api-2.3.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jakarta.xml.bind-api-2.3.2.jar
-	25/08/01 13:40:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jakarta.xml.bind-api-2.3.2.jar' for reading
-	25/08/01 13:40:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/janino-3.1.9.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/janino-3.1.9.jar
-	25/08/01 13:40:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/janino-3.1.9.jar' for reading
-	25/08/01 13:40:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/javassist-3.29.2-GA.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/javassist-3.29.2-GA.jar
-	25/08/01 13:40:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/javassist-3.29.2-GA.jar' for reading
-	25/08/01 13:40:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/javax.inject-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/javax.inject-1.jar
-	25/08/01 13:40:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/javax.inject-1.jar' for reading
-	25/08/01 13:40:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/javax.jdo-3.2.0-m3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/javax.jdo-3.2.0-m3.jar
-	25/08/01 13:40:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/javax.jdo-3.2.0-m3.jar' for reading
-[INFO] 2025-08-01 13:40:38.008 +0000 -  ->
-	25/08/01 13:40:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/javax.servlet-api-3.1.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/javax.servlet-api-3.1.0.jar
-	25/08/01 13:40:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/javax.servlet-api-3.1.0.jar' for reading
-	25/08/01 13:40:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/javolution-5.5.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/javolution-5.5.1.jar
-	25/08/01 13:40:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/javolution-5.5.1.jar' for reading
-	25/08/01 13:40:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jaxb-runtime-2.3.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jaxb-runtime-2.3.2.jar
-	25/08/01 13:40:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jaxb-runtime-2.3.2.jar' for reading
-	25/08/01 13:40:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jcl-over-slf4j-2.0.7.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jcl-over-slf4j-2.0.7.jar
-	25/08/01 13:40:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jcl-over-slf4j-2.0.7.jar' for reading
-	25/08/01 13:40:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jdo-api-3.0.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jdo-api-3.0.1.jar
-	25/08/01 13:40:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jdo-api-3.0.1.jar' for reading
-	25/08/01 13:40:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jersey-client-2.40.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jersey-client-2.40.jar
-	25/08/01 13:40:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jersey-client-2.40.jar' for reading
-	25/08/01 13:40:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jersey-common-2.40.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jersey-common-2.40.jar
-	25/08/01 13:40:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jersey-common-2.40.jar' for reading
-	25/08/01 13:40:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jersey-container-servlet-2.40.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jersey-container-servlet-2.40.jar
-	25/08/01 13:40:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jersey-container-servlet-2.40.jar' for reading
-	25/08/01 13:40:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jersey-container-servlet-core-2.40.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jersey-container-servlet-core-2.40.jar
-	25/08/01 13:40:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jersey-container-servlet-core-2.40.jar' for reading
-	25/08/01 13:40:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jersey-hk2-2.40.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jersey-hk2-2.40.jar
-	25/08/01 13:40:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jersey-hk2-2.40.jar' for reading
-	25/08/01 13:40:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jersey-server-2.40.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jersey-server-2.40.jar
-	25/08/01 13:40:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jersey-server-2.40.jar' for reading
-	25/08/01 13:40:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jetty-rewrite-9.3.27.v20190418.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jetty-rewrite-9.3.27.v20190418.jar
-	25/08/01 13:40:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jetty-rewrite-9.3.27.v20190418.jar' for reading
-	25/08/01 13:40:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jline-2.14.6.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jline-2.14.6.jar
-	25/08/01 13:40:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jline-2.14.6.jar' for reading
-[INFO] 2025-08-01 13:40:39.009 +0000 -  ->
-	25/08/01 13:40:38 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jmespath-java-1.12.705.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jmespath-java-1.12.705.jar
-	25/08/01 13:40:38 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jmespath-java-1.12.705.jar' for reading
-	25/08/01 13:40:38 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/joda-time-2.12.5.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/joda-time-2.12.5.jar
-	25/08/01 13:40:38 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/joda-time-2.12.5.jar' for reading
-	25/08/01 13:40:38 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jodd-core-3.5.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jodd-core-3.5.2.jar
-	25/08/01 13:40:38 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jodd-core-3.5.2.jar' for reading
-	25/08/01 13:40:38 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jpam-1.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/jpam-1.1.jar
-	25/08/01 13:40:38 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jpam-1.1.jar' for reading
-	25/08/01 13:40:38 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/json-1.8.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/json-1.8.jar
-	25/08/01 13:40:38 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/json-1.8.jar' for reading
-	25/08/01 13:40:38 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/json4s-ast_2.12-3.7.0-M11.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3202/json4s-ast_2.12-3.7.0-M11.jar
-	💾 开始写入标签结果到MySQL...
-[INFO] 2025-08-01 13:41:31.032 +0000 -  ->
-	📤 准备写入 610 条标签记录...
-	✅ 标签结果写入成功: 610 条记录
-	   ✅ Group_1tags_1tables: 610 个用户
-	   ✅ 标签组 Group_1tags_1tables 处理完成
-	   🧹 已清理 1 个表的缓存: ['tag_system.user_risk_profile']
+${SPARK_HOME}/bin/spark-submit --master yarn --deploy-mode cluster --conf spark.driver.cores=1 --conf spark.driver.memory=512M --conf spark.executor.instances=2 --conf spark.executor.cores=2 --conf spark.executor.memory=2G --name specific_compute_tags --jars /dolphinscheduler/default/resources/mysql-connector-j-8.0.33.jar file:/dolphinscheduler/default/resources/bigdata_tag_system/src/tag_engine/main.py --mode task-tags --tag-ids 1,2,3,4,5,6,7,8,9
+[INFO] 2025-08-02 05:48:15.221 +0000 - Executing shell command : sudo -u root -i /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_25/954/3526/954_3526.sh
+[INFO] 2025-08-02 05:48:15.224 +0000 - process start, process id is: 864642
+[INFO] 2025-08-02 05:48:17.224 +0000 -  ->
+	25/08/02 05:48:16 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+	25/08/02 05:48:17 INFO Configuration: resource-types.xml not found
+	25/08/02 05:48:17 INFO ResourceUtils: Unable to find 'resource-types.xml'.
+	25/08/02 05:48:17 INFO Client: Verifying our application has not requested more than the maximum memory capability of the cluster (23424 MB per container)
+	25/08/02 05:48:17 INFO Client: Will allocate AM container, with 896 MB memory including 384 MB overhead
+	25/08/02 05:48:17 INFO Client: Setting up container launch context for our AM
+	25/08/02 05:48:17 INFO Client: Setting up the launch environment for our AM container
+	25/08/02 05:48:17 INFO Client: Preparing resources for our AM container
+[INFO] 2025-08-02 05:48:18.225 +0000 -  ->
+	25/08/02 05:48:17 INFO PlatformInfo: Unable to read clusterId from http://localhost:8321/configuration, trying extra instance data file: /var/lib/instance-controller/extraInstanceData.json
+	25/08/02 05:48:17 INFO PlatformInfo: Unable to read clusterId from /var/lib/instance-controller/extraInstanceData.json, trying EMR job-flow data file: /var/lib/info/job-flow.json
+	25/08/02 05:48:17 INFO PlatformInfo: Unable to read clusterId from /var/lib/info/job-flow.json, out of places to look
+	25/08/02 05:48:17 INFO ClientConfigurationFactory: Set initial getObject socket timeout to 2000 ms.
+[INFO] 2025-08-02 05:48:19.226 +0000 -  ->
+	25/08/02 05:48:18 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/HikariCP-2.5.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/HikariCP-2.5.1.jar
+	25/08/02 05:48:18 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/HikariCP-2.5.1.jar' for reading
+[INFO] 2025-08-02 05:48:20.226 +0000 -  ->
+	25/08/02 05:48:19 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/JLargeArrays-1.5.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/JLargeArrays-1.5.jar
+	25/08/02 05:48:19 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/JLargeArrays-1.5.jar' for reading
+	25/08/02 05:48:19 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/JTransforms-3.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/JTransforms-3.1.jar
+	25/08/02 05:48:19 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/JTransforms-3.1.jar' for reading
+	25/08/02 05:48:19 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/RoaringBitmap-0.9.45.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/RoaringBitmap-0.9.45.jar
+	25/08/02 05:48:19 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/RoaringBitmap-0.9.45.jar' for reading
+	25/08/02 05:48:19 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/ST4-4.0.4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/ST4-4.0.4.jar
+	25/08/02 05:48:19 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/ST4-4.0.4.jar' for reading
+	25/08/02 05:48:20 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/activation-1.1.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/activation-1.1.1.jar
+	25/08/02 05:48:20 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/activation-1.1.1.jar' for reading
+	25/08/02 05:48:20 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/aggdesigner-algorithm-6.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/aggdesigner-algorithm-6.0.jar
+	25/08/02 05:48:20 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/aggdesigner-algorithm-6.0.jar' for reading
+[INFO] 2025-08-02 05:48:21.227 +0000 -  ->
+	25/08/02 05:48:20 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/aircompressor-0.27.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/aircompressor-0.27.jar
+	25/08/02 05:48:20 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/aircompressor-0.27.jar' for reading
+	25/08/02 05:48:20 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/algebra_2.12-2.0.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/algebra_2.12-2.0.1.jar
+	25/08/02 05:48:20 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/algebra_2.12-2.0.1.jar' for reading
+	25/08/02 05:48:20 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/animal-sniffer-annotations-1.14.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/animal-sniffer-annotations-1.14.jar
+	25/08/02 05:48:20 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/animal-sniffer-annotations-1.14.jar' for reading
+	25/08/02 05:48:20 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/animal-sniffer-annotations-1.23.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/animal-sniffer-annotations-1.23.jar
+	25/08/02 05:48:20 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/animal-sniffer-annotations-1.23.jar' for reading
+	25/08/02 05:48:20 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/annotations-16.0.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/annotations-16.0.2.jar
+	25/08/02 05:48:20 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/annotations-16.0.2.jar' for reading
+	25/08/02 05:48:20 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/annotations-17.0.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/annotations-17.0.0.jar
+	25/08/02 05:48:20 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/annotations-17.0.0.jar' for reading
+	25/08/02 05:48:20 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/annotations-4.1.1.4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/annotations-4.1.1.4.jar
+	25/08/02 05:48:20 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/annotations-4.1.1.4.jar' for reading
+	25/08/02 05:48:20 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/antlr-runtime-3.5.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/antlr-runtime-3.5.2.jar
+	25/08/02 05:48:20 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/antlr-runtime-3.5.2.jar' for reading
+	25/08/02 05:48:20 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/antlr4-runtime-4.9.3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/antlr4-runtime-4.9.3.jar
+	25/08/02 05:48:20 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/antlr4-runtime-4.9.3.jar' for reading
+	25/08/02 05:48:21 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/aopalliance-1.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/aopalliance-1.0.jar
+	25/08/02 05:48:21 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/aopalliance-1.0.jar' for reading
+	25/08/02 05:48:21 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/aopalliance-repackaged-2.6.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/aopalliance-repackaged-2.6.1.jar
+	25/08/02 05:48:21 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/aopalliance-repackaged-2.6.1.jar' for reading
+[INFO] 2025-08-02 05:48:22.227 +0000 -  ->
+	25/08/02 05:48:21 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/arpack-3.0.3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/arpack-3.0.3.jar
+	25/08/02 05:48:21 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/arpack-3.0.3.jar' for reading
+	25/08/02 05:48:21 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/arpack_combined_all-0.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/arpack_combined_all-0.1.jar
+	25/08/02 05:48:21 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/arpack_combined_all-0.1.jar' for reading
+	25/08/02 05:48:21 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/arrow-format-12.0.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/arrow-format-12.0.1.jar
+	25/08/02 05:48:21 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/arrow-format-12.0.1.jar' for reading
+	25/08/02 05:48:21 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/arrow-memory-core-12.0.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/arrow-memory-core-12.0.1.jar
+	25/08/02 05:48:21 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/arrow-memory-core-12.0.1.jar' for reading
+	25/08/02 05:48:21 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/arrow-memory-netty-12.0.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/arrow-memory-netty-12.0.1.jar
+	25/08/02 05:48:21 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/arrow-memory-netty-12.0.1.jar' for reading
+	25/08/02 05:48:21 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/arrow-vector-12.0.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/arrow-vector-12.0.1.jar
+	25/08/02 05:48:21 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/arrow-vector-12.0.1.jar' for reading
+	25/08/02 05:48:21 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/audience-annotations-0.12.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/audience-annotations-0.12.0.jar
+	25/08/02 05:48:21 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/audience-annotations-0.12.0.jar' for reading
+	25/08/02 05:48:21 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/avro-1.11.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/avro-1.11.2.jar
+	25/08/02 05:48:21 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/avro-1.11.2.jar' for reading
+	25/08/02 05:48:22 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/avro-ipc-1.11.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/avro-ipc-1.11.2.jar
+	25/08/02 05:48:22 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/avro-ipc-1.11.2.jar' for reading
+	25/08/02 05:48:22 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/avro-mapred-1.11.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/avro-mapred-1.11.2.jar
+	25/08/02 05:48:22 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/avro-mapred-1.11.2.jar' for reading
+[INFO] 2025-08-02 05:48:23.228 +0000 -  ->
+	25/08/02 05:48:22 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/bcprov-ext-jdk15on-1.66.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/bcprov-ext-jdk15on-1.66.jar
+	25/08/02 05:48:22 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/bcprov-ext-jdk15on-1.66.jar' for reading
+	25/08/02 05:48:22 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/blas-3.0.3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/blas-3.0.3.jar
+	25/08/02 05:48:22 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/blas-3.0.3.jar' for reading
+	25/08/02 05:48:22 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/bonecp-0.8.0.RELEASE.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/bonecp-0.8.0.RELEASE.jar
+	25/08/02 05:48:22 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/bonecp-0.8.0.RELEASE.jar' for reading
+	25/08/02 05:48:22 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/breeze-macros_2.12-2.1.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/breeze-macros_2.12-2.1.0.jar
+	25/08/02 05:48:22 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/breeze-macros_2.12-2.1.0.jar' for reading
+	25/08/02 05:48:22 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/breeze_2.12-2.1.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/breeze_2.12-2.1.0.jar
+	25/08/02 05:48:22 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/breeze_2.12-2.1.0.jar' for reading
+	25/08/02 05:48:22 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/cats-kernel_2.12-2.1.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/cats-kernel_2.12-2.1.1.jar
+	25/08/02 05:48:22 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/cats-kernel_2.12-2.1.1.jar' for reading
+	25/08/02 05:48:23 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/checker-qual-2.5.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/checker-qual-2.5.2.jar
+	25/08/02 05:48:23 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/checker-qual-2.5.2.jar' for reading
+	25/08/02 05:48:23 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/chill-java-0.10.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/chill-java-0.10.0.jar
+	25/08/02 05:48:23 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/chill-java-0.10.0.jar' for reading
+	25/08/02 05:48:23 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/chill_2.12-0.10.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/chill_2.12-0.10.0.jar
+	25/08/02 05:48:23 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/chill_2.12-0.10.0.jar' for reading
+[INFO] 2025-08-02 05:48:24.229 +0000 -  ->
+	25/08/02 05:48:23 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-cli-1.5.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/commons-cli-1.5.0.jar
+	25/08/02 05:48:23 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-cli-1.5.0.jar' for reading
+	25/08/02 05:48:23 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-codec-1.16.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/commons-codec-1.16.1.jar
+	25/08/02 05:48:23 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-codec-1.16.1.jar' for reading
+	25/08/02 05:48:23 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-collections-3.2.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/commons-collections-3.2.2.jar
+	25/08/02 05:48:23 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-collections-3.2.2.jar' for reading
+	25/08/02 05:48:23 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-collections4-4.4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/commons-collections4-4.4.jar
+	25/08/02 05:48:23 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-collections4-4.4.jar' for reading
+	25/08/02 05:48:23 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-compiler-3.1.9.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/commons-compiler-3.1.9.jar
+	25/08/02 05:48:23 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-compiler-3.1.9.jar' for reading
+	25/08/02 05:48:23 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-compress-1.23.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/commons-compress-1.23.0.jar
+	25/08/02 05:48:23 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-compress-1.23.0.jar' for reading
+	25/08/02 05:48:23 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-crypto-1.1.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/commons-crypto-1.1.0.jar
+	25/08/02 05:48:23 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-crypto-1.1.0.jar' for reading
+	25/08/02 05:48:23 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-dbcp-1.4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/commons-dbcp-1.4.jar
+	25/08/02 05:48:23 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-dbcp-1.4.jar' for reading
+	25/08/02 05:48:23 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-io-2.16.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/commons-io-2.16.1.jar
+	25/08/02 05:48:23 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-io-2.16.1.jar' for reading
+	25/08/02 05:48:24 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-lang-2.6.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/commons-lang-2.6.jar
+	25/08/02 05:48:24 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-lang-2.6.jar' for reading
+	25/08/02 05:48:24 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-lang3-3.12.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/commons-lang3-3.12.0.jar
+	25/08/02 05:48:24 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-lang3-3.12.0.jar' for reading
+	25/08/02 05:48:24 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-logging-1.1.3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/commons-logging-1.1.3.jar
+	25/08/02 05:48:24 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-logging-1.1.3.jar' for reading
+[INFO] 2025-08-02 05:48:25.230 +0000 -  ->
+	25/08/02 05:48:24 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-math3-3.6.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/commons-math3-3.6.1.jar
+	25/08/02 05:48:24 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-math3-3.6.1.jar' for reading
+	25/08/02 05:48:24 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-pool-1.5.4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/commons-pool-1.5.4.jar
+	25/08/02 05:48:24 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-pool-1.5.4.jar' for reading
+	25/08/02 05:48:24 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/commons-text-1.10.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/commons-text-1.10.0.jar
+	25/08/02 05:48:24 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/commons-text-1.10.0.jar' for reading
+	25/08/02 05:48:24 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/compress-lzf-1.1.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/compress-lzf-1.1.2.jar
+	25/08/02 05:48:24 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/compress-lzf-1.1.2.jar' for reading
+	25/08/02 05:48:24 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/curator-client-2.13.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/curator-client-2.13.0.jar
+	25/08/02 05:48:24 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/curator-client-2.13.0.jar' for reading
+	25/08/02 05:48:24 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/curator-framework-2.13.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/curator-framework-2.13.0.jar
+	25/08/02 05:48:24 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/curator-framework-2.13.0.jar' for reading
+	25/08/02 05:48:24 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/curator-recipes-2.13.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/curator-recipes-2.13.0.jar
+	25/08/02 05:48:24 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/curator-recipes-2.13.0.jar' for reading
+	25/08/02 05:48:24 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/datanucleus-api-jdo-4.2.4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/datanucleus-api-jdo-4.2.4.jar
+	25/08/02 05:48:24 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/datanucleus-api-jdo-4.2.4.jar' for reading
+	25/08/02 05:48:24 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/datanucleus-core-4.1.17.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/datanucleus-core-4.1.17.jar
+	25/08/02 05:48:24 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/datanucleus-core-4.1.17.jar' for reading
+	25/08/02 05:48:25 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/datanucleus-rdbms-4.1.19.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/datanucleus-rdbms-4.1.19.jar
+	25/08/02 05:48:25 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/datanucleus-rdbms-4.1.19.jar' for reading
+	25/08/02 05:48:25 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/datasketches-java-3.3.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/datasketches-java-3.3.0.jar
+	25/08/02 05:48:25 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/datasketches-java-3.3.0.jar' for reading
+	25/08/02 05:48:25 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/datasketches-memory-2.1.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/datasketches-memory-2.1.0.jar
+[INFO] 2025-08-02 05:48:26.231 +0000 -  ->
+	25/08/02 05:48:25 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/datasketches-memory-2.1.0.jar' for reading
+	25/08/02 05:48:25 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/derby-10.14.2.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/derby-10.14.2.0.jar
+	25/08/02 05:48:25 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/derby-10.14.2.0.jar' for reading
+	25/08/02 05:48:25 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/disruptor-3.3.7.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/disruptor-3.3.7.jar
+	25/08/02 05:48:25 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/disruptor-3.3.7.jar' for reading
+	25/08/02 05:48:25 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/dropwizard-metrics-hadoop-metrics2-reporter-0.1.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/dropwizard-metrics-hadoop-metrics2-reporter-0.1.2.jar
+	25/08/02 05:48:25 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/dropwizard-metrics-hadoop-metrics2-reporter-0.1.2.jar' for reading
+	25/08/02 05:48:25 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/emr-spark-goodies.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/emr-spark-goodies.jar
+	25/08/02 05:48:25 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/emr-spark-goodies.jar' for reading
+	25/08/02 05:48:25 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/emrfs-hadoop-assembly-2.66.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/emrfs-hadoop-assembly-2.66.0.jar
+	25/08/02 05:48:25 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/emrfs-hadoop-assembly-2.66.0.jar' for reading
+	25/08/02 05:48:26 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/error_prone_annotations-2.1.3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/error_prone_annotations-2.1.3.jar
+	25/08/02 05:48:26 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/error_prone_annotations-2.1.3.jar' for reading
+	25/08/02 05:48:26 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/error_prone_annotations-2.18.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/error_prone_annotations-2.18.0.jar
+	25/08/02 05:48:26 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/error_prone_annotations-2.18.0.jar' for reading
+	25/08/02 05:48:26 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/findbugs-annotations-3.0.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/findbugs-annotations-3.0.1.jar
+	25/08/02 05:48:26 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/findbugs-annotations-3.0.1.jar' for reading
+	25/08/02 05:48:26 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/flatbuffers-java-1.12.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/flatbuffers-java-1.12.0.jar
+	25/08/02 05:48:26 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/flatbuffers-java-1.12.0.jar' for reading
+[INFO] 2025-08-02 05:48:27.231 +0000 -  ->
+	25/08/02 05:48:26 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/gmetric4j-1.0.10.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/gmetric4j-1.0.10.jar
+	25/08/02 05:48:26 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/gmetric4j-1.0.10.jar' for reading
+	25/08/02 05:48:26 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/grpc-api-1.56.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/grpc-api-1.56.0.jar
+	25/08/02 05:48:26 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/grpc-api-1.56.0.jar' for reading
+	25/08/02 05:48:26 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/grpc-context-1.56.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/grpc-context-1.56.0.jar
+	25/08/02 05:48:26 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/grpc-context-1.56.0.jar' for reading
+	25/08/02 05:48:26 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/grpc-core-1.56.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/grpc-core-1.56.0.jar
+	25/08/02 05:48:26 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/grpc-core-1.56.0.jar' for reading
+	25/08/02 05:48:26 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/grpc-netty-1.56.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/grpc-netty-1.56.0.jar
+	25/08/02 05:48:26 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/grpc-netty-1.56.0.jar' for reading
+	25/08/02 05:48:26 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/grpc-protobuf-1.56.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/grpc-protobuf-1.56.0.jar
+	25/08/02 05:48:26 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/grpc-protobuf-1.56.0.jar' for reading
+	25/08/02 05:48:26 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/grpc-protobuf-lite-1.56.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/grpc-protobuf-lite-1.56.0.jar
+	25/08/02 05:48:26 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/grpc-protobuf-lite-1.56.0.jar' for reading
+	25/08/02 05:48:26 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/grpc-services-1.56.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/grpc-services-1.56.0.jar
+	25/08/02 05:48:26 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/grpc-services-1.56.0.jar' for reading
+	25/08/02 05:48:26 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/grpc-stub-1.56.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/grpc-stub-1.56.0.jar
+	25/08/02 05:48:26 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/grpc-stub-1.56.0.jar' for reading
+	25/08/02 05:48:26 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/gson-2.10.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/gson-2.10.1.jar
+	25/08/02 05:48:26 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/gson-2.10.1.jar' for reading
+	25/08/02 05:48:27 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/guava-14.0.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/guava-14.0.1.jar
+	25/08/02 05:48:27 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/guava-14.0.1.jar' for reading
+	25/08/02 05:48:27 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hadoop-client-api-3.4.0-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/hadoop-client-api-3.4.0-amzn-1.jar
+	25/08/02 05:48:27 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hadoop-client-api-3.4.0-amzn-1.jar' for reading
+[INFO] 2025-08-02 05:48:28.232 +0000 -  ->
+	25/08/02 05:48:27 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hadoop-client-runtime-3.4.0-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/hadoop-client-runtime-3.4.0-amzn-1.jar
+	25/08/02 05:48:27 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hadoop-client-runtime-3.4.0-amzn-1.jar' for reading
+	25/08/02 05:48:27 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hadoop-shaded-guava-1.2.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/hadoop-shaded-guava-1.2.0.jar
+	25/08/02 05:48:27 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hadoop-shaded-guava-1.2.0.jar' for reading
+	25/08/02 05:48:28 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hadoop-yarn-server-web-proxy-3.4.0-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/hadoop-yarn-server-web-proxy-3.4.0-amzn-1.jar
+	25/08/02 05:48:28 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hadoop-yarn-server-web-proxy-3.4.0-amzn-1.jar' for reading
+	25/08/02 05:48:28 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-beeline-2.3.9-amzn-4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/hive-beeline-2.3.9-amzn-4.jar
+	25/08/02 05:48:28 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-beeline-2.3.9-amzn-4.jar' for reading
+[INFO] 2025-08-02 05:48:29.232 +0000 -  ->
+	25/08/02 05:48:28 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-cli-2.3.9-amzn-4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/hive-cli-2.3.9-amzn-4.jar
+	25/08/02 05:48:28 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-cli-2.3.9-amzn-4.jar' for reading
+	25/08/02 05:48:28 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-common-2.3.9-amzn-4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/hive-common-2.3.9-amzn-4.jar
+	25/08/02 05:48:28 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-common-2.3.9-amzn-4.jar' for reading
+	25/08/02 05:48:28 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-exec-2.3.9-amzn-4-core.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/hive-exec-2.3.9-amzn-4-core.jar
+	25/08/02 05:48:28 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-exec-2.3.9-amzn-4-core.jar' for reading
+	25/08/02 05:48:28 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-jdbc-2.3.9-amzn-4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/hive-jdbc-2.3.9-amzn-4.jar
+	25/08/02 05:48:28 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-jdbc-2.3.9-amzn-4.jar' for reading
+	25/08/02 05:48:28 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-llap-common-2.3.9-amzn-4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/hive-llap-common-2.3.9-amzn-4.jar
+	25/08/02 05:48:28 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-llap-common-2.3.9-amzn-4.jar' for reading
+	25/08/02 05:48:28 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-metastore-2.3.9-amzn-4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/hive-metastore-2.3.9-amzn-4.jar
+	25/08/02 05:48:28 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-metastore-2.3.9-amzn-4.jar' for reading
+	25/08/02 05:48:28 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-serde-2.3.9-amzn-4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/hive-serde-2.3.9-amzn-4.jar
+	25/08/02 05:48:28 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-serde-2.3.9-amzn-4.jar' for reading
+	25/08/02 05:48:28 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-service-rpc-3.1.3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/hive-service-rpc-3.1.3.jar
+	25/08/02 05:48:28 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-service-rpc-3.1.3.jar' for reading
+	25/08/02 05:48:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-shims-0.23-2.3.9-amzn-4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/hive-shims-0.23-2.3.9-amzn-4.jar
+	25/08/02 05:48:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-shims-0.23-2.3.9-amzn-4.jar' for reading
+	25/08/02 05:48:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-shims-2.3.9-amzn-4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/hive-shims-2.3.9-amzn-4.jar
+	25/08/02 05:48:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-shims-2.3.9-amzn-4.jar' for reading
+	25/08/02 05:48:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-shims-common-2.3.9-amzn-4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/hive-shims-common-2.3.9-amzn-4.jar
+	25/08/02 05:48:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-shims-common-2.3.9-amzn-4.jar' for reading
+[INFO] 2025-08-02 05:48:30.236 +0000 -  ->
+	25/08/02 05:48:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-shims-scheduler-2.3.9-amzn-4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/hive-shims-scheduler-2.3.9-amzn-4.jar
+	25/08/02 05:48:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-shims-scheduler-2.3.9-amzn-4.jar' for reading
+	25/08/02 05:48:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hive-storage-api-2.8.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/hive-storage-api-2.8.1.jar
+	25/08/02 05:48:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hive-storage-api-2.8.1.jar' for reading
+	25/08/02 05:48:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hk2-api-2.6.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/hk2-api-2.6.1.jar
+	25/08/02 05:48:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hk2-api-2.6.1.jar' for reading
+	25/08/02 05:48:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hk2-locator-2.6.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/hk2-locator-2.6.1.jar
+	25/08/02 05:48:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hk2-locator-2.6.1.jar' for reading
+	25/08/02 05:48:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/hk2-utils-2.6.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/hk2-utils-2.6.1.jar
+	25/08/02 05:48:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/hk2-utils-2.6.1.jar' for reading
+	25/08/02 05:48:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/httpclient-4.5.13.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/httpclient-4.5.13.jar
+	25/08/02 05:48:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/httpclient-4.5.13.jar' for reading
+	25/08/02 05:48:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/httpcore-4.4.13.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/httpcore-4.4.13.jar
+	25/08/02 05:48:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/httpcore-4.4.13.jar' for reading
+	25/08/02 05:48:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/istack-commons-runtime-3.0.8.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/istack-commons-runtime-3.0.8.jar
+	25/08/02 05:48:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/istack-commons-runtime-3.0.8.jar' for reading
+	25/08/02 05:48:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/ivy-2.5.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/ivy-2.5.1.jar
+	25/08/02 05:48:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/ivy-2.5.1.jar' for reading
+	25/08/02 05:48:29 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/j2objc-annotations-1.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/j2objc-annotations-1.1.jar
+	25/08/02 05:48:29 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/j2objc-annotations-1.1.jar' for reading
+	25/08/02 05:48:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jackson-annotations-2.15.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jackson-annotations-2.15.2.jar
+	25/08/02 05:48:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jackson-annotations-2.15.2.jar' for reading
+	25/08/02 05:48:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jackson-core-2.15.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jackson-core-2.15.2.jar
+	25/08/02 05:48:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jackson-core-2.15.2.jar' for reading
+[INFO] 2025-08-02 05:48:31.237 +0000 -  ->
+	25/08/02 05:48:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jackson-core-asl-1.9.13.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jackson-core-asl-1.9.13.jar
+	25/08/02 05:48:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jackson-core-asl-1.9.13.jar' for reading
+	25/08/02 05:48:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jackson-databind-2.15.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jackson-databind-2.15.2.jar
+	25/08/02 05:48:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jackson-databind-2.15.2.jar' for reading
+	25/08/02 05:48:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jackson-dataformat-yaml-2.15.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jackson-dataformat-yaml-2.15.2.jar
+	25/08/02 05:48:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jackson-dataformat-yaml-2.15.2.jar' for reading
+	25/08/02 05:48:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jackson-datatype-jsr310-2.15.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jackson-datatype-jsr310-2.15.2.jar
+	25/08/02 05:48:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jackson-datatype-jsr310-2.15.2.jar' for reading
+	25/08/02 05:48:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jackson-mapper-asl-1.9.13.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jackson-mapper-asl-1.9.13.jar
+	25/08/02 05:48:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jackson-mapper-asl-1.9.13.jar' for reading
+	25/08/02 05:48:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jackson-module-scala_2.12-2.15.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jackson-module-scala_2.12-2.15.2.jar
+	25/08/02 05:48:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jackson-module-scala_2.12-2.15.2.jar' for reading
+	25/08/02 05:48:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jakarta.annotation-api-1.3.5.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jakarta.annotation-api-1.3.5.jar
+	25/08/02 05:48:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jakarta.annotation-api-1.3.5.jar' for reading
+	25/08/02 05:48:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jakarta.inject-2.6.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jakarta.inject-2.6.1.jar
+	25/08/02 05:48:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jakarta.inject-2.6.1.jar' for reading
+	25/08/02 05:48:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jakarta.servlet-api-4.0.3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jakarta.servlet-api-4.0.3.jar
+	25/08/02 05:48:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jakarta.servlet-api-4.0.3.jar' for reading
+	25/08/02 05:48:30 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jakarta.validation-api-2.0.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jakarta.validation-api-2.0.2.jar
+	25/08/02 05:48:30 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jakarta.validation-api-2.0.2.jar' for reading
+	25/08/02 05:48:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jakarta.ws.rs-api-2.1.6.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jakarta.ws.rs-api-2.1.6.jar
+	25/08/02 05:48:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jakarta.ws.rs-api-2.1.6.jar' for reading
+	25/08/02 05:48:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jakarta.xml.bind-api-2.3.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jakarta.xml.bind-api-2.3.2.jar
+	25/08/02 05:48:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jakarta.xml.bind-api-2.3.2.jar' for reading
+	25/08/02 05:48:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/janino-3.1.9.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/janino-3.1.9.jar
+	25/08/02 05:48:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/janino-3.1.9.jar' for reading
+[INFO] 2025-08-02 05:48:32.238 +0000 -  ->
+	25/08/02 05:48:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/javassist-3.29.2-GA.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/javassist-3.29.2-GA.jar
+	25/08/02 05:48:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/javassist-3.29.2-GA.jar' for reading
+	25/08/02 05:48:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/javax.inject-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/javax.inject-1.jar
+	25/08/02 05:48:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/javax.inject-1.jar' for reading
+	25/08/02 05:48:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/javax.jdo-3.2.0-m3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/javax.jdo-3.2.0-m3.jar
+	25/08/02 05:48:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/javax.jdo-3.2.0-m3.jar' for reading
+	25/08/02 05:48:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/javax.servlet-api-3.1.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/javax.servlet-api-3.1.0.jar
+	25/08/02 05:48:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/javax.servlet-api-3.1.0.jar' for reading
+	25/08/02 05:48:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/javolution-5.5.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/javolution-5.5.1.jar
+	25/08/02 05:48:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/javolution-5.5.1.jar' for reading
+	25/08/02 05:48:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jaxb-runtime-2.3.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jaxb-runtime-2.3.2.jar
+	25/08/02 05:48:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jaxb-runtime-2.3.2.jar' for reading
+	25/08/02 05:48:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jcl-over-slf4j-2.0.7.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jcl-over-slf4j-2.0.7.jar
+	25/08/02 05:48:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jcl-over-slf4j-2.0.7.jar' for reading
+	25/08/02 05:48:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jdo-api-3.0.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jdo-api-3.0.1.jar
+	25/08/02 05:48:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jdo-api-3.0.1.jar' for reading
+	25/08/02 05:48:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jersey-client-2.40.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jersey-client-2.40.jar
+	25/08/02 05:48:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jersey-client-2.40.jar' for reading
+	25/08/02 05:48:31 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jersey-common-2.40.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jersey-common-2.40.jar
+	25/08/02 05:48:31 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jersey-common-2.40.jar' for reading
+	25/08/02 05:48:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jersey-container-servlet-2.40.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jersey-container-servlet-2.40.jar
+	25/08/02 05:48:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jersey-container-servlet-2.40.jar' for reading
+	25/08/02 05:48:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jersey-container-servlet-core-2.40.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jersey-container-servlet-core-2.40.jar
+	25/08/02 05:48:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jersey-container-servlet-core-2.40.jar' for reading
+	25/08/02 05:48:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jersey-hk2-2.40.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jersey-hk2-2.40.jar
+	25/08/02 05:48:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jersey-hk2-2.40.jar' for reading
+[INFO] 2025-08-02 05:48:33.239 +0000 -  ->
+	25/08/02 05:48:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jersey-server-2.40.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jersey-server-2.40.jar
+	25/08/02 05:48:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jersey-server-2.40.jar' for reading
+	25/08/02 05:48:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jetty-rewrite-9.3.27.v20190418.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jetty-rewrite-9.3.27.v20190418.jar
+	25/08/02 05:48:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jetty-rewrite-9.3.27.v20190418.jar' for reading
+	25/08/02 05:48:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jline-2.14.6.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jline-2.14.6.jar
+	25/08/02 05:48:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jline-2.14.6.jar' for reading
+	25/08/02 05:48:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jmespath-java-1.12.705.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jmespath-java-1.12.705.jar
+	25/08/02 05:48:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jmespath-java-1.12.705.jar' for reading
+	25/08/02 05:48:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/joda-time-2.12.5.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/joda-time-2.12.5.jar
+	25/08/02 05:48:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/joda-time-2.12.5.jar' for reading
+	25/08/02 05:48:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jodd-core-3.5.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jodd-core-3.5.2.jar
+	25/08/02 05:48:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jodd-core-3.5.2.jar' for reading
+	25/08/02 05:48:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jpam-1.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jpam-1.1.jar
+	25/08/02 05:48:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jpam-1.1.jar' for reading
+	25/08/02 05:48:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/json-1.8.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/json-1.8.jar
+	25/08/02 05:48:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/json-1.8.jar' for reading
+	25/08/02 05:48:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/json4s-ast_2.12-3.7.0-M11.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/json4s-ast_2.12-3.7.0-M11.jar
+	25/08/02 05:48:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/json4s-ast_2.12-3.7.0-M11.jar' for reading
+	25/08/02 05:48:32 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/json4s-core_2.12-3.7.0-M11.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/json4s-core_2.12-3.7.0-M11.jar
+	25/08/02 05:48:32 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/json4s-core_2.12-3.7.0-M11.jar' for reading
+	25/08/02 05:48:33 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/json4s-jackson_2.12-3.7.0-M11.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/json4s-jackson_2.12-3.7.0-M11.jar
+	25/08/02 05:48:33 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/json4s-jackson_2.12-3.7.0-M11.jar' for reading
+	25/08/02 05:48:33 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/json4s-scalap_2.12-3.7.0-M11.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/json4s-scalap_2.12-3.7.0-M11.jar
+	25/08/02 05:48:33 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/json4s-scalap_2.12-3.7.0-M11.jar' for reading
+	25/08/02 05:48:33 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jsr305-3.0.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jsr305-3.0.0.jar
+	25/08/02 05:48:33 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jsr305-3.0.0.jar' for reading
+[INFO] 2025-08-02 05:48:34.240 +0000 -  ->
+	25/08/02 05:48:33 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jsr305-3.0.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jsr305-3.0.2.jar
+	25/08/02 05:48:33 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jsr305-3.0.2.jar' for reading
+	25/08/02 05:48:33 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jta-1.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jta-1.1.jar
+	25/08/02 05:48:33 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jta-1.1.jar' for reading
+	25/08/02 05:48:33 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/jul-to-slf4j-2.0.7.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/jul-to-slf4j-2.0.7.jar
+	25/08/02 05:48:33 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/jul-to-slf4j-2.0.7.jar' for reading
+	25/08/02 05:48:33 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/kryo-shaded-4.0.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/kryo-shaded-4.0.2.jar
+	25/08/02 05:48:33 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/kryo-shaded-4.0.2.jar' for reading
+	25/08/02 05:48:33 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/lapack-3.0.3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/lapack-3.0.3.jar
+	25/08/02 05:48:33 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/lapack-3.0.3.jar' for reading
+	25/08/02 05:48:33 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/leveldbjni-all-1.8.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/leveldbjni-all-1.8.jar
+	25/08/02 05:48:33 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/leveldbjni-all-1.8.jar' for reading
+	25/08/02 05:48:33 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/libfb303-0.9.3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/libfb303-0.9.3.jar
+	25/08/02 05:48:33 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/libfb303-0.9.3.jar' for reading
+	25/08/02 05:48:33 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/libthrift-0.12.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/libthrift-0.12.0.jar
+	25/08/02 05:48:33 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/libthrift-0.12.0.jar' for reading
+	25/08/02 05:48:33 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/log4j-1.2-api-2.20.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/log4j-1.2-api-2.20.0.jar
+	25/08/02 05:48:33 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/log4j-1.2-api-2.20.0.jar' for reading
+	25/08/02 05:48:33 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/log4j-api-2.20.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/log4j-api-2.20.0.jar
+	25/08/02 05:48:33 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/log4j-api-2.20.0.jar' for reading
+	25/08/02 05:48:33 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/log4j-core-2.20.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/log4j-core-2.20.0.jar
+	25/08/02 05:48:33 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/log4j-core-2.20.0.jar' for reading
+	25/08/02 05:48:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/log4j-slf4j2-impl-2.20.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/log4j-slf4j2-impl-2.20.0.jar
+	25/08/02 05:48:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/log4j-slf4j2-impl-2.20.0.jar' for reading
+	25/08/02 05:48:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/logging-interceptor-3.12.12.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/logging-interceptor-3.12.12.jar
+	25/08/02 05:48:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/logging-interceptor-3.12.12.jar' for reading
+	25/08/02 05:48:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/lz4-java-1.8.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/lz4-java-1.8.0.jar
+	25/08/02 05:48:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/lz4-java-1.8.0.jar' for reading
+	25/08/02 05:48:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/mariadb-connector-java.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/mariadb-connector-java.jar
+[INFO] 2025-08-02 05:48:35.240 +0000 -  ->
+	25/08/02 05:48:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/mariadb-connector-java.jar' for reading
+	25/08/02 05:48:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/metrics-core-4.2.19.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/metrics-core-4.2.19.jar
+	25/08/02 05:48:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/metrics-core-4.2.19.jar' for reading
+	25/08/02 05:48:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/metrics-graphite-4.2.19.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/metrics-graphite-4.2.19.jar
+	25/08/02 05:48:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/metrics-graphite-4.2.19.jar' for reading
+	25/08/02 05:48:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/metrics-jmx-4.2.19.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/metrics-jmx-4.2.19.jar
+	25/08/02 05:48:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/metrics-jmx-4.2.19.jar' for reading
+	25/08/02 05:48:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/metrics-json-4.2.19.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/metrics-json-4.2.19.jar
+	25/08/02 05:48:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/metrics-json-4.2.19.jar' for reading
+	25/08/02 05:48:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/metrics-jvm-4.2.19.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/metrics-jvm-4.2.19.jar
+	25/08/02 05:48:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/metrics-jvm-4.2.19.jar' for reading
+	25/08/02 05:48:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/minlog-1.3.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/minlog-1.3.0.jar
+	25/08/02 05:48:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/minlog-1.3.0.jar' for reading
+	25/08/02 05:48:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/netty-all-4.1.100.Final.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/netty-all-4.1.100.Final.jar
+	25/08/02 05:48:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/netty-all-4.1.100.Final.jar' for reading
+	25/08/02 05:48:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/netty-buffer-4.1.100.Final.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/netty-buffer-4.1.100.Final.jar
+	25/08/02 05:48:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/netty-buffer-4.1.100.Final.jar' for reading
+	25/08/02 05:48:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/netty-codec-4.1.100.Final.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/netty-codec-4.1.100.Final.jar
+	25/08/02 05:48:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/netty-codec-4.1.100.Final.jar' for reading
+	25/08/02 05:48:34 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/netty-codec-http-4.1.100.Final.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/netty-codec-http-4.1.100.Final.jar
+	25/08/02 05:48:34 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/netty-codec-http-4.1.100.Final.jar' for reading
+	25/08/02 05:48:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/netty-codec-http2-4.1.100.Final.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/netty-codec-http2-4.1.100.Final.jar
+	25/08/02 05:48:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/netty-codec-http2-4.1.100.Final.jar' for reading
+	25/08/02 05:48:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/netty-codec-socks-4.1.100.Final.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/netty-codec-socks-4.1.100.Final.jar
+	25/08/02 05:48:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/netty-codec-socks-4.1.100.Final.jar' for reading
+	25/08/02 05:48:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/netty-common-4.1.100.Final.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/netty-common-4.1.100.Final.jar
+[INFO] 2025-08-02 05:48:36.241 +0000 -  ->
+	25/08/02 05:48:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/netty-common-4.1.100.Final.jar' for reading
+	25/08/02 05:48:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/netty-handler-4.1.100.Final.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/netty-handler-4.1.100.Final.jar
+	25/08/02 05:48:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/netty-handler-4.1.100.Final.jar' for reading
+	25/08/02 05:48:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/netty-handler-proxy-4.1.100.Final.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/netty-handler-proxy-4.1.100.Final.jar
+	25/08/02 05:48:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/netty-handler-proxy-4.1.100.Final.jar' for reading
+	25/08/02 05:48:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/netty-resolver-4.1.100.Final.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/netty-resolver-4.1.100.Final.jar
+	25/08/02 05:48:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/netty-resolver-4.1.100.Final.jar' for reading
+	25/08/02 05:48:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/netty-transport-4.1.100.Final.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/netty-transport-4.1.100.Final.jar
+	25/08/02 05:48:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/netty-transport-4.1.100.Final.jar' for reading
+	25/08/02 05:48:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/netty-transport-classes-epoll-4.1.100.Final.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/netty-transport-classes-epoll-4.1.100.Final.jar
+	25/08/02 05:48:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/netty-transport-classes-epoll-4.1.100.Final.jar' for reading
+	25/08/02 05:48:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/netty-transport-classes-kqueue-4.1.100.Final.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/netty-transport-classes-kqueue-4.1.100.Final.jar
+	25/08/02 05:48:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/netty-transport-classes-kqueue-4.1.100.Final.jar' for reading
+	25/08/02 05:48:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/netty-transport-native-epoll-4.1.100.Final-linux-aarch_64.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/netty-transport-native-epoll-4.1.100.Final-linux-aarch_64.jar
+	25/08/02 05:48:35 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/netty-transport-native-epoll-4.1.100.Final-linux-aarch_64.jar' for reading
+	25/08/02 05:48:35 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/netty-transport-native-epoll-4.1.100.Final-linux-x86_64.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/netty-transport-native-epoll-4.1.100.Final-linux-x86_64.jar
+	25/08/02 05:48:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/netty-transport-native-epoll-4.1.100.Final-linux-x86_64.jar' for reading
+	25/08/02 05:48:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/netty-transport-native-kqueue-4.1.100.Final-osx-aarch_64.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/netty-transport-native-kqueue-4.1.100.Final-osx-aarch_64.jar
+	25/08/02 05:48:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/netty-transport-native-kqueue-4.1.100.Final-osx-aarch_64.jar' for reading
+	25/08/02 05:48:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/netty-transport-native-kqueue-4.1.100.Final-osx-x86_64.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/netty-transport-native-kqueue-4.1.100.Final-osx-x86_64.jar
+	25/08/02 05:48:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/netty-transport-native-kqueue-4.1.100.Final-osx-x86_64.jar' for reading
+	25/08/02 05:48:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/netty-transport-native-unix-common-4.1.100.Final.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/netty-transport-native-unix-common-4.1.100.Final.jar
+	25/08/02 05:48:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/netty-transport-native-unix-common-4.1.100.Final.jar' for reading
+	25/08/02 05:48:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/objenesis-2.5.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/objenesis-2.5.1.jar
+	25/08/02 05:48:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/objenesis-2.5.1.jar' for reading
+[INFO] 2025-08-02 05:48:37.242 +0000 -  ->
+	25/08/02 05:48:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/objenesis-3.3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/objenesis-3.3.jar
+	25/08/02 05:48:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/objenesis-3.3.jar' for reading
+	25/08/02 05:48:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/okhttp-3.12.12.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/okhttp-3.12.12.jar
+	25/08/02 05:48:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/okhttp-3.12.12.jar' for reading
+	25/08/02 05:48:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/okio-1.15.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/okio-1.15.0.jar
+	25/08/02 05:48:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/okio-1.15.0.jar' for reading
+	25/08/02 05:48:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/opencsv-2.3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/opencsv-2.3.jar
+	25/08/02 05:48:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/opencsv-2.3.jar' for reading
+	25/08/02 05:48:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/orc-core-1.9.4-shaded-protobuf.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/orc-core-1.9.4-shaded-protobuf.jar
+	25/08/02 05:48:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/orc-core-1.9.4-shaded-protobuf.jar' for reading
+	25/08/02 05:48:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/orc-mapreduce-1.9.4-shaded-protobuf.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/orc-mapreduce-1.9.4-shaded-protobuf.jar
+	25/08/02 05:48:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/orc-mapreduce-1.9.4-shaded-protobuf.jar' for reading
+	25/08/02 05:48:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/orc-shims-1.9.4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/orc-shims-1.9.4.jar
+	25/08/02 05:48:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/orc-shims-1.9.4.jar' for reading
+	25/08/02 05:48:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/oro-2.0.8.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/oro-2.0.8.jar
+	25/08/02 05:48:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/oro-2.0.8.jar' for reading
+	25/08/02 05:48:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/osgi-resource-locator-1.0.3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/osgi-resource-locator-1.0.3.jar
+	25/08/02 05:48:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/osgi-resource-locator-1.0.3.jar' for reading
+	25/08/02 05:48:36 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/paranamer-2.8.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/paranamer-2.8.jar
+	25/08/02 05:48:36 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/paranamer-2.8.jar' for reading
+	25/08/02 05:48:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/parquet-column-1.13.1-amzn-3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/parquet-column-1.13.1-amzn-3.jar
+	25/08/02 05:48:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/parquet-column-1.13.1-amzn-3.jar' for reading
+	25/08/02 05:48:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/parquet-common-1.13.1-amzn-3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/parquet-common-1.13.1-amzn-3.jar
+	25/08/02 05:48:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/parquet-common-1.13.1-amzn-3.jar' for reading
+	25/08/02 05:48:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/parquet-encoding-1.13.1-amzn-3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/parquet-encoding-1.13.1-amzn-3.jar
+	25/08/02 05:48:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/parquet-encoding-1.13.1-amzn-3.jar' for reading
+[INFO] 2025-08-02 05:48:38.243 +0000 -  ->
+	25/08/02 05:48:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/parquet-format-structures-1.13.1-amzn-3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/parquet-format-structures-1.13.1-amzn-3.jar
+	25/08/02 05:48:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/parquet-format-structures-1.13.1-amzn-3.jar' for reading
+	25/08/02 05:48:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/parquet-hadoop-1.13.1-amzn-3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/parquet-hadoop-1.13.1-amzn-3.jar
+	25/08/02 05:48:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/parquet-hadoop-1.13.1-amzn-3.jar' for reading
+	25/08/02 05:48:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/parquet-jackson-1.13.1-amzn-3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/parquet-jackson-1.13.1-amzn-3.jar
+	25/08/02 05:48:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/parquet-jackson-1.13.1-amzn-3.jar' for reading
+	25/08/02 05:48:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/perfmark-api-0.26.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/perfmark-api-0.26.0.jar
+	25/08/02 05:48:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/perfmark-api-0.26.0.jar' for reading
+	25/08/02 05:48:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/pickle-1.3.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/pickle-1.3.jar
+	25/08/02 05:48:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/pickle-1.3.jar' for reading
+	25/08/02 05:48:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/proto-google-common-protos-2.17.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/proto-google-common-protos-2.17.0.jar
+	25/08/02 05:48:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/proto-google-common-protos-2.17.0.jar' for reading
+	25/08/02 05:48:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/py4j-0.10.9.7.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/py4j-0.10.9.7.jar
+	25/08/02 05:48:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/py4j-0.10.9.7.jar' for reading
+	25/08/02 05:48:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/remotetea-oncrpc-1.1.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/remotetea-oncrpc-1.1.2.jar
+	25/08/02 05:48:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/remotetea-oncrpc-1.1.2.jar' for reading
+	25/08/02 05:48:37 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/rocksdbjni-8.3.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/rocksdbjni-8.3.2.jar
+	25/08/02 05:48:37 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/rocksdbjni-8.3.2.jar' for reading
+[INFO] 2025-08-02 05:48:39.244 +0000 -  ->
+	25/08/02 05:48:38 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/scala-collection-compat_2.12-2.7.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/scala-collection-compat_2.12-2.7.0.jar
+	25/08/02 05:48:38 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/scala-collection-compat_2.12-2.7.0.jar' for reading
+	25/08/02 05:48:38 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/scala-compiler-2.12.18.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/scala-compiler-2.12.18.jar
+	25/08/02 05:48:38 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/scala-compiler-2.12.18.jar' for reading
+	25/08/02 05:48:38 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/scala-library-2.12.18.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/scala-library-2.12.18.jar
+	25/08/02 05:48:38 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/scala-library-2.12.18.jar' for reading
+	25/08/02 05:48:38 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/scala-parser-combinators_2.12-2.3.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/scala-parser-combinators_2.12-2.3.0.jar
+	25/08/02 05:48:38 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/scala-parser-combinators_2.12-2.3.0.jar' for reading
+	25/08/02 05:48:39 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/scala-reflect-2.12.18.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/scala-reflect-2.12.18.jar
+	25/08/02 05:48:39 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/scala-reflect-2.12.18.jar' for reading
+	25/08/02 05:48:39 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/scala-xml_2.12-2.1.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/scala-xml_2.12-2.1.0.jar
+	25/08/02 05:48:39 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/scala-xml_2.12-2.1.0.jar' for reading
+[INFO] 2025-08-02 05:48:40.244 +0000 -  ->
+	25/08/02 05:48:39 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/shims-0.9.45.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/shims-0.9.45.jar
+	25/08/02 05:48:39 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/shims-0.9.45.jar' for reading
+	25/08/02 05:48:39 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/slf4j-api-2.0.7.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/slf4j-api-2.0.7.jar
+	25/08/02 05:48:39 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/slf4j-api-2.0.7.jar' for reading
+	25/08/02 05:48:39 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/snakeyaml-2.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/snakeyaml-2.1.jar
+	25/08/02 05:48:39 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/snakeyaml-2.1.jar' for reading
+	25/08/02 05:48:39 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/snakeyaml-engine-2.6.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/snakeyaml-engine-2.6.jar
+	25/08/02 05:48:39 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/snakeyaml-engine-2.6.jar' for reading
+	25/08/02 05:48:39 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/snappy-java-1.1.10.5.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/snappy-java-1.1.10.5.jar
+	25/08/02 05:48:39 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/snappy-java-1.1.10.5.jar' for reading
+	25/08/02 05:48:40 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-acl-1.0.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-acl-1.0.0.jar
+	25/08/02 05:48:40 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-acl-1.0.0.jar' for reading
+	25/08/02 05:48:40 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-catalyst_2.12-3.5.2-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-catalyst_2.12-3.5.2-amzn-1.jar
+	25/08/02 05:48:40 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-catalyst_2.12-3.5.2-amzn-1.jar' for reading
+[INFO] 2025-08-02 05:48:41.245 +0000 -  ->
+	25/08/02 05:48:40 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-common-utils_2.12-3.5.2-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-common-utils_2.12-3.5.2-amzn-1.jar
+	25/08/02 05:48:40 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-common-utils_2.12-3.5.2-amzn-1.jar' for reading
+	25/08/02 05:48:40 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-core_2.12-3.5.2-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-core_2.12-3.5.2-amzn-1.jar
+	25/08/02 05:48:40 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-core_2.12-3.5.2-amzn-1.jar' for reading
+	25/08/02 05:48:40 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-fgac-iceberg_2.12-3.5.2-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-fgac-iceberg_2.12-3.5.2-amzn-1.jar
+	25/08/02 05:48:40 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-fgac-iceberg_2.12-3.5.2-amzn-1.jar' for reading
+	25/08/02 05:48:40 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-fgac_2.12-3.5.2-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-fgac_2.12-3.5.2-amzn-1.jar
+	25/08/02 05:48:40 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-fgac_2.12-3.5.2-amzn-1.jar' for reading
+	25/08/02 05:48:41 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-ganglia-lgpl_2.12-3.5.2-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-ganglia-lgpl_2.12-3.5.2-amzn-1.jar
+	25/08/02 05:48:41 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-ganglia-lgpl_2.12-3.5.2-amzn-1.jar' for reading
+	25/08/02 05:48:41 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-graphx_2.12-3.5.2-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-graphx_2.12-3.5.2-amzn-1.jar
+	25/08/02 05:48:41 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-graphx_2.12-3.5.2-amzn-1.jar' for reading
+	25/08/02 05:48:41 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-hive-thriftserver_2.12-3.5.2-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-hive-thriftserver_2.12-3.5.2-amzn-1.jar
+	25/08/02 05:48:41 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-hive-thriftserver_2.12-3.5.2-amzn-1.jar' for reading
+	25/08/02 05:48:41 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-hive_2.12-3.5.2-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-hive_2.12-3.5.2-amzn-1.jar
+	25/08/02 05:48:41 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-hive_2.12-3.5.2-amzn-1.jar' for reading
+[INFO] 2025-08-02 05:48:42.246 +0000 -  ->
+	25/08/02 05:48:41 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-kvstore_2.12-3.5.2-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-kvstore_2.12-3.5.2-amzn-1.jar
+	25/08/02 05:48:41 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-kvstore_2.12-3.5.2-amzn-1.jar' for reading
+	25/08/02 05:48:41 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-launcher_2.12-3.5.2-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-launcher_2.12-3.5.2-amzn-1.jar
+	25/08/02 05:48:41 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-launcher_2.12-3.5.2-amzn-1.jar' for reading
+	25/08/02 05:48:41 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-mllib-local_2.12-3.5.2-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-mllib-local_2.12-3.5.2-amzn-1.jar
+	25/08/02 05:48:41 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-mllib-local_2.12-3.5.2-amzn-1.jar' for reading
+	25/08/02 05:48:41 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-mllib_2.12-3.5.2-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-mllib_2.12-3.5.2-amzn-1.jar
+	25/08/02 05:48:41 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-mllib_2.12-3.5.2-amzn-1.jar' for reading
+	25/08/02 05:48:41 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-network-common_2.12-3.5.2-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-network-common_2.12-3.5.2-amzn-1.jar
+	25/08/02 05:48:41 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-network-common_2.12-3.5.2-amzn-1.jar' for reading
+	25/08/02 05:48:41 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-network-shuffle_2.12-3.5.2-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-network-shuffle_2.12-3.5.2-amzn-1.jar
+	25/08/02 05:48:41 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-network-shuffle_2.12-3.5.2-amzn-1.jar' for reading
+	25/08/02 05:48:41 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-repl_2.12-3.5.2-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-repl_2.12-3.5.2-amzn-1.jar
+	25/08/02 05:48:41 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-repl_2.12-3.5.2-amzn-1.jar' for reading
+	25/08/02 05:48:41 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-sketch_2.12-3.5.2-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-sketch_2.12-3.5.2-amzn-1.jar
+	25/08/02 05:48:41 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-sketch_2.12-3.5.2-amzn-1.jar' for reading
+	25/08/02 05:48:41 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-sql-api_2.12-3.5.2-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-sql-api_2.12-3.5.2-amzn-1.jar
+	25/08/02 05:48:41 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-sql-api_2.12-3.5.2-amzn-1.jar' for reading
+	25/08/02 05:48:42 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-sql_2.12-3.5.2-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-sql_2.12-3.5.2-amzn-1.jar
+	25/08/02 05:48:42 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-sql_2.12-3.5.2-amzn-1.jar' for reading
+	25/08/02 05:48:42 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-streaming_2.12-3.5.2-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-streaming_2.12-3.5.2-amzn-1.jar
+	25/08/02 05:48:42 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-streaming_2.12-3.5.2-amzn-1.jar' for reading
+[INFO] 2025-08-02 05:48:43.247 +0000 -  ->
+	25/08/02 05:48:42 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-tags_2.12-3.5.2-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-tags_2.12-3.5.2-amzn-1.jar
+	25/08/02 05:48:42 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-tags_2.12-3.5.2-amzn-1.jar' for reading
+	25/08/02 05:48:42 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-unsafe_2.12-3.5.2-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-unsafe_2.12-3.5.2-amzn-1.jar
+	25/08/02 05:48:42 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-unsafe_2.12-3.5.2-amzn-1.jar' for reading
+	25/08/02 05:48:42 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spark-yarn_2.12-3.5.2-amzn-1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spark-yarn_2.12-3.5.2-amzn-1.jar
+	25/08/02 05:48:42 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spark-yarn_2.12-3.5.2-amzn-1.jar' for reading
+	25/08/02 05:48:42 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spire-macros_2.12-0.17.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spire-macros_2.12-0.17.0.jar
+	25/08/02 05:48:42 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spire-macros_2.12-0.17.0.jar' for reading
+	25/08/02 05:48:42 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spire-platform_2.12-0.17.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spire-platform_2.12-0.17.0.jar
+	25/08/02 05:48:42 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spire-platform_2.12-0.17.0.jar' for reading
+	25/08/02 05:48:42 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spire-util_2.12-0.17.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spire-util_2.12-0.17.0.jar
+	25/08/02 05:48:42 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spire-util_2.12-0.17.0.jar' for reading
+	25/08/02 05:48:42 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/spire_2.12-0.17.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/spire_2.12-0.17.0.jar
+	25/08/02 05:48:42 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/spire_2.12-0.17.0.jar' for reading
+	25/08/02 05:48:42 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/stax-api-1.0.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/stax-api-1.0.1.jar
+	25/08/02 05:48:42 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/stax-api-1.0.1.jar' for reading
+	25/08/02 05:48:42 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/stream-2.9.6.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/stream-2.9.6.jar
+	25/08/02 05:48:42 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/stream-2.9.6.jar' for reading
+	25/08/02 05:48:42 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/super-csv-2.2.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/super-csv-2.2.0.jar
+	25/08/02 05:48:42 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/super-csv-2.2.0.jar' for reading
+	25/08/02 05:48:43 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/threeten-extra-1.7.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/threeten-extra-1.7.1.jar
+	25/08/02 05:48:43 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/threeten-extra-1.7.1.jar' for reading
+	25/08/02 05:48:43 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/tink-1.9.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/tink-1.9.0.jar
+	25/08/02 05:48:43 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/tink-1.9.0.jar' for reading
+	25/08/02 05:48:43 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/transaction-api-1.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/transaction-api-1.1.jar
+	25/08/02 05:48:43 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/transaction-api-1.1.jar' for reading
+[INFO] 2025-08-02 05:48:44.248 +0000 -  ->
+	25/08/02 05:48:43 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/univocity-parsers-2.9.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/univocity-parsers-2.9.1.jar
+	25/08/02 05:48:43 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/univocity-parsers-2.9.1.jar' for reading
+	25/08/02 05:48:43 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/volcano-client-6.7.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/volcano-client-6.7.2.jar
+	25/08/02 05:48:43 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/volcano-client-6.7.2.jar' for reading
+	25/08/02 05:48:43 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/volcano-model-v1beta1-6.7.2.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/volcano-model-v1beta1-6.7.2.jar
+	25/08/02 05:48:43 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/volcano-model-v1beta1-6.7.2.jar' for reading
+	25/08/02 05:48:43 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/xbean-asm9-shaded-4.23.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/xbean-asm9-shaded-4.23.jar
+	25/08/02 05:48:43 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/xbean-asm9-shaded-4.23.jar' for reading
+	25/08/02 05:48:43 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/xz-1.9.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/xz-1.9.jar
+	25/08/02 05:48:43 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/xz-1.9.jar' for reading
+	25/08/02 05:48:43 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/zjsonpatch-0.3.0.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/zjsonpatch-0.3.0.jar
+	25/08/02 05:48:43 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/zjsonpatch-0.3.0.jar' for reading
+	25/08/02 05:48:43 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/zookeeper-3.9.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/zookeeper-3.9.1.jar
+	25/08/02 05:48:43 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/zookeeper-3.9.1.jar' for reading
+	25/08/02 05:48:43 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/zookeeper-jute-3.9.1.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/zookeeper-jute-3.9.1.jar
+	25/08/02 05:48:43 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/zookeeper-jute-3.9.1.jar' for reading
+	25/08/02 05:48:43 INFO Client: Uploading resource s3://exchanges-flink-test/batch/emr/spark-jars/zstd-jni-1.5.5-4.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/zstd-jni-1.5.5-4.jar
+	25/08/02 05:48:43 INFO S3NativeFileSystem: Opening 's3://exchanges-flink-test/batch/emr/spark-jars/zstd-jni-1.5.5-4.jar' for reading
+	25/08/02 05:48:44 INFO Client: Uploading resource file:/dolphinscheduler/default/resources/mysql-connector-j-8.0.33.jar -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/mysql-connector-j-8.0.33.jar
+	25/08/02 05:48:44 INFO Client: Uploading resource file:/etc/spark/conf/hive-site.xml -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/hive-site.xml
+	25/08/02 05:48:44 INFO Client: Uploading resource file:/etc/hudi/conf/hudi-defaults.conf -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/hudi-defaults.conf
+	25/08/02 05:48:44 INFO Client: Uploading resource file:/dolphinscheduler/default/resources/bigdata_tag_system/src/tag_engine/main.py -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/main.py
+	25/08/02 05:48:44 INFO Client: Uploading resource file:/mnt/spark/python/lib/pyspark.zip -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/pyspark.zip
+	25/08/02 05:48:44 INFO Client: Uploading resource file:/mnt/spark/python/lib/py4j-0.10.9.7-src.zip -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/py4j-0.10.9.7-src.zip
+[INFO] 2025-08-02 05:48:45.248 +0000 -  ->
+	25/08/02 05:48:44 INFO Client: Uploading resource file:/tmp/spark-04612671-4cbf-43a5-bc74-76acb55929aa/__spark_conf__7916852632764505525.zip -> hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209/__spark_conf__.zip
+	25/08/02 05:48:44 INFO SecurityManager: Changing view acls to: root
+	25/08/02 05:48:44 INFO SecurityManager: Changing modify acls to: root
+	25/08/02 05:48:44 INFO SecurityManager: Changing view acls groups to:
+	25/08/02 05:48:44 INFO SecurityManager: Changing modify acls groups to:
+	25/08/02 05:48:44 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users with view permissions: root; groups with view permissions: EMPTY; users with modify permissions: root; groups with modify permissions: EMPTY
+	25/08/02 05:48:44 INFO Client: Submitting application application_1739849539217_3209 to ResourceManager
+	25/08/02 05:48:44 INFO YarnClientImpl: Submitted application application_1739849539217_3209
+[INFO] 2025-08-02 05:48:46.249 +0000 -  ->
+	25/08/02 05:48:45 INFO Client: Application report for application_1739849539217_3209 (state: ACCEPTED)
+	25/08/02 05:48:45 INFO Client:
+		 client token: N/A
+		 diagnostics: AM container is launched, waiting for AM container to Register with RM
+		 ApplicationMaster host: N/A
+		 ApplicationMaster RPC port: -1
+		 queue: root.default
+		 start time: 1754113724408
+		 final status: UNDEFINED
+		 tracking URL: http://ip-172-31-9-196.ap-southeast-1.compute.internal:20888/proxy/application_1739849539217_3209/
+		 user: root
+[INFO] 2025-08-02 05:49:02.251 +0000 -  ->
+	25/08/02 05:49:01 INFO Client: Application report for application_1739849539217_3209 (state: FAILED)
+	25/08/02 05:49:01 INFO Client:
+		 client token: N/A
+		 diagnostics: Application application_1739849539217_3209 failed 2 times due to AM Container for appattempt_1739849539217_3209_000002 exited with  exitCode: 13
+	Failing this attempt.Diagnostics: [2025-08-02 05:49:01.216]Exception from container-launch.
+	Container id: container_1739849539217_3209_02_000001
+	Exit code: 13
 
-	📦 处理标签组 4/4: Group_2tags_1tables
-	🚀 开始计算标签组: Group_2tags_1tables
-[INFO] 2025-08-01 13:41:32.032 +0000 -  ->
-	   📋 该组标签规则数: 2
-	🔍 TagRuleParser初始化完成
-	🔍 分析字段依赖关系...
-[INFO] 2025-08-01 13:41:33.033 +0000 -  ->
-	✅ 字段依赖分析完成: 1 个表
-	   📊 tag_system.user_basic_info: ['age', 'user_id']
-	📖 加载Hive表: tag_system.user_basic_info
-	✅ 表 tag_system.user_basic_info 加载完成，字段: {'age', 'user_id'}
-	✅ 单表加载并缓存完成: tag_system.user_basic_info (alias: user_basic_info)
-	   🔗 组内共享表JOIN完成，用户数: 1000
-	   🎯 并行计算并聚合 2 个标签...
-	🔍 TagRuleParser初始化完成
-	      🏷️  解析标签 7 规则...
-	         🔍 标签 7 SQL条件: (user_basic_info.age BETWEEN 18 AND 65)
-	      🏷️  解析标签 8 规则...
-	         🔍 标签 8 SQL条件: (user_basic_info.age NOT BETWEEN 0 AND 17)
-	   ⚡ 使用并行表达式工具构建 2 个标签条件...
-	   ✅ 并行计算并聚合完成: 1000 个有标签用户
-	✅ 标签组计算完成: 1000 个用户
-	📖 加载现有用户标签数据...
-	✅ 现有标签数据加载完成: 996 个用户
-	💾 开始写入标签结果到MySQL...
-[INFO] 2025-08-01 13:41:34.033 +0000 -  ->
-	📤 准备写入 1000 条标签记录...
-	✅ 标签结果写入成功: 1000 条记录
-	   ✅ Group_2tags_1tables: 1000 个用户
-	   ✅ 标签组 Group_2tags_1tables 处理完成
-	   🧹 已清理 1 个表的缓存: ['tag_system.user_basic_info']
-	✅ 标签计算完成
-	❌ 获取标签统计失败: [NOT_COLUMN_OR_STR] Argument `col` should be a Column or str, got float.
+	[2025-08-02 05:49:01.217]Container exited with a non-zero exit code 13. Error file: prelaunch.err.
+	Last 4096 bytes of prelaunch.err :
+	Last 4096 bytes of stderr :
+	25/08/02 05:48:59 INFO SignalUtils: Registering signal handler for TERM
+	25/08/02 05:48:59 INFO SignalUtils: Registering signal handler for HUP
+	25/08/02 05:48:59 INFO SignalUtils: Registering signal handler for INT
+	25/08/02 05:49:00 INFO ApplicationMaster: ApplicationAttemptId: appattempt_1739849539217_3209_000002
+	25/08/02 05:49:00 INFO ApplicationMaster: Starting the user application in a separate Thread
+	25/08/02 05:49:00 INFO ApplicationMaster: Waiting for spark context initialization...
+	25/08/02 05:49:00 ERROR ApplicationMaster: User application exited with status 1
+	25/08/02 05:49:00 INFO ApplicationMaster: Final app status: FAILED, exitCode: 13, (reason: User application exited with status 1)
+	25/08/02 05:49:00 ERROR ApplicationMaster: Uncaught exception:
+	org.apache.spark.SparkException: Exception thrown in awaitResult:
+		at org.apache.spark.util.SparkThreadUtils$.awaitResult(SparkThreadUtils.scala:56) ~[spark-common-utils_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.util.ThreadUtils$.awaitResult(ThreadUtils.scala:310) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.yarn.ApplicationMaster.runDriver(ApplicationMaster.scala:509) ~[spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.yarn.ApplicationMaster.run(ApplicationMaster.scala:268) ~[spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.yarn.ApplicationMaster$$anon$3.run(ApplicationMaster.scala:937) ~[spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.yarn.ApplicationMaster$$anon$3.run(ApplicationMaster.scala:936) ~[spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at java.security.AccessController.doPrivileged(AccessController.java:712) [?:?]
+		at javax.security.auth.Subject.doAs(Subject.java:439) [?:?]
+		at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1953) [hadoop-client-api-3.4.0-amzn-1.jar:?]
+		at org.apache.spark.deploy.yarn.ApplicationMaster$.main(ApplicationMaster.scala:936) [spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.yarn.ApplicationMaster.main(ApplicationMaster.scala) [spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+	Caused by: org.apache.spark.SparkUserAppException: User application exited with 1
+		at org.apache.spark.deploy.PythonRunner$.main(PythonRunner.scala:112) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.PythonRunner.main(PythonRunner.scala) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?]
+		at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?]
+		at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?]
+		at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?]
+		at org.apache.spark.deploy.yarn.ApplicationMaster$$anon$2.run(ApplicationMaster.scala:741) ~[spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+	25/08/02 05:49:00 INFO ApplicationMaster: Deleting staging directory hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209
+	25/08/02 05:49:00 INFO ShutdownHookManager: Shutdown hook called
 
-	============================================================
-	✅ 任务执行成功
-	============================================================
-	🧹 HiveMeta缓存已清理
-	🧹 TagEngine资源清理完成
-	🧹 关闭Spark会话...
-[INFO] 2025-08-01 13:41:35.034 +0000 -  ->
-	👋 程序退出
-[INFO] 2025-08-01 13:41:35.034 +0000 - process has exited. execute path:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_21/945/3517, processId:849301 ,exitStatusCode:0 ,processWaitForStatus:true ,processExitValue:0
-[INFO] 2025-08-01 13:41:35.035 +0000 - Start finding appId in /usr/local/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250801/18466477060960/21/945/3517.log, fetch way: log
-[INFO] 2025-08-01 13:41:35.035 +0000 - Find appId: application_1739849539217_3202 from /usr/local/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250801/18466477060960/21/945/3517.log
-[INFO] 2025-08-01 13:41:35.036 +0000 - ***********************************************************************************************
-[INFO] 2025-08-01 13:41:35.036 +0000 - *********************************  Finalize task instance  ************************************
-[INFO] 2025-08-01 13:41:35.036 +0000 - ***********************************************************************************************
-[INFO] 2025-08-01 13:41:35.036 +0000 - Upload output files: [] successfully
-[INFO] 2025-08-01 13:41:35.036 +0000 - Send task execute status: SUCCESS to master : 172.31.9.77:1234
-[INFO] 2025-08-01 13:41:35.036 +0000 - Remove the current task execute context from worker cache
-[INFO] 2025-08-01 13:41:35.036 +0000 - The current execute mode isn't develop mode, will clear the task execute file: /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_21/945/3517
-[INFO] 2025-08-01 13:41:35.037 +0000 - Success clear the task execute file: /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_21/945/3517
-[INFO] 2025-08-01 13:41:35.037 +0000 - FINALIZE_SESSION
+
+	[2025-08-02 05:49:01.217]Container exited with a non-zero exit code 13. Error file: prelaunch.err.
+	Last 4096 bytes of prelaunch.err :
+	Last 4096 bytes of stderr :
+	25/08/02 05:48:59 INFO SignalUtils: Registering signal handler for TERM
+	25/08/02 05:48:59 INFO SignalUtils: Registering signal handler for HUP
+	25/08/02 05:48:59 INFO SignalUtils: Registering signal handler for INT
+	25/08/02 05:49:00 INFO ApplicationMaster: ApplicationAttemptId: appattempt_1739849539217_3209_000002
+	25/08/02 05:49:00 INFO ApplicationMaster: Starting the user application in a separate Thread
+	25/08/02 05:49:00 INFO ApplicationMaster: Waiting for spark context initialization...
+	25/08/02 05:49:00 ERROR ApplicationMaster: User application exited with status 1
+	25/08/02 05:49:00 INFO ApplicationMaster: Final app status: FAILED, exitCode: 13, (reason: User application exited with status 1)
+	25/08/02 05:49:00 ERROR ApplicationMaster: Uncaught exception:
+	org.apache.spark.SparkException: Exception thrown in awaitResult:
+		at org.apache.spark.util.SparkThreadUtils$.awaitResult(SparkThreadUtils.scala:56) ~[spark-common-utils_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.util.ThreadUtils$.awaitResult(ThreadUtils.scala:310) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.yarn.ApplicationMaster.runDriver(ApplicationMaster.scala:509) ~[spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.yarn.ApplicationMaster.run(ApplicationMaster.scala:268) ~[spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.yarn.ApplicationMaster$$anon$3.run(ApplicationMaster.scala:937) ~[spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.yarn.ApplicationMaster$$anon$3.run(ApplicationMaster.scala:936) ~[spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at java.security.AccessController.doPrivileged(AccessController.java:712) [?:?]
+		at javax.security.auth.Subject.doAs(Subject.java:439) [?:?]
+		at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1953) [hadoop-client-api-3.4.0-amzn-1.jar:?]
+		at org.apache.spark.deploy.yarn.ApplicationMaster$.main(ApplicationMaster.scala:936) [spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.yarn.ApplicationMaster.main(ApplicationMaster.scala) [spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+	Caused by: org.apache.spark.SparkUserAppException: User application exited with 1
+		at org.apache.spark.deploy.PythonRunner$.main(PythonRunner.scala:112) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.PythonRunner.main(PythonRunner.scala) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?]
+		at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?]
+		at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?]
+		at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?]
+		at org.apache.spark.deploy.yarn.ApplicationMaster$$anon$2.run(ApplicationMaster.scala:741) ~[spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+	25/08/02 05:49:00 INFO ApplicationMaster: Deleting staging directory hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209
+	25/08/02 05:49:00 INFO ShutdownHookManager: Shutdown hook called
+
+
+	For more detailed output, check the application tracking page: http://ip-172-31-9-196.ap-southeast-1.compute.internal:8088/cluster/app/application_1739849539217_3209 Then click on links to logs of each attempt.
+	. Failing the application.
+		 ApplicationMaster host: N/A
+		 ApplicationMaster RPC port: -1
+		 queue: root.default
+		 start time: 1754113724408
+		 final status: FAILED
+		 tracking URL: http://ip-172-31-9-196.ap-southeast-1.compute.internal:8088/cluster/app/application_1739849539217_3209
+		 user: root
+	25/08/02 05:49:01 ERROR Client: Application diagnostics message: Application application_1739849539217_3209 failed 2 times due to AM Container for appattempt_1739849539217_3209_000002 exited with  exitCode: 13
+	Failing this attempt.Diagnostics: [2025-08-02 05:49:01.216]Exception from container-launch.
+	Container id: container_1739849539217_3209_02_000001
+	Exit code: 13
+
+	[2025-08-02 05:49:01.217]Container exited with a non-zero exit code 13. Error file: prelaunch.err.
+	Last 4096 bytes of prelaunch.err :
+	Last 4096 bytes of stderr :
+	25/08/02 05:48:59 INFO SignalUtils: Registering signal handler for TERM
+	25/08/02 05:48:59 INFO SignalUtils: Registering signal handler for HUP
+	25/08/02 05:48:59 INFO SignalUtils: Registering signal handler for INT
+	25/08/02 05:49:00 INFO ApplicationMaster: ApplicationAttemptId: appattempt_1739849539217_3209_000002
+	25/08/02 05:49:00 INFO ApplicationMaster: Starting the user application in a separate Thread
+	25/08/02 05:49:00 INFO ApplicationMaster: Waiting for spark context initialization...
+	25/08/02 05:49:00 ERROR ApplicationMaster: User application exited with status 1
+	25/08/02 05:49:00 INFO ApplicationMaster: Final app status: FAILED, exitCode: 13, (reason: User application exited with status 1)
+	25/08/02 05:49:00 ERROR ApplicationMaster: Uncaught exception:
+	org.apache.spark.SparkException: Exception thrown in awaitResult:
+		at org.apache.spark.util.SparkThreadUtils$.awaitResult(SparkThreadUtils.scala:56) ~[spark-common-utils_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.util.ThreadUtils$.awaitResult(ThreadUtils.scala:310) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.yarn.ApplicationMaster.runDriver(ApplicationMaster.scala:509) ~[spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.yarn.ApplicationMaster.run(ApplicationMaster.scala:268) ~[spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.yarn.ApplicationMaster$$anon$3.run(ApplicationMaster.scala:937) ~[spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.yarn.ApplicationMaster$$anon$3.run(ApplicationMaster.scala:936) ~[spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at java.security.AccessController.doPrivileged(AccessController.java:712) [?:?]
+		at javax.security.auth.Subject.doAs(Subject.java:439) [?:?]
+		at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1953) [hadoop-client-api-3.4.0-amzn-1.jar:?]
+		at org.apache.spark.deploy.yarn.ApplicationMaster$.main(ApplicationMaster.scala:936) [spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.yarn.ApplicationMaster.main(ApplicationMaster.scala) [spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+	Caused by: org.apache.spark.SparkUserAppException: User application exited with 1
+		at org.apache.spark.deploy.PythonRunner$.main(PythonRunner.scala:112) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.PythonRunner.main(PythonRunner.scala) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?]
+		at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?]
+		at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?]
+		at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?]
+		at org.apache.spark.deploy.yarn.ApplicationMaster$$anon$2.run(ApplicationMaster.scala:741) ~[spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+	25/08/02 05:49:00 INFO ApplicationMaster: Deleting staging directory hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209
+	25/08/02 05:49:00 INFO ShutdownHookManager: Shutdown hook called
+
+
+	[2025-08-02 05:49:01.217]Container exited with a non-zero exit code 13. Error file: prelaunch.err.
+	Last 4096 bytes of prelaunch.err :
+	Last 4096 bytes of stderr :
+	25/08/02 05:48:59 INFO SignalUtils: Registering signal handler for TERM
+	25/08/02 05:48:59 INFO SignalUtils: Registering signal handler for HUP
+	25/08/02 05:48:59 INFO SignalUtils: Registering signal handler for INT
+	25/08/02 05:49:00 INFO ApplicationMaster: ApplicationAttemptId: appattempt_1739849539217_3209_000002
+	25/08/02 05:49:00 INFO ApplicationMaster: Starting the user application in a separate Thread
+	25/08/02 05:49:00 INFO ApplicationMaster: Waiting for spark context initialization...
+	25/08/02 05:49:00 ERROR ApplicationMaster: User application exited with status 1
+	25/08/02 05:49:00 INFO ApplicationMaster: Final app status: FAILED, exitCode: 13, (reason: User application exited with status 1)
+	25/08/02 05:49:00 ERROR ApplicationMaster: Uncaught exception:
+	org.apache.spark.SparkException: Exception thrown in awaitResult:
+		at org.apache.spark.util.SparkThreadUtils$.awaitResult(SparkThreadUtils.scala:56) ~[spark-common-utils_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.util.ThreadUtils$.awaitResult(ThreadUtils.scala:310) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.yarn.ApplicationMaster.runDriver(ApplicationMaster.scala:509) ~[spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.yarn.ApplicationMaster.run(ApplicationMaster.scala:268) ~[spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.yarn.ApplicationMaster$$anon$3.run(ApplicationMaster.scala:937) ~[spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.yarn.ApplicationMaster$$anon$3.run(ApplicationMaster.scala:936) ~[spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at java.security.AccessController.doPrivileged(AccessController.java:712) [?:?]
+		at javax.security.auth.Subject.doAs(Subject.java:439) [?:?]
+		at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1953) [hadoop-client-api-3.4.0-amzn-1.jar:?]
+		at org.apache.spark.deploy.yarn.ApplicationMaster$.main(ApplicationMaster.scala:936) [spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.yarn.ApplicationMaster.main(ApplicationMaster.scala) [spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+	Caused by: org.apache.spark.SparkUserAppException: User application exited with 1
+		at org.apache.spark.deploy.PythonRunner$.main(PythonRunner.scala:112) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at org.apache.spark.deploy.PythonRunner.main(PythonRunner.scala) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+		at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?]
+		at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?]
+		at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?]
+		at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?]
+		at org.apache.spark.deploy.yarn.ApplicationMaster$$anon$2.run(ApplicationMaster.scala:741) ~[spark-yarn_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
+	25/08/02 05:49:00 INFO ApplicationMaster: Deleting staging directory hdfs://ha-nn-uri/user/root/.sparkStaging/application_1739849539217_3209
+	25/08/02 05:49:00 INFO ShutdownHookManager: Shutdown hook called
+
+
+	For more detailed output, check the application tracking page: http://ip-172-31-9-196.ap-southeast-1.compute.internal:8088/cluster/app/application_1739849539217_3209 Then click on links to logs of each attempt.
+	. Failing the application.
+	Exception in thread "main" org.apache.spark.SparkException: Application application_1739849539217_3209 finished with failed status
+		at org.apache.spark.deploy.yarn.Client.run(Client.scala:1319)
+		at org.apache.spark.deploy.yarn.YarnClusterApplication.start(Client.scala:1752)
+		at org.apache.spark.deploy.SparkSubmit.org$apache$spark$deploy$SparkSubmit$$runMain(SparkSubmit.scala:1100)
+		at org.apache.spark.deploy.SparkSubmit.doRunMain$1(SparkSubmit.scala:194)
+		at org.apache.spark.deploy.SparkSubmit.submit(SparkSubmit.scala:217)
+		at org.apache.spark.deploy.SparkSubmit.doSubmit(SparkSubmit.scala:91)
+		at org.apache.spark.deploy.SparkSubmit$$anon$2.doSubmit(SparkSubmit.scala:1192)
+		at org.apache.spark.deploy.SparkSubmit$.main(SparkSubmit.scala:1201)
+		at org.apache.spark.deploy.SparkSubmit.main(SparkSubmit.scala)
+	25/08/02 05:49:01 INFO ShutdownHookManager: Shutdown hook called
+	25/08/02 05:49:01 INFO ShutdownHookManager: Deleting directory /tmp/spark-bd5f0b28-cc00-49e0-a212-57948d2c08a5
+	25/08/02 05:49:01 INFO ShutdownHookManager: Deleting directory /tmp/spark-04612671-4cbf-43a5-bc74-76acb55929aa
+[INFO] 2025-08-02 05:49:02.253 +0000 - process has exited. execute path:/tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_25/954/3526, processId:864642 ,exitStatusCode:1 ,processWaitForStatus:true ,processExitValue:1
+[INFO] 2025-08-02 05:49:02.253 +0000 - Start finding appId in /usr/local/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250802/18466477060960/25/954/3526.log, fetch way: log
+[INFO] 2025-08-02 05:49:02.253 +0000 - Find appId: application_1739849539217_3209 from /usr/local/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250802/18466477060960/25/954/3526.log
+[INFO] 2025-08-02 05:49:02.254 +0000 - ***********************************************************************************************
+[INFO] 2025-08-02 05:49:02.254 +0000 - *********************************  Finalize task instance  ************************************
+[INFO] 2025-08-02 05:49:02.254 +0000 - ***********************************************************************************************
+[INFO] 2025-08-02 05:49:02.254 +0000 - Upload output files: [] successfully
+[INFO] 2025-08-02 05:49:02.254 +0000 - Send task execute status: FAILURE to master : 172.31.9.77:1234
+[INFO] 2025-08-02 05:49:02.254 +0000 - Remove the current task execute context from worker cache
+[INFO] 2025-08-02 05:49:02.254 +0000 - The current execute mode isn't develop mode, will clear the task execute file: /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_25/954/3526
+[INFO] 2025-08-02 05:49:02.256 +0000 - Success clear the task execute file: /tmp/dolphinscheduler/exec/process/default/18466461502048/18466477060960_25/954/3526
+[INFO] 2025-08-02 05:49:02.256 +0000 - FINALIZE_SESSION
