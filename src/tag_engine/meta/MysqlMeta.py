@@ -55,19 +55,19 @@ class MysqlMeta:
         """
         print(f"📋 加载标签规则，指定标签: {tagIds}")
         
-        # 构建查询SQL
+        # 构建查询SQL - 更新为新的表结构
         query = """
-        (SELECT tr.tag_id, tr.rule_conditions, td.tag_name, td.description
-         FROM tag_rules tr
-         LEFT JOIN tag_definition td ON tr.tag_id = td.tag_id
-         WHERE tr.is_active = 1
+        (SELECT trc.tag_id, trc.tag_conditions as rule_conditions, td.tag_name, td.description
+         FROM tag_rules_config trc
+         LEFT JOIN tag_definition td ON trc.tag_id = td.id
+         WHERE td.is_active = 1
         """
         
         if tagIds:
             tagIdsStr = ','.join(map(str, tagIds))
-            query += f" AND tr.tag_id IN ({tagIdsStr})"
+            query += f" AND trc.tag_id IN ({tagIdsStr})"
         
-        query += " ORDER BY tr.tag_id) as tag_rules"
+        query += " ORDER BY trc.tag_id) as tag_rules_config"
         
         try:
             rulesDF = self.spark.read \
@@ -94,7 +94,7 @@ class MysqlMeta:
         """
         print("📖 加载现有用户标签数据...")
         
-        query = "(SELECT user_id, tag_ids FROM user_tags WHERE tag_ids IS NOT NULL) as existing_tags"
+        query = "(SELECT user_id, tag_id_list FROM user_tag_relation WHERE tag_id_list IS NOT NULL) as existing_tags"
         
         try:
             existingDF = self.spark.read \
@@ -109,7 +109,7 @@ class MysqlMeta:
             # 使用SparkUdfs模块转换JSON为Array
             existingDF = existingDF.withColumn(
                 "existing_tag_ids",
-                json_to_array(col("tag_ids"))
+                json_to_array(col("tag_id_list"))
             ).select("user_id", "existing_tag_ids")
             
             print(f"✅ 现有标签数据加载完成: {existingDF.count()} 个用户")
@@ -148,7 +148,7 @@ class MysqlMeta:
             print(f"📋 创建临时表: {temp_table}")
             
             # 使用Spark原生JDBC写入，完全避免Python代码分发
-            resultsDF.select("user_id", col("final_tag_ids_json").alias("tag_ids")) \
+            resultsDF.select("user_id", col("final_tag_ids_json").alias("tag_id_list")) \
                 .write \
                 .format("jdbc") \
                 .option("url", self.jdbcUrl) \
@@ -216,8 +216,8 @@ class MysqlMeta:
         return self.spark.createDataFrame([], schema)
     
     def _executeSimpleUpsert(self, temp_table: str, record_count: int) -> bool:
-        """执行简单的UPSERT，利用现有的user_tags表结构"""
-        print(f"🔄 执行UPSERT操作，从 {temp_table} 到 user_tags...")
+        """执行简单的UPSERT，利用现有的user_tag_relation表结构"""
+        print(f"🔄 执行UPSERT操作，从 {temp_table} 到 user_tag_relation...")
         
         try:
             connection = pymysql.connect(**self.mysqlConfig)
@@ -225,19 +225,19 @@ class MysqlMeta:
             with connection.cursor() as cursor:
                 # 简单UPSERT，保持原有表结构和业务逻辑
                 upsert_sql = f"""
-                INSERT INTO user_tags (user_id, tag_ids)
-                SELECT user_id, tag_ids
+                INSERT INTO user_tag_relation (user_id, tag_id_list)
+                SELECT user_id, tag_id_list
                 FROM {temp_table}
                 ON DUPLICATE KEY UPDATE
                     updated_time = CASE 
-                        WHEN JSON_EXTRACT(user_tags.tag_ids, '$') <> JSON_EXTRACT(VALUES(tag_ids), '$')
+                        WHEN JSON_EXTRACT(user_tag_relation.tag_id_list, '$') <> JSON_EXTRACT(VALUES(tag_id_list), '$')
                         THEN CURRENT_TIMESTAMP 
-                        ELSE user_tags.updated_time 
+                        ELSE user_tag_relation.updated_time 
                     END,
-                    tag_ids = VALUES(tag_ids)
+                    tag_id_list = VALUES(tag_id_list)
                 """
                 
-                print(f"   📝 执行SQL: INSERT INTO user_tags ... FROM {temp_table}")
+                print(f"   📝 执行SQL: INSERT INTO user_tag_relation ... FROM {temp_table}")
                 cursor.execute(upsert_sql)
                 affected_rows = cursor.rowcount
                 connection.commit()
