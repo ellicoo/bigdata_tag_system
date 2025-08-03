@@ -104,7 +104,7 @@ CREATE TABLE `tag_rules_config` (
 --标签结果表更新为：
 CREATE TABLE `user_tag_relation` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `user_id` bigint  NOT NULL COMMENT '用户ID',
+  `user_id` varchar(128) NOT NULL COMMENT '用户ID',
   `tag_id_list` json NOT NULL COMMENT '用户的所有标签ID数组',
   `created_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updated_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
