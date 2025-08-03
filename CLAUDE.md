@@ -238,6 +238,139 @@ python src/tag_engine/main.py --mode generate-test-data
 python src/tag_engine/main.py --mode list-tasks
 ```
 
+## 高性能分布式写入架构
+
+系统采用**临时表+MySQL内部UPSERT**的混合架构，实现高性能的分布式数据写入，最小化网络传输和充分利用各组件优势。
+
+### 架构设计概览
+
+整个写入过程分为两个阶段：**分布式写入临时表** + **MySQL内部数据转移**
+
+### 阶段1：分布式写入MySQL临时表
+```
+┌─────────────┐    JDBC写入    ┌──────────────────────┐
+│ Executor-1  │──────────────→│                      │
+├─────────────┤               │   MySQL临时表         │
+│ Executor-2  │──────────────→│ user_tags_temp_xxx   │
+├─────────────┤               │                      │
+│ Executor-3  │──────────────→│ (自动创建+数据写入)    │
+└─────────────┘               └──────────────────────┘
+
+数据流：Spark Executors → MySQL临时表 (分布式并行写入)
+```
+
+**核心代码实现**：
+```python
+# 每次生成唯一临时表名，避免冲突
+temp_table = f"user_tags_temp_{int(time.time())}"
+
+# Spark分布式JDBC写入，各Executor直接连MySQL
+resultsDF.select("user_id", col("final_tag_ids_json").alias("tag_id_list")) \
+    .write \
+    .format("jdbc") \
+    .option("url", self.jdbcUrl) \
+    .option("dbtable", temp_table) \
+    .mode("overwrite") \  # 删除+创建+插入，确保干净环境
+    .save()
+```
+
+### 阶段2：MySQL内部数据转移
+```
+MySQL内部操作：
+┌──────────────────────┐    SELECT + UPSERT    ┌──────────────────────┐
+│   临时表              │─────────────────────→│   业务表              │
+│ user_tags_temp_xxx   │                      │ user_tag_relation    │
+│                      │    (数据不离开MySQL)   │                      │
+└──────────────────────┘                      └──────────────────────┘
+
+数据流：MySQL临时表 → MySQL业务表 (数据库内部操作，无网络开销)
+```
+
+**核心代码实现**：
+```python
+def _executeSimpleUpsert(self, temp_table: str, record_count: int) -> bool:
+    connection = pymysql.connect(**self.mysqlConfig)  # Driver单点连接
+    
+    # 复杂UPSERT逻辑在MySQL内部执行
+    upsert_sql = f"""
+    INSERT INTO user_tag_relation (user_id, tag_id_list)
+    SELECT user_id, tag_id_list FROM {temp_table}
+    ON DUPLICATE KEY UPDATE
+        updated_time = CASE 
+            WHEN JSON_EXTRACT(user_tag_relation.tag_id_list, '$') <> JSON_EXTRACT(VALUES(tag_id_list), '$')
+            THEN CURRENT_TIMESTAMP 
+            ELSE user_tag_relation.updated_time 
+        END,
+        tag_id_list = VALUES(tag_id_list)
+    """
+    
+    cursor.execute(upsert_sql)  # 单个SQL处理所有数据
+```
+
+### 架构优势分析
+
+#### 1. **网络流量最小化**
+```
+传统方案（数据经过Driver）:
+Executor → Driver → MySQL  (数据传输2次)
+
+当前方案:
+Executor → MySQL临时表     (数据传输1次)
+MySQL临时表 → MySQL业务表  (MySQL内部，无网络开销)
+```
+
+#### 2. **性能优势对比**
+
+| 方案 | 网络往返 | Driver内存 | 并发写入 | 复杂UPSERT |
+|------|----------|------------|----------|------------|
+| 逐行UPSERT | N次 | 高压力 | ❌ | ✅ |
+| Spark直写 | 1次 | 低压力 | ✅ | ❌ |
+| **临时表方案** | **1次** | **低压力** | **✅** | **✅** |
+
+#### 3. **组件职责优化**
+- **Spark Executors**: 分布式并行写入，充分利用集群资源
+- **MySQL**: 高效UPSERT和JSON处理，利用数据库优化能力  
+- **Driver**: 只负责协调SQL命令，不处理大量数据
+
+#### 4. **事务安全性**
+```sql
+-- 整个UPSERT在单个MySQL事务中完成
+START TRANSACTION;
+INSERT INTO user_tag_relation ... FROM temp_table ...;
+COMMIT;
+-- 确保数据一致性，支持回滚
+```
+
+### 实际执行示例
+
+假设处理100万条标签结果：
+
+```python
+# 阶段1: Spark分布式写入 (假设4个分区)
+Executor-1: 写入25万行到 user_tags_temp_1691234567
+Executor-2: 写入25万行到 user_tags_temp_1691234567  
+Executor-3: 写入25万行到 user_tags_temp_1691234567
+Executor-4: 写入25万行到 user_tags_temp_1691234567
+
+# 阶段2: MySQL内部UPSERT (单个高效操作)
+INSERT INTO user_tag_relation (user_id, tag_id_list)
+SELECT user_id, tag_id_list FROM user_tags_temp_1691234567
+ON DUPLICATE KEY UPDATE ...
+-- 处理100万行，但数据不离开MySQL服务器
+
+# 阶段3: 清理临时表
+DROP TABLE user_tags_temp_1691234567
+```
+
+### 设计模式总结
+
+这种**分布式写入+数据库内部处理**的混合架构，是大数据场景下的最佳实践：
+
+1. **数据本地性**: 最小化数据传输，利用MySQL内部优化
+2. **分布式能力**: 充分利用Spark集群的并行写入能力
+3. **复杂逻辑支持**: 支持JSON比较、条件更新等复杂业务逻辑
+4. **高可靠性**: 事务保证、自动清理、错误恢复机制
+
 ## Smart Tag Merging Mechanism
 
 The system uses a **Spark native functions + UDF** hybrid strategy to ensure type safety and high performance:

@@ -261,7 +261,107 @@ def json_to_array(json_col):
 - **批量计算**：同组标签并行计算，共享表读取和JOIN结果
 - **资源管理**：合理的Spark资源配置和内存管理
 
-### 4. 数据写入优化
+### 4. 高性能分布式写入架构
+
+系统采用**临时表+MySQL内部UPSERT**的创新架构，实现最小化网络传输的高性能分布式写入。
+
+#### **两阶段写入模式**
+
+**阶段1：分布式写入MySQL临时表**
+```
+┌─────────────┐    JDBC写入    ┌──────────────────────┐
+│ Executor-1  │──────────────→│                      │
+├─────────────┤               │   MySQL临时表         │
+│ Executor-2  │──────────────→│ user_tags_temp_xxx   │
+├─────────────┤               │                      │
+│ Executor-3  │──────────────→│ (自动创建+数据写入)    │
+└─────────────┘               └──────────────────────┘
+
+数据流：Spark Executors → MySQL临时表 (分布式并行写入)
+```
+
+**核心实现**：
+```python
+# 每次生成唯一临时表名，避免冲突
+temp_table = f"user_tags_temp_{int(time.time())}"
+
+# Spark分布式JDBC写入，各Executor直接连MySQL
+resultsDF.select("user_id", col("final_tag_ids_json").alias("tag_id_list")) \
+    .write \
+    .format("jdbc") \
+    .option("url", self.jdbcUrl) \
+    .option("dbtable", temp_table) \
+    .mode("overwrite") \  # 删除+创建+插入，确保干净环境
+    .save()
+```
+
+**阶段2：MySQL内部数据转移**
+```
+MySQL内部操作：
+┌──────────────────────┐    SELECT + UPSERT    ┌──────────────────────┐
+│   临时表              │─────────────────────→│   业务表              │
+│ user_tags_temp_xxx   │                      │ user_tag_relation    │
+│                      │    (数据不离开MySQL)   │                      │
+└──────────────────────┘                      └──────────────────────┘
+
+数据流：MySQL临时表 → MySQL业务表 (数据库内部操作，无网络开销)
+```
+
+**核心实现**：
+```python
+def _executeSimpleUpsert(self, temp_table: str, record_count: int) -> bool:
+    connection = pymysql.connect(**self.mysqlConfig)  # Driver单点连接
+    
+    # 复杂UPSERT逻辑在MySQL内部执行
+    upsert_sql = f"""
+    INSERT INTO user_tag_relation (user_id, tag_id_list)
+    SELECT user_id, tag_id_list FROM {temp_table}
+    ON DUPLICATE KEY UPDATE
+        updated_time = CASE 
+            WHEN JSON_EXTRACT(user_tag_relation.tag_id_list, '$') <> JSON_EXTRACT(VALUES(tag_id_list), '$')
+            THEN CURRENT_TIMESTAMP 
+            ELSE user_tag_relation.updated_time 
+        END,
+        tag_id_list = VALUES(tag_id_list)
+    """
+    
+    cursor.execute(upsert_sql)  # 单个SQL处理所有数据
+```
+
+#### **架构优势对比**
+
+| 方案 | 网络往返 | Driver内存 | 并发写入 | 复杂UPSERT |
+|------|----------|------------|----------|------------|
+| 逐行UPSERT | N次 | 高压力 | ❌ | ✅ |
+| Spark直写 | 1次 | 低压力 | ✅ | ❌ |
+| **临时表方案** | **1次** | **低压力** | **✅** | **✅** |
+
+#### **性能示例**
+假设处理100万条标签结果：
+```python
+# 阶段1: Spark分布式写入 (假设4个分区)
+Executor-1: 写入25万行到 user_tags_temp_1691234567
+Executor-2: 写入25万行到 user_tags_temp_1691234567  
+Executor-3: 写入25万行到 user_tags_temp_1691234567
+Executor-4: 写入25万行到 user_tags_temp_1691234567
+
+# 阶段2: MySQL内部UPSERT (单个高效操作)
+INSERT INTO user_tag_relation (user_id, tag_id_list)
+SELECT user_id, tag_id_list FROM user_tags_temp_1691234567
+ON DUPLICATE KEY UPDATE ...
+-- 处理100万行，但数据不离开MySQL服务器
+
+# 阶段3: 清理临时表
+DROP TABLE user_tags_temp_1691234567
+```
+
+#### **关键创新点**
+- ✅ **数据本地性**：最小化数据传输，利用MySQL内部优化
+- ✅ **分布式能力**：充分利用Spark集群的并行写入能力
+- ✅ **复杂逻辑支持**：支持JSON比较、条件更新等复杂业务逻辑
+- ✅ **高可靠性**：事务保证、自动清理、错误恢复机制
+
+### 5. 传统数据写入优化
 - **批量UPSERT**：高效的MySQL批量更新，支持标签合并
 - **标签合并算法**：
   ```
@@ -270,7 +370,7 @@ def json_to_array(json_col):
   ```
 - **时间戳管理**：精确的创建和更新时间追踪，支持幂等操作
 
-### 5. 架构优化亮点
+### 6. 架构优化亮点
 - **零数据丢失**：智能标签合并，新老标签完美融合
 - **类型兼容**：支持`List[int]`、`Array[int]`、嵌套数组等多种类型
 - **错误恢复**：单个标签组失败不影响其他组计算
