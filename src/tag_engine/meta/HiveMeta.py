@@ -4,9 +4,10 @@
 Hive数据源管理类
 参考TFECUserPortrait的EsMeta设计模式，负责Hive表的读取、缓存和JOIN操作
 """
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import *
+from datetime import datetime
 
 
 class HiveMeta:
@@ -26,139 +27,106 @@ class HiveMeta:
         """
         self.spark = spark
         self.cachedTables: Dict[str, DataFrame] = {}
+        self.failed_tables: Dict[str, str] = {}  # 记录加载失败的表
         
-        print("🗄️  HiveMeta初始化完成")
+        # 设置分区日期为当天
+        self.partition_date = datetime.now().strftime("%Y-%m-%d")
+        
+        print(f"🗄️  HiveMeta初始化完成，将使用分区: {self.partition_date}")
     
-    def loadTable(self, tableName: str, selectFields: Optional[List[str]] = None) -> DataFrame:
-        """纯粹加载单个Hive表，不缓存
-        
-        Args:
-            tableName: 表名
-            selectFields: 需要选择的字段列表，None表示选择所有字段
-            
-        Returns:
-            DataFrame: 加载的表DataFrame（未缓存）
-        """
-        print(f"📖 加载Hive表: {tableName}")
-        
-        try:
-            df = self.spark.table(tableName)
-            
-            # 字段选择优化
-            if selectFields:
-                # 确保user_id在选择字段中（JOIN需要）
-                if "user_id" not in selectFields:
-                    selectFields = ["user_id"] + selectFields
-                df = df.select(*selectFields)
-            
-            print(f"✅ 表 {tableName} 加载完成，字段: {selectFields or 'ALL'}")
-            return df
-            
-        except Exception as e:
-            print(f"❌ 加载表 {tableName} 失败: {e}")
-            # 返回空DataFrame，避免程序崩溃
-            return self._createEmptyDataFrame()
-    
-    def loadTables(self, tableNames: List[str], fieldMapping: Optional[Dict[str, List[str]]] = None) -> Dict[str, DataFrame]:
-        """批量加载多个Hive表
-        
-        Args:
-            tableNames: 表名列表
-            fieldMapping: 表名到字段列表的映射，格式: {"table1": ["field1", "field2"]}
-            
-        Returns:
-            Dict[str, DataFrame]: 表名到DataFrame的映射
-        """
-        result = {}
-        
-        for tableName in tableNames:
-            selectFields = fieldMapping.get(tableName) if fieldMapping else None
-            result[tableName] = self.loadTable(tableName, selectFields)
-        
-        print(f"📚 批量加载完成: {len(result)} 个表")
-        return result
-    
-    def loadAndJoinTables(self, tableNames: List[str], 
-                         fieldMapping: Optional[Dict[str, List[str]]] = None,
-                         joinKey: str = "user_id") -> DataFrame:
-        """加载并JOIN多个表，统一控制缓存策略
-        
-        策略：
-        - 单表情况：缓存单表
-        - 多表情况：缓存JOIN结果
+    def loadAndJoinTablesWithFailureTracking(self, tableNames: List[str], 
+                                             tagTableMapping: Dict[int, List[str]],
+                                             fieldMapping: Optional[Dict[str, List[str]]] = None,
+                                             joinKey: str = "user_id") -> Tuple[DataFrame, List[int]]:
+        """加载并JOIN多个表，跟踪失败的标签ID
         
         Args:
             tableNames: 需要JOIN的表名列表
+            tagTableMapping: 标签ID到依赖表的映射 {tag_id: [table1, table2]}
             fieldMapping: 表名到字段列表的映射
             joinKey: JOIN的键，默认为user_id
             
         Returns:
-            DataFrame: JOIN后的结果DataFrame（已缓存）
+            Tuple[DataFrame, List[int]]: (JOIN后的DataFrame, 失败的标签ID列表)
         """
-        if not tableNames:
-            return self._createEmptyDataFrame()
+        print(f"🔗 开始容错加载表: {tableNames}")
         
-        if len(tableNames) == 1:
-            # 🚀 单表情况：缓存单表
-            tableName = tableNames[0]
-            selectFields = fieldMapping.get(tableName) if fieldMapping else None
-            
-            # 生成单表缓存key
-            fieldKey = str(sorted(selectFields)) if selectFields else "ALL"
-            singleTableCacheKey = f"{tableName}:{fieldKey}"
-            
-            # 检查是否已缓存
-            if singleTableCacheKey in self.cachedTables:
-                print(f"🚀 复用单表缓存: {tableName}")
-                return self.cachedTables[singleTableCacheKey]
-            
-            # 加载并缓存单表
-            resultDF = self.loadTable(tableName, selectFields)
-            
-            # 🔧 关键修复：使用简化的表名作为alias，避免点号导致的反引号问题
-            # 例如：tag_system.user_asset_summary -> user_asset_summary
+        # 清空之前的失败记录
+        self.failed_tables.clear()
+        
+        successful_tables = []
+        failed_tag_ids = set()
+        
+        # 逐个尝试加载表
+        for tableName in tableNames:
+            try:
+                selectFields = fieldMapping.get(tableName) if fieldMapping else None
+                
+                # 建立基础链式调用：表 -> 分区过滤
+                df = self.spark.table(tableName).filter(col('dt') == self.partition_date)
+                print(f"   📅 应用分区过滤: dt='{self.partition_date}'")
+                
+                # 字段选择和验证
+                if selectFields:
+                    # 验证字段是否存在（这里会触发懒加载执行）
+                    available_columns = df.columns
+                    missing_fields = [field for field in selectFields if field not in available_columns]
+                    
+                    if missing_fields:
+                        error_msg = f"字段不存在: {missing_fields}"
+                        raise Exception(error_msg)
+                    
+                    # 确保user_id在选择字段中
+                    if "user_id" not in selectFields:
+                        selectFields = ["user_id"] + selectFields
+                    
+                    # 继续链式调用：添加字段选择
+                    df = df.select(*selectFields)
+
+                successful_tables.append((tableName, df))
+                print(f"✅ 表 {tableName} 加载成功")
+                
+            except Exception as e:
+                error_msg = str(e)
+                self.failed_tables[tableName] = error_msg
+                print(f"❌ 表 {tableName} 加载失败: {error_msg}")
+                
+                # 找出依赖此表的标签ID
+                for tag_id, dependent_tables in tagTableMapping.items():
+                    if tableName in dependent_tables:
+                        failed_tag_ids.add(tag_id)
+                        print(f"   📌 标签 {tag_id} 受影响")
+        
+        
+        # 记录成功加载的表名列表
+        successful_table_names = [tableName for tableName, df in successful_tables]
+        self._last_successful_tables = successful_table_names
+        
+        # 如果没有成功加载的表，返回空DataFrame
+        if not successful_tables:
+            print("❌ 所有表加载失败，返回空DataFrame")
+            self._last_successful_tables = []
+            return self._createEmptyDataFrame(), list(failed_tag_ids)
+        
+        # 如果只有一个成功的表，直接返回
+        if len(successful_tables) == 1:
+            tableName, resultDF = successful_tables[0]
             aliasName = tableName.split('.')[-1]
             resultDF = resultDF.alias(aliasName)
-            
-            from pyspark import StorageLevel
-            resultDF.persist(StorageLevel.MEMORY_AND_DISK)
-            self.cachedTables[singleTableCacheKey] = resultDF
-            
-            print(f"✅ 单表加载并缓存完成: {tableName} (alias: {aliasName})")
-            return resultDF
+            print(f"✅ 单表加载完成: {tableName}")
+            return resultDF, list(failed_tag_ids)
         
-        # 🚀 多表情况：缓存JOIN结果
-        # 为JOIN结果生成缓存key，确保相同的JOIN操作复用结果
-        sortedTables = sorted(tableNames)
-        fieldKey = ""
-        if fieldMapping:
-            fieldItems = sorted([(t, sorted(fields)) for t, fields in fieldMapping.items() if t in tableNames])
-            fieldKey = str(fieldItems)
-        joinCacheKey = f"JOIN:{','.join(sortedTables)}:{fieldKey}:{joinKey}"
-        
-        # 检查是否已缓存JOIN结果
-        if joinCacheKey in self.cachedTables:
-            print(f"🚀 复用JOIN缓存: {tableNames}")
-            return self.cachedTables[joinCacheKey]
-        
-        print(f"🔗 开始JOIN表: {tableNames}")
-        
-        # 🚀 关键优化：多表情况直接JOIN，不缓存中间子表，只缓存最终JOIN结果
+        # 多表JOIN
+        print(f"🔗 开始JOIN {len(successful_tables)} 个成功加载的表")
         resultDF = None
         
-        for i, tableName in enumerate(tableNames):
-            # 直接加载表，不缓存子表
-            selectFields = fieldMapping.get(tableName) if fieldMapping else None
-            currentDF = self.loadTable(tableName, selectFields)
-            
-            # 🔧 关键修复：使用简化的表名作为alias，避免点号导致的反引号问题
-            # 例如：tag_system.user_asset_summary -> user_asset_summary
+        for i, (tableName, currentDF) in enumerate(successful_tables):
             aliasName = tableName.split('.')[-1]
             
             if resultDF is None:
                 # 第一个表作为基础
                 resultDF = currentDF.alias(aliasName)
-                print(f"   📋 基础表: {tableName} (alias: {aliasName})")
+                print(f"   📋 基础表: {tableName}")
             else:
                 # LEFT JOIN后续表
                 resultDF = resultDF.join(
@@ -166,15 +134,10 @@ class HiveMeta:
                     joinKey,
                     "left"
                 )
-                print(f"   🔗 LEFT JOIN: {tableName} (alias: {aliasName})")
+                print(f"   🔗 LEFT JOIN: {tableName}")
         
-        # 🚀 关键策略：只缓存最终JOIN结果，不缓存中间子表
-        from pyspark import StorageLevel
-        resultDF.persist(StorageLevel.MEMORY_AND_DISK)
-        self.cachedTables[joinCacheKey] = resultDF
-        
-        print(f"✅ JOIN完成并缓存最终结果，涉及 {len(tableNames)} 个表")
-        return resultDF
+        print(f"✅ 容错JOIN完成，成功: {len(successful_tables)} 表，失败标签: {list(failed_tag_ids)}")
+        return resultDF, list(failed_tag_ids)
     
     def clearCache(self):
         """清理所有缓存的表"""
@@ -239,6 +202,25 @@ class HiveMeta:
         else:
             print(f"   ℹ️  组 {groupTables} 无需清理缓存")
     
+    def getFailureSummary(self) -> str:
+        """获取失败摘要信息"""
+        if not self.failed_tables:
+            return "无表加载失败"
+        
+        summary_parts = []
+        for table, error in self.failed_tables.items():
+            summary_parts.append(f"{table}: {error}")
+        
+        return f"失败表({len(self.failed_tables)}个): {'; '.join(summary_parts)}"
+    
+    def getSuccessfulTables(self) -> List[str]:
+        """获取成功加载的表名列表"""
+        # 从最近一次容错加载中获取成功的表
+        # 这个需要在loadAndJoinTablesWithFailureTracking中记录
+        if hasattr(self, '_last_successful_tables'):
+            return self._last_successful_tables
+        return []
+
     def _createEmptyDataFrame(self) -> DataFrame:
         """创建空的DataFrame（包含user_id字段）"""
         from pyspark.sql.types import StructType, StructField, StringType
@@ -248,3 +230,19 @@ class HiveMeta:
         ])
         
         return self.spark.createDataFrame([], schema)
+    
+    def setPartitionDate(self, partition_date: str):
+        """设置分区日期（仅在需要时使用）
+        
+        Args:
+            partition_date: 分区日期，格式为'YYYY-MM-DD'
+        """
+        self.partition_date = partition_date
+        print(f"📅 分区日期已更新为: {self.partition_date}")
+        
+        # 清理缓存，因为分区日期变了
+        self.clearCache()
+    
+    def getPartitionDate(self) -> str:
+        """获取当前设置的分区日期"""
+        return self.partition_date

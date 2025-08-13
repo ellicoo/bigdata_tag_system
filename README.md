@@ -66,7 +66,7 @@ python src/tag_engine/main.py --mode task-tags --tag-ids 1,2,3
 python dolphin_deploy_package.py
 
 # 2. 上传到DolphinScheduler资源中心
-# 将生成的 dolphin_gui_deploy/tag_system_dolphin.zip 上传到海豚调度器资源管理
+# 将生成的 dolphin_gui_deploy/bigdata_tag_system.zip 上传到海豚调度器资源管理
 
 # 3. 创建Spark任务
 # 主程序: /dolphinscheduler/default/resources/bigdata_tag_system/main.py

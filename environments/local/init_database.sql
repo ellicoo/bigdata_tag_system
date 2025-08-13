@@ -194,86 +194,211 @@ INSERT IGNORE INTO tag_definition (id, tag_name, tag_identify, category_id, tag_
 (47, '主流邮箱中国用户', 'MAINSTREAM_EMAIL_CN', '10', 1, 1, 2, 2, 'Gmail/Yahoo邮箱且中国手机号用户', '(Gmail OR Yahoo邮箱) AND 中国手机号', 'system'),
 (48, '中年高价值用户', 'MIDDLE_AGE_HIGH_VALUE', '10', 1, 1, 2, 2, '25-45岁非低资产的高等级或高端产品用户', '25-45岁 AND 非低资产 AND (高等级 OR 高端产品)', 'system'),
 (49, '非高风险新手用户', 'NOT_HIGH_RISK_NEWBIE', '10', 1, 1, 2, 2, '不同时持有高风险产品且非VIP的用户', 'NOT(高风险产品 AND 非VIP)', 'system'),
-(50, '完整信息用户', 'COMPLETE_INFO', '10', 1, 1, 2, 2, '姓名生日完整且可选服务为空的用户', '姓名完整 AND 生日完整 AND 可选服务为空', 'system');
+(50, '完整信息用户', 'COMPLETE_INFO', '10', 1, 1, 2, 2, '姓名生日完整且可选服务为空的用户', '姓名完整 AND 生日完整 AND 可选服务为空', 'system'),
+
+-- === 新增DWS颗粒化字段标签定义 (71-90) ===
+-- 基于新的DWS表结构颗粒化字段的标签
+(71, '现货资产优势用户', 'SPOT_ASSET_ADVANTAGE', '7', 1, 1, 2, 2, '现货持仓超过合约持仓的用户', '现货持仓 > 合约持仓', 'system'),
+(72, '合约交易专家', 'CONTRACT_TRADING_EXPERT', '2', 1, 1, 2, 2, '合约交易量大且有合约交易经验的用户', '合约交易量 >= 50000 AND 有合约交易', 'system'),
+(73, '理财爱好者', 'FINANCE_ENTHUSIAST', '8', 1, 1, 2, 2, '理财持仓和交易次数都较高的用户', '理财持仓 > 10000 AND 理财交易次数 > 5', 'system'),
+(74, '链上活跃用户', 'ONCHAIN_ACTIVE', '2', 1, 1, 2, 2, '在链上有持仓和交易活动的用户', '链上持仓 > 0 AND 链上交易次数 > 3', 'system'),
+(75, '现货流动性提供者', 'SPOT_LIQUIDITY_PROVIDER', '2', 1, 1, 2, 2, '现货可用余额高且交易频繁的用户', '现货可用余额 > 50000 AND 现货交易次数 > 20', 'system'),
+(76, '合约资金管理者', 'CONTRACT_FUND_MANAGER', '7', 1, 1, 2, 2, '合约资金充足且风险控制良好的用户', '合约可用余额 > 20000 AND 合约锁仓 < 5000', 'system'),
+(77, '理财保守型用户', 'FINANCE_CONSERVATIVE', '5', 1, 1, 2, 2, '理财锁仓超过可用余额的长期持有用户', '理财锁仓 > 0 AND 理财锁仓 > 理财可用余额', 'system'),
+(78, '多元化投资者', 'DIVERSIFIED_INVESTOR', '1', 1, 1, 2, 2, '现货、合约、理财都有持仓的多元化投资用户', '现货+合约+理财 都有持仓', 'system'),
+(79, '现货专一用户', 'SPOT_ONLY_USER', '5', 1, 1, 2, 2, '只持有现货资产，其他持仓为零的专一用户', '只有现货持仓，其他持仓为0', 'system'),
+(80, '高频现货交易者', 'HIGH_FREQ_SPOT_TRADER', '2', 1, 1, 2, 2, '现货近30日交易活跃且交易频繁的用户', '现货近30日交易额 > 10000 AND 现货交易次数 > 15', 'system'),
+(81, '合约近期活跃用户', 'CONTRACT_RECENT_ACTIVE', '2', 1, 1, 2, 2, '合约近30日交易活跃的用户', '合约近30日交易额 > 20000 AND 合约交易次数 > 10', 'system'),
+(82, '全业务活跃用户', 'ALL_BUSINESS_ACTIVE', '2', 1, 1, 2, 2, '现货、合约、理财、链上都有交易的全能用户', '现货+合约+理财+链上 都有交易', 'system'),
+(83, '资产均衡用户', 'BALANCED_ASSET_USER', '7', 1, 1, 2, 2, '现货、合约、理财持仓水平相近的均衡用户', '现货、合约、理财持仓都在5000-50000范围', 'system'),
+(84, '链上投资专家', 'ONCHAIN_INVESTMENT_EXPERT', '8', 1, 1, 2, 2, '链上持仓占比较高的DeFi投资专家', '链上持仓 > 10000 AND 链上交易次数 > 5', 'system'),
+(85, '现金流管理专家', 'CASH_FLOW_MANAGER', '7', 1, 1, 2, 2, '可用余额超过锁仓金额的现金流管理用户', '总可用余额 > 总锁仓金额', 'system'),
+(86, '理财产品重度用户', 'FINANCE_HEAVY_USER', '8', 1, 1, 2, 2, '理财交易次数很高的理财产品重度使用用户', '理财交易次数 > 10 AND 已开通理财', 'system'),
+(87, '跨链DeFi用户', 'CROSS_CHAIN_DEFI_USER', '8', 1, 1, 2, 2, '有链上交易且持有主流币种的DeFi用户', '链上交易 > 0 AND 持有BTC或ETH', 'system'),
+(88, '资产安全意识用户', 'SECURITY_CONSCIOUS_USER', '3', 1, 1, 2, 2, '锁仓金额超过可用余额的风险控制意识强用户', '各类锁仓总额 > 可用余额总额', 'system'),
+(89, '新兴业务探索者', 'EMERGING_BUSINESS_EXPLORER', '8', 1, 1, 2, 2, '积极参与链上等新兴业务的探索型用户', '链上交易次数 > 3 AND 链上持仓 > 5000', 'system'),
+(90, '综合高价值用户', 'COMPREHENSIVE_HIGH_VALUE', '1', 1, 1, 2, 2, '各类持仓和交易都达到高标准的综合高价值用户', '各类持仓都 > 20000 AND 各类交易都活跃', 'system');
 
 
--- 完整的标签规则插入示例，包含各种操作符和逻辑类型
+-- 完整的标签规则插入示例，基于新DWS层表结构，覆盖所有49个指标和所有操作符
 INSERT INTO tag_rules_config (tag_id, tag_conditions) VALUES
--- 基础数值类型操作符示例
-(1, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_asset_summary", "field": "total_asset_value", "operator": "=", "value": "100000", "type": "number"}]}}]}'),
-(2, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_asset_summary", "field": "total_asset_value", "operator": "!=", "value": "0", "type": "number"}]}}]}'),
-(3, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_activity_summary", "field": "trade_count_30d", "operator": ">", "value": "10", "type": "number"}]}}]}'),
-(4, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_activity_summary", "field": "trade_count_30d", "operator": "<", "value": "5", "type": "number"}]}}]}'),
-(5, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_asset_summary", "field": "cash_balance", "operator": ">=", "value": "50000", "type": "number"}]}}]}'),
-(6, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_risk_profile", "field": "risk_score", "operator": "<=", "value": "30", "type": "number"}]}}]}'),
-(7, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "age", "operator": "in_range", "value": ["18", "65"], "type": "number"}]}}]}'),
-(8, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "age", "operator": "not_in_range", "value": ["0", "17"], "type": "number"}]}}]}'),
-(9, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_asset_summary", "field": "debt_amount", "operator": "is_null", "value": "", "type": "number"}]}}]}'),
-(10, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_asset_summary", "field": "total_asset_value", "operator": "is_not_null", "value": "", "type": "number"}]}}]}'),
+-- 数值类型指标规则 - 覆盖所有17个数值指标 (=, !=, >, <, >=, <=, in_range, not_in_range, is_null, is_not_null)
+(1, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "total_deposit_amount", "operator": "=", "value": "100000", "type": "number"}]}}]}'),
+(2, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "total_withdraw_amount", "operator": "!=", "value": "0", "type": "number"}]}}]}'),
+(3, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_trading_df", "field": "recent_30d_trading_volume", "operator": ">", "value": "10000", "type": "number"}]}}]}'),
+(4, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_activity_df", "field": "login_count_7d", "operator": "<", "value": "5", "type": "number"}]}}]}'),
+(5, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "available_balance", "operator": ">=", "value": "50000", "type": "number"}]}}]}'),
+(6, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_marketing_df", "field": "commission_rate", "operator": "<=", "value": "30", "type": "number"}]}}]}'),
+(7, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_activity_df", "field": "days_since_register", "operator": "in_range", "value": ["30", "365"], "type": "number"}]}}]}'),
+(8, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "withdraw_count_30d", "operator": "not_in_range", "value": ["0", "3"], "type": "number"}]}}]}'),
+(9, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "locked_amount", "operator": "is_null", "value": "", "type": "number"}]}}]}'),
+(10, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "current_total_position_value", "operator": "is_not_null", "value": "", "type": "number"}]}}]}'),
+(11, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "net_deposit_amount", "operator": ">", "value": "0", "type": "number"}]}}]}'),
+(12, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_trading_df", "field": "total_trading_volume", "operator": ">=", "value": "100000", "type": "number"}]}}]}'),
+(13, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "deposit_fail_count", "operator": "<=", "value": "3", "type": "number"}]}}]}'),
+(14, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_activity_df", "field": "days_since_last_login", "operator": "in_range", "value": ["1", "7"], "type": "number"}]}}]}'),
+(15, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_marketing_df", "field": "red_packet_count", "operator": "not_in_range", "value": ["0", "2"], "type": "number"}]}}]}'),
+(16, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_marketing_df", "field": "successful_invites_count", "operator": "is_null", "value": "", "type": "number"}]}}]}'),
+(17, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_marketing_df", "field": "total_commission_amount", "operator": "is_not_null", "value": "", "type": "number"}]}}]}'),
 
--- 字符串类型操作符示例
-(11, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "user_level", "operator": "=", "value": "VIP3", "type": "string"}]}}]}'),
-(12, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "user_level", "operator": "!=", "value": "VIP1", "type": "string"}]}}]}'),
-(13, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "phone_number", "operator": "contains", "value": "138", "type": "string"}]}}]}'),
-(14, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "email", "operator": "not_contains", "value": "temp", "type": "string"}]}}]}'),
-(15, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "phone_number", "operator": "starts_with", "value": "+86", "type": "string"}]}}]}'),
-(16, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "email", "operator": "ends_with", "value": "gmail.com", "type": "string"}]}}]}'),
-(17, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "middle_name", "operator": "is_null", "value": "", "type": "string"}]}}]}'),
-(18, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "first_name", "operator": "is_not_null", "value": "", "type": "string"}]}}]}'),
+-- 字符串类型指标规则 - 覆盖所有5个字符串指标 (=, !=, contains, not_contains, starts_with, ends_with, is_null, is_not_null)
+(18, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_activity_df", "field": "login_ip_address", "operator": "=", "value": "192.168.1.1", "type": "string"}]}}]}'),
+(19, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_activity_df", "field": "country_region_code", "operator": "!=", "value": "+1", "type": "string"}]}}]}'),
+(20, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_activity_df", "field": "email_suffix", "operator": "contains", "value": "gmail", "type": "string"}]}}]}'),
+(21, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_profile_df", "field": "register_source_channel", "operator": "not_contains", "value": "spam", "type": "string"}]}}]}'),
+(22, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_activity_df", "field": "country_region_code", "operator": "starts_with", "value": "+86", "type": "string"}]}}]}'),
+(23, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_activity_df", "field": "email_suffix", "operator": "ends_with", "value": ".com", "type": "string"}]}}]}'),
+(24, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_activity_df", "field": "operating_system", "operator": "is_null", "value": "", "type": "string"}]}}]}'),
+(25, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_activity_df", "field": "login_ip_address", "operator": "is_not_null", "value": "", "type": "string"}]}}]}'),
 
--- 日期类型操作符示例
-(19, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "registration_date", "operator": "=", "value": "2025-01-01", "type": "date"}]}}]}'),
-(20, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_activity_summary", "field": "last_login_date", "operator": "!=", "value": "2025-01-01", "type": "date"}]}}]}'),
-(21, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_activity_summary", "field": "last_login_date", "operator": ">", "value": "2025-01-01", "type": "date"}]}}]}'),
-(22, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "registration_date", "operator": "<", "value": "2024-12-31", "type": "date"}]}}]}'),
-(23, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "registration_date", "operator": "date_in_range", "value": ["2024-01-01", "2024-12-31"], "type": "date"}]}}]}'),
-(24, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_activity_summary", "field": "last_login_date", "operator": "date_not_in_range", "value": ["2023-01-01", "2023-12-31"], "type": "date"}]}}]}'),
-(25, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_activity_summary", "field": "last_trade_date", "operator": "is_null", "value": "", "type": "date"}]}}]}'),
-(26, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "birthday", "operator": "is_not_null", "value": "", "type": "date"}]}}]}'),
+-- 日期类型指标规则 - 覆盖所有7个日期指标 (=, !=, >, <, >=, <=, date_in_range, date_not_in_range, is_null, is_not_null)
+(26, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_profile_df", "field": "register_time", "operator": "=", "value": "2025-01-01", "type": "date"}]}}]}'),
+(27, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_activity_df", "field": "last_login_time", "operator": "!=", "value": "2025-01-01", "type": "date"}]}}]}'),
+(28, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_activity_df", "field": "last_activity_time", "operator": ">", "value": "2025-01-01", "type": "date"}]}}]}'),
+(29, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "last_deposit_time", "operator": "<", "value": "2024-12-31", "type": "date"}]}}]}'),
+(30, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "last_withdraw_time", "operator": ">=", "value": "2024-01-01", "type": "date"}]}}]}'),
+(31, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_trading_df", "field": "first_trade_time", "operator": "<=", "value": "2025-12-31", "type": "date"}]}}]}'),
+(32, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_trading_df", "field": "last_trade_time", "operator": "date_in_range", "value": ["2024-01-01", "2024-12-31"], "type": "date"}]}}]}'),
+(33, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_activity_df", "field": "last_login_time", "operator": "date_not_in_range", "value": ["2023-01-01", "2023-12-31"], "type": "date"}]}}]}'),
+(34, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_trading_df", "field": "first_trade_time", "operator": "is_null", "value": "", "type": "date"}]}}]}'),
+(35, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_profile_df", "field": "register_time", "operator": "is_not_null", "value": "", "type": "date"}]}}]}'),
 
--- 布尔类型操作符示例
-(27, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "is_vip", "operator": "is_true", "value": "true", "type": "boolean"}]}}]}'),
-(28, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "is_banned", "operator": "is_false", "value": "false", "type": "boolean"}]}}]}'),
+-- 布尔类型指标规则 - 覆盖所有8个布尔指标 (is_true/=, is_false/!=)
+(36, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_profile_df", "field": "is_kyc_completed", "operator": "is_true", "value": "true", "type": "boolean"}]}}]}'),
+(37, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_profile_df", "field": "is_2fa_enabled", "operator": "is_false", "value": "false", "type": "boolean"}]}}]}'),
+(38, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_risk_df", "field": "is_blacklist_user", "operator": "=", "value": "false", "type": "boolean"}]}}]}'),
+(39, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_risk_df", "field": "is_high_risk_ip", "operator": "!=", "value": "true", "type": "boolean"}]}}]}'),
+(40, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_trading_df", "field": "has_contract_trading", "operator": "is_true", "value": "true", "type": "boolean"}]}}]}'),
+(41, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_trading_df", "field": "has_finance_management", "operator": "is_false", "value": "false", "type": "boolean"}]}}]}'),
+(42, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_trading_df", "field": "has_pending_orders", "operator": "=", "value": "true", "type": "boolean"}]}}]}'),
+(43, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_profile_df", "field": "is_agent", "operator": "!=", "value": "true", "type": "boolean"}]}}]}'),
 
--- 枚举类型操作符示例
-(29, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "kyc_status", "operator": "=", "value": "verified", "type": "enum"}]}}]}'),
-(30, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "account_status", "operator": "!=", "value": "suspended", "type": "enum"}]}}]}'),
-(31, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "user_level", "operator": "belongs_to", "value": ["VIP1", "VIP2", "VIP3"], "type": "enum"}]}}]}'),
-(32, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "account_status", "operator": "not_belongs_to", "value": ["suspended", "banned"], "type": "enum"}]}}]}'),
-(33, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "secondary_status", "operator": "is_null", "value": "", "type": "enum"}]}}]}'),
-(34, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "primary_status", "operator": "is_not_null", "value": "", "type": "enum"}]}}]}'),
+-- 枚举类型指标规则 - 覆盖所有6个枚举指标 (=, !=, belongs_to, not_belongs_to, is_null, is_not_null)
+(44, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_profile_df", "field": "user_level", "operator": "=", "value": "VIP3", "type": "enum"}]}}]}'),
+(45, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_risk_df", "field": "channel_source", "operator": "!=", "value": "spam", "type": "enum"}]}}]}'),
+(46, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_profile_df", "field": "register_method", "operator": "belongs_to", "value": ["email", "phone", "google"], "type": "enum"}]}}]}'),
+(47, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_trading_df", "field": "contract_trading_style", "operator": "not_belongs_to", "value": ["high_risk", "speculative"], "type": "enum"}]}}]}'),
+(48, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_profile_df", "field": "register_country", "operator": "is_null", "value": "", "type": "enum"}]}}]}'),
+(49, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_profile_df", "field": "kyc_country", "operator": "is_not_null", "value": "", "type": "enum"}]}}]}'),
 
--- 列表类型操作符示例
-(35, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_preferences", "field": "interested_products", "operator": "contains_any", "value": ["stocks", "bonds"], "type": "list"}]}}]}'),
-(36, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_preferences", "field": "owned_products", "operator": "contains_all", "value": ["savings", "checking"], "type": "list"}]}}]}'),
-(37, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_preferences", "field": "blacklisted_products", "operator": "not_contains", "value": ["forex"], "type": "list"}]}}]}'),
-(38, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_preferences", "field": "active_products", "operator": "intersects", "value": ["premium", "gold"], "type": "list"}]}}]}'),
-(39, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_preferences", "field": "expired_products", "operator": "no_intersection", "value": ["premium", "platinum"], "type": "list"}]}}]}'),
-(40, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_preferences", "field": "optional_services", "operator": "is_null", "value": "", "type": "list"}]}}]}'),
-(41, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_preferences", "field": "required_services", "operator": "is_not_null", "value": "", "type": "list"}]}}]}'),
+-- 列表类型指标规则 - 覆盖所有6个列表指标 (contains_any, contains_all, not_contains, intersects, no_intersection, is_null, is_not_null)
+(50, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_behavior_df", "field": "current_holding_coins", "operator": "contains_any", "value": ["BTC", "ETH"], "type": "list"}]}}]}'),
+(51, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_behavior_df", "field": "traded_coins_list", "operator": "contains_all", "value": ["USDT", "BTC"], "type": "list"}]}}]}'),
+(52, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_behavior_df", "field": "device_fingerprint_list", "operator": "not_contains", "value": ["malicious_device"], "type": "list"}]}}]}'),
+(53, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_behavior_df", "field": "participated_activity_ids", "operator": "intersects", "value": ["ACT001", "ACT002"], "type": "list"}]}}]}'),
+(54, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_behavior_df", "field": "reward_claim_history", "operator": "no_intersection", "value": ["spam_reward", "fake_reward"], "type": "list"}]}}]}'),
+(55, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_behavior_df", "field": "used_coupon_types", "operator": "is_null", "value": "", "type": "list"}]}}]}'),
+(56, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_behavior_df", "field": "current_holding_coins", "operator": "is_not_null", "value": "", "type": "list"}]}}]}'),
 
--- NOT逻辑示例
-(42, '{"logic": "NOT", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "user_level", "operator": "=", "value": "VIP1", "type": "string"}]}}]}'),
-(43, '{"logic": "NOT", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "tag_system.user_asset_summary", "field": "total_asset_value", "operator": "<", "value": "1000", "type": "number"}, {"table": "tag_system.user_activity_summary", "field": "trade_count_30d", "operator": "=", "value": "0", "type": "number"}]}}]}'),
+-- 复杂混合逻辑示例 - condition间的AND/OR/NOT组合
+-- 高价值认证用户：(高资产 OR 高交易量) AND 已认证 AND 非封禁
+(57, '{"logic": "AND", "conditions": [{"condition": {"logic": "OR", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "current_total_position_value", "operator": ">=", "value": "100000", "type": "number"}, {"table": "dws_user.dws_user_trading_df", "field": "total_trading_volume", "operator": ">=", "value": "500000", "type": "number"}]}}, {"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_profile_df", "field": "is_kyc_completed", "operator": "=", "value": "true", "type": "boolean"}]}}, {"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_risk_df", "field": "is_blacklist_user", "operator": "!=", "value": "true", "type": "boolean"}]}}]}'),
 
--- 复杂的多条件组合示例
-(44, '{"logic": "AND", "conditions": [{"condition": {"logic": "OR", "fields": [{"table": "tag_system.user_basic_info", "field": "user_level", "operator": "belongs_to", "value": ["VIP2", "VIP3"], "type": "enum"}, {"table": "tag_system.user_asset_summary", "field": "total_asset_value", "operator": ">=", "value": "100000", "type": "number"}]}}, {"condition": {"logic": "AND", "fields": [{"table": "tag_system.user_basic_info", "field": "kyc_status", "operator": "=", "value": "verified", "type": "enum"}, {"table": "tag_system.user_basic_info", "field": "is_banned", "operator": "is_false", "value": "false", "type": "boolean"}]}}]}'),
+-- 活跃或新用户：近期活跃 OR 新注册用户
+(58, '{"logic": "OR", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_activity_df", "field": "days_since_last_login", "operator": "<=", "value": "7", "type": "number"}, {"table": "dws_user.dws_user_activity_df", "field": "login_count_7d", "operator": ">=", "value": "3", "type": "number"}]}}, {"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_activity_df", "field": "days_since_register", "operator": "<=", "value": "30", "type": "number"}]}}]}'),
 
-(45, '{"logic": "OR", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "tag_system.user_activity_summary", "field": "last_login_date", "operator": "date_in_range", "value": ["2025-01-01", "2025-07-26"], "type": "date"}, {"table": "tag_system.user_activity_summary", "field": "trade_count_30d", "operator": ">", "value": "5", "type": "number"}]}}, {"condition": {"logic": "None", "fields": [{"table": "tag_system.user_asset_summary", "field": "cash_balance", "operator": ">=", "value": "50000", "type": "number"}]}}]}'),
+-- 非问题用户：NOT(高风险 OR 封禁)
+(59, '{"logic": "NOT", "conditions": [{"condition": {"logic": "OR", "fields": [{"table": "dws_user.dws_user_risk_df", "field": "is_high_risk_ip", "operator": "=", "value": "true", "type": "boolean"}, {"table": "dws_user.dws_user_risk_df", "field": "is_blacklist_user", "operator": "=", "value": "true", "type": "boolean"}]}}]}'),
 
-(46, '{"logic": "NOT", "conditions": [{"condition": {"logic": "OR", "fields": [{"table": "tag_system.user_basic_info", "field": "account_status", "operator": "belongs_to", "value": ["suspended", "banned"], "type": "enum"}, {"table": "tag_system.user_activity_summary", "field": "last_login_date", "operator": "date_not_in_range", "value": ["2024-01-01", "2025-07-26"], "type": "date"}]}}]}'),
+-- fields间的混合逻辑示例 - AND/OR/NOT在同一condition内
+-- 主流邮箱用户：Gmail OR Yahoo邮箱
+(60, '{"logic": "AND", "conditions": [{"condition": {"logic": "OR", "fields": [{"table": "dws_user.dws_user_activity_df", "field": "email_suffix", "operator": "contains", "value": "gmail", "type": "string"}, {"table": "dws_user.dws_user_activity_df", "field": "email_suffix", "operator": "contains", "value": "yahoo", "type": "string"}]}}]}'),
 
--- 字符串模糊匹配组合
-(47, '{"logic": "AND", "conditions": [{"condition": {"logic": "OR", "fields": [{"table": "tag_system.user_basic_info", "field": "email", "operator": "ends_with", "value": "gmail.com", "type": "string"}, {"table": "tag_system.user_basic_info", "field": "email", "operator": "ends_with", "value": "yahoo.com", "type": "string"}]}}, {"condition": {"logic": "None", "fields": [{"table": "tag_system.user_basic_info", "field": "phone_number", "operator": "starts_with", "value": "+86", "type": "string"}]}}]}'),
+-- 中高级VIP用户：VIP2 OR VIP3 OR VIP4 OR VIP5
+(61, '{"logic": "AND", "conditions": [{"condition": {"logic": "OR", "fields": [{"table": "dws_user.dws_user_profile_df", "field": "user_level", "operator": "=", "value": "VIP2", "type": "enum"}, {"table": "dws_user.dws_user_profile_df", "field": "user_level", "operator": "=", "value": "VIP3", "type": "enum"}, {"table": "dws_user.dws_user_profile_df", "field": "user_level", "operator": "=", "value": "VIP4", "type": "enum"}, {"table": "dws_user.dws_user_profile_df", "field": "user_level", "operator": "=", "value": "VIP5", "type": "enum"}]}}]}'),
 
--- 数值范围和枚举组合
-(48, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "tag_system.user_basic_info", "field": "age", "operator": "in_range", "value": ["25", "45"], "type": "number"}, {"table": "tag_system.user_asset_summary", "field": "total_asset_value", "operator": "not_in_range", "value": ["0", "1000"], "type": "number"}]}}, {"condition": {"logic": "OR", "fields": [{"table": "tag_system.user_basic_info", "field": "user_level", "operator": "belongs_to", "value": ["VIP3", "VIP4", "VIP5"], "type": "enum"}, {"table": "tag_system.user_preferences", "field": "owned_products", "operator": "contains_any", "value": ["premium", "platinum"], "type": "list"}]}}]}'),
+-- 中国用户且有资产：+86手机号 AND 有总资产
+(62, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_activity_df", "field": "country_region_code", "operator": "=", "value": "+86", "type": "string"}, {"table": "dws_user.dws_user_asset_df", "field": "current_total_position_value", "operator": ">", "value": "0", "type": "number"}]}}]}'),
 
--- 列表操作和布尔组合
-(49, '{"logic": "NOT", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "tag_system.user_preferences", "field": "interested_products", "operator": "contains_all", "value": ["high_risk", "speculative"], "type": "list"}, {"table": "tag_system.user_basic_info", "field": "is_vip", "operator": "is_false", "value": "false", "type": "boolean"}]}}]}'),
+-- 非低价值用户：NOT(低资产 AND 无交易)
+(63, '{"logic": "AND", "conditions": [{"condition": {"logic": "NOT", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "current_total_position_value", "operator": "<=", "value": "1000", "type": "number"}, {"table": "dws_user.dws_user_trading_df", "field": "total_trading_volume", "operator": "=", "value": "0", "type": "number"}]}}]}'),
 
--- 空值检查组合
-(50, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "tag_system.user_basic_info", "field": "first_name", "operator": "is_not_null", "value": "", "type": "string"}, {"table": "tag_system.user_basic_info", "field": "last_name", "operator": "is_not_null", "value": "", "type": "string"}, {"table": "tag_system.user_basic_info", "field": "birthday", "operator": "is_not_null", "value": "", "type": "date"}]}}, {"condition": {"logic": "OR", "fields": [{"table": "tag_system.user_basic_info", "field": "middle_name", "operator": "is_null", "value": "", "type": "string"}, {"table": "tag_system.user_preferences", "field": "optional_services", "operator": "is_null", "value": "", "type": "list"}]}}]}');
+-- 多层嵌套复杂逻辑示例
+-- 优质活跃用户：(高资产 OR 高交易) AND (近期登录 OR 频繁登录) AND NOT(高风险 OR 封禁)
+(64, '{"logic": "AND", "conditions": [{"condition": {"logic": "OR", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "current_total_position_value", "operator": ">=", "value": "50000", "type": "number"}, {"table": "dws_user.dws_user_trading_df", "field": "recent_30d_trading_volume", "operator": ">=", "value": "100000", "type": "number"}]}}, {"condition": {"logic": "OR", "fields": [{"table": "dws_user.dws_user_activity_df", "field": "days_since_last_login", "operator": "<=", "value": "3", "type": "number"}, {"table": "dws_user.dws_user_activity_df", "field": "login_count_7d", "operator": ">=", "value": "5", "type": "number"}]}}, {"condition": {"logic": "NOT", "fields": [{"table": "dws_user.dws_user_risk_df", "field": "is_high_risk_ip", "operator": "=", "value": "true", "type": "boolean"}, {"table": "dws_user.dws_user_risk_df", "field": "is_blacklist_user", "operator": "=", "value": "true", "type": "boolean"}]}}]}'),
+
+-- 完整信息的投资者：(KYC已认证 AND 2FA已开启) AND (有交易经验 OR 有资产) AND NOT(代理用户)
+(65, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_profile_df", "field": "is_kyc_completed", "operator": "=", "value": "true", "type": "boolean"}, {"table": "dws_user.dws_user_profile_df", "field": "is_2fa_enabled", "operator": "=", "value": "true", "type": "boolean"}]}}, {"condition": {"logic": "OR", "fields": [{"table": "dws_user.dws_user_trading_df", "field": "total_trading_volume", "operator": ">", "value": "0", "type": "number"}, {"table": "dws_user.dws_user_asset_df", "field": "current_total_position_value", "operator": ">", "value": "0", "type": "number"}]}}, {"condition": {"logic": "NOT", "fields": [{"table": "dws_user.dws_user_profile_df", "field": "is_agent", "operator": "=", "value": "true", "type": "boolean"}]}}]}'),
+
+-- 多币种持有者：持有BTC AND (持有ETH OR USDT) AND NOT持有风险币种
+(66, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_behavior_df", "field": "current_holding_coins", "operator": "contains_any", "value": ["BTC"], "type": "list"}]}}, {"condition": {"logic": "OR", "fields": [{"table": "dws_user.dws_user_behavior_df", "field": "current_holding_coins", "operator": "contains_any", "value": ["ETH"], "type": "list"}, {"table": "dws_user.dws_user_behavior_df", "field": "current_holding_coins", "operator": "contains_any", "value": ["USDT"], "type": "list"}]}}, {"condition": {"logic": "NOT", "fields": [{"table": "dws_user.dws_user_behavior_df", "field": "current_holding_coins", "operator": "intersects", "value": ["RISK_COIN", "SCAM_COIN"], "type": "list"}]}}]}'),
+
+-- 活动参与但理性用户：参与活动 AND (有邀请成功 OR 有返佣) AND NOT(过度营销用户)
+(67, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_behavior_df", "field": "participated_activity_ids", "operator": "is_not_null", "value": "", "type": "list"}]}}, {"condition": {"logic": "OR", "fields": [{"table": "dws_user.dws_user_marketing_df", "field": "successful_invites_count", "operator": ">", "value": "0", "type": "number"}, {"table": "dws_user.dws_user_marketing_df", "field": "total_commission_amount", "operator": ">", "value": "0", "type": "number"}]}}, {"condition": {"logic": "NOT", "fields": [{"table": "dws_user.dws_user_marketing_df", "field": "red_packet_count", "operator": ">", "value": "50", "type": "number"}]}}]}'),
+
+-- 多平台跨设备用户：使用多种设备 AND (iOS OR Android) AND NOT(只用Web)
+(68, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_behavior_df", "field": "device_fingerprint_list", "operator": "contains_all", "value": ["Chrome_Win10", "Safari_macOS"], "type": "list"}]}}, {"condition": {"logic": "OR", "fields": [{"table": "dws_user.dws_user_activity_df", "field": "operating_system", "operator": "=", "value": "iOS", "type": "string"}, {"table": "dws_user.dws_user_activity_df", "field": "operating_system", "operator": "=", "value": "Android", "type": "string"}]}}, {"condition": {"logic": "NOT", "fields": [{"table": "dws_user.dws_user_behavior_df", "field": "device_fingerprint_list", "operator": "contains_all", "value": ["Web_Only"], "type": "list"}]}}]}'),
+
+-- 理财偏好但谨慎用户：开通理财 AND (有挂单习惯 OR 非高杠杆) AND NOT(投机风格)
+(69, '{"logic": "AND", "conditions": [{"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_trading_df", "field": "has_finance_management", "operator": "=", "value": "true", "type": "boolean"}]}}, {"condition": {"logic": "OR", "fields": [{"table": "dws_user.dws_user_trading_df", "field": "has_pending_orders", "operator": "=", "value": "true", "type": "boolean"}, {"table": "dws_user.dws_user_trading_df", "field": "contract_trading_style", "operator": "!=", "value": "高杠杆", "type": "enum"}]}}, {"condition": {"logic": "NOT", "fields": [{"table": "dws_user.dws_user_trading_df", "field": "contract_trading_style", "operator": "belongs_to", "value": ["投机", "高风险"], "type": "enum"}]}}]}'),
+
+-- 国际化高净值用户：非中国地区 AND 高资产 AND (多币种 OR 合约交易) AND NOT(新手用户)
+(70, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_activity_df", "field": "country_region_code", "operator": "!=", "value": "+86", "type": "string"}, {"table": "dws_user.dws_user_profile_df", "field": "register_country", "operator": "not_belongs_to", "value": ["CN"], "type": "enum"}]}}, {"condition": {"logic": "None", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "current_total_position_value", "operator": ">=", "value": "200000", "type": "number"}]}}, {"condition": {"logic": "OR", "fields": [{"table": "dws_user.dws_user_behavior_df", "field": "current_holding_coins", "operator": "contains_any", "value": ["BTC", "ETH", "USDT"], "type": "list"}, {"table": "dws_user.dws_user_trading_df", "field": "has_contract_trading", "operator": "=", "value": "true", "type": "boolean"}]}}, {"condition": {"logic": "NOT", "fields": [{"table": "dws_user.dws_user_activity_df", "field": "days_since_register", "operator": "<=", "value": "30", "type": "number"}]}}]}'),
+
+-- === 新增DWS颗粒化字段标签规则 (71-90) ===
+-- 基于新的DWS表结构颗粒化字段的标签规则
+
+-- 现货资产优势用户：现货持仓 > 合约持仓
+(71, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "spot_position_value", "operator": ">", "value": "0", "type": "number"}, {"table": "dws_user.dws_user_asset_df", "field": "spot_position_value", "operator": ">", "value": "contract_position_value", "type": "number"}]}}]}'),
+
+-- 合约交易专家：合约交易量 >= 现货交易量 AND 有合约交易
+(72, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_trading_df", "field": "contract_trading_volume", "operator": ">=", "value": "50000", "type": "number"}, {"table": "dws_user.dws_user_trading_df", "field": "has_contract_trading", "operator": "=", "value": "true", "type": "boolean"}]}}]}'),
+
+-- 理财爱好者：理财持仓 > 10000 AND 理财交易次数 > 5
+(73, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "finance_position_value", "operator": ">", "value": "10000", "type": "number"}, {"table": "dws_user.dws_user_trading_df", "field": "finance_trade_count", "operator": ">", "value": "5", "type": "number"}]}}]}'),
+
+-- 链上活跃用户：链上持仓 > 0 AND 链上交易次数 > 3
+(74, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "onchain_position_value", "operator": ">", "value": "0", "type": "number"}, {"table": "dws_user.dws_user_trading_df", "field": "onchain_trade_count", "operator": ">", "value": "3", "type": "number"}]}}]}'),
+
+-- 现货流动性提供者：现货可用余额 > 50000 AND 现货交易次数 > 20
+(75, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "spot_available_balance", "operator": ">", "value": "50000", "type": "number"}, {"table": "dws_user.dws_user_trading_df", "field": "spot_trade_count", "operator": ">", "value": "20", "type": "number"}]}}]}'),
+
+-- 合约资金管理者：合约可用余额 > 20000 AND 合约锁仓 < 5000 (风险控制)
+(76, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "contract_available_balance", "operator": ">", "value": "20000", "type": "number"}, {"table": "dws_user.dws_user_asset_df", "field": "contract_locked_amount", "operator": "<", "value": "5000", "type": "number"}]}}]}'),
+
+-- 理财保守型用户：理财锁仓 > 理财可用余额 (长期持有)
+(77, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "finance_locked_amount", "operator": ">", "value": "0", "type": "number"}, {"table": "dws_user.dws_user_asset_df", "field": "finance_locked_amount", "operator": ">", "value": "finance_available_balance", "type": "number"}]}}]}'),
+
+-- 多元化投资者：现货+合约+理财 都有持仓
+(78, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "spot_position_value", "operator": ">", "value": "0", "type": "number"}, {"table": "dws_user.dws_user_asset_df", "field": "contract_position_value", "operator": ">", "value": "0", "type": "number"}, {"table": "dws_user.dws_user_asset_df", "field": "finance_position_value", "operator": ">", "value": "0", "type": "number"}]}}]}'),
+
+-- 现货专一用户：只有现货持仓，其他持仓为0
+(79, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "spot_position_value", "operator": ">", "value": "0", "type": "number"}, {"table": "dws_user.dws_user_asset_df", "field": "contract_position_value", "operator": "=", "value": "0", "type": "number"}, {"table": "dws_user.dws_user_asset_df", "field": "finance_position_value", "operator": "=", "value": "0", "type": "number"}, {"table": "dws_user.dws_user_asset_df", "field": "onchain_position_value", "operator": "=", "value": "0", "type": "number"}]}}]}'),
+
+-- 高频现货交易者：现货近30日交易额 > 现货总交易额的50%
+(80, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_trading_df", "field": "spot_recent_30d_volume", "operator": ">", "value": "10000", "type": "number"}, {"table": "dws_user.dws_user_trading_df", "field": "spot_trade_count", "operator": ">", "value": "15", "type": "number"}]}}]}'),
+
+-- 合约近期活跃用户：合约近30日交易额 > 20000 AND 合约交易次数 > 10
+(81, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_trading_df", "field": "contract_recent_30d_volume", "operator": ">", "value": "20000", "type": "number"}, {"table": "dws_user.dws_user_trading_df", "field": "contract_trade_count", "operator": ">", "value": "10", "type": "number"}]}}]}'),
+
+-- 全业务活跃用户：现货+合约+理财+链上 都有交易
+(82, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_trading_df", "field": "spot_trade_count", "operator": ">", "value": "0", "type": "number"}, {"table": "dws_user.dws_user_trading_df", "field": "contract_trade_count", "operator": ">", "value": "0", "type": "number"}, {"table": "dws_user.dws_user_trading_df", "field": "finance_trade_count", "operator": ">", "value": "0", "type": "number"}, {"table": "dws_user.dws_user_trading_df", "field": "onchain_trade_count", "operator": ">", "value": "0", "type": "number"}]}}]}'),
+
+-- 资产均衡用户：现货、合约、理财持仓都在相似水平(差异 < 50%)
+(83, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "spot_position_value", "operator": "in_range", "value": ["5000", "50000"], "type": "number"}, {"table": "dws_user.dws_user_asset_df", "field": "contract_position_value", "operator": "in_range", "value": ["5000", "50000"], "type": "number"}, {"table": "dws_user.dws_user_asset_df", "field": "finance_position_value", "operator": "in_range", "value": ["5000", "50000"], "type": "number"}]}}]}'),
+
+-- 链上投资专家：链上持仓占总持仓比例 > 30%
+(84, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "onchain_position_value", "operator": ">", "value": "10000", "type": "number"}, {"table": "dws_user.dws_user_trading_df", "field": "onchain_trade_count", "operator": ">", "value": "5", "type": "number"}]}}]}'),
+
+-- 现金流管理专家：总可用余额 > 总锁仓金额
+(85, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "available_balance", "operator": ">", "value": "0", "type": "number"}, {"table": "dws_user.dws_user_asset_df", "field": "available_balance", "operator": ">", "value": "locked_amount", "type": "number"}]}}]}'),
+
+-- 理财产品重度用户：理财交易次数 > 现货+合约交易次数
+(86, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_trading_df", "field": "finance_trade_count", "operator": ">", "value": "10", "type": "number"}, {"table": "dws_user.dws_user_trading_df", "field": "has_finance_management", "operator": "=", "value": "true", "type": "boolean"}]}}]}'),
+
+-- 跨链DeFi用户：链上交易 > 0 AND 持有主流币种
+(87, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_trading_df", "field": "onchain_trade_count", "operator": ">", "value": "0", "type": "number"}, {"table": "dws_user.dws_user_behavior_df", "field": "current_holding_coins", "operator": "contains_any", "value": ["BTC", "ETH"], "type": "list"}]}}]}'),
+
+-- 资产安全意识用户：各类锁仓总额 > 可用余额总额 (风险控制意识强)
+(88, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "locked_amount", "operator": ">", "value": "0", "type": "number"}, {"table": "dws_user.dws_user_asset_df", "field": "locked_amount", "operator": ">", "value": "available_balance", "type": "number"}]}}]}'),
+
+-- 新兴业务探索者：链上交易占总交易的比例较高
+(89, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_trading_df", "field": "onchain_trade_count", "operator": ">", "value": "3", "type": "number"}, {"table": "dws_user.dws_user_asset_df", "field": "onchain_position_value", "operator": ">", "value": "5000", "type": "number"}]}}]}'),
+
+-- 综合高价值用户：各类持仓都 > 20000 AND 各类交易都活跃
+(90, '{"logic": "AND", "conditions": [{"condition": {"logic": "AND", "fields": [{"table": "dws_user.dws_user_asset_df", "field": "spot_position_value", "operator": ">", "value": "20000", "type": "number"}, {"table": "dws_user.dws_user_asset_df", "field": "contract_position_value", "operator": ">", "value": "20000", "type": "number"}, {"table": "dws_user.dws_user_asset_df", "field": "finance_position_value", "operator": ">", "value": "20000", "type": "number"}, {"table": "dws_user.dws_user_trading_df", "field": "spot_trade_count", "operator": ">", "value": "5", "type": "number"}, {"table": "dws_user.dws_user_trading_df", "field": "contract_trade_count", "operator": ">", "value": "5", "type": "number"}, {"table": "dws_user.dws_user_trading_df", "field": "finance_trade_count", "operator": ">", "value": "3", "type": "number"}]}}]}')
+
+;
 
 
 

@@ -1,0 +1,51 @@
+# 标签规则支持的操作符列表
+# 从 src/tag_engine/parser/TagRuleParser.py 中提取
+# 更新日期: 2025-01-20
+
+## 基础比较操作符
+=               等于
+!=              不等于
+>               大于
+>=              大于等于
+<               小于
+<=              小于等于
+
+## 范围操作符
+in_range        数值在范围内 (BETWEEN)
+not_in_range    数值不在范围内 (NOT BETWEEN)
+date_in_range   日期在范围内 (BETWEEN)
+date_not_in_range   日期不在范围内 (NOT BETWEEN)
+
+## 字符串匹配操作符
+contains        包含子字符串 (LIKE '%value%')
+starts_with     以指定字符串开头 (LIKE 'value%')
+ends_with       以指定字符串结尾 (LIKE '%value')
+not_contains    不包含子字符串
+
+## 集合操作符
+belongs_to      属于列表 (IN)
+not_belongs_to  不属于列表 (NOT IN)
+
+## 空值判断操作符
+is_null         是否为空值 (IS NULL)
+is_not_null     是否非空值 (IS NOT NULL)
+
+## 布尔值操作符
+is_true         是否为真值 (= TRUE)
+is_false        是否为假值 (= FALSE)
+
+## 数组/列表字段专用操作符
+contains_any    数组包含任意一个值 (OR array_contains)
+contains_all    数组包含所有值 (AND array_contains)
+intersects      数组交集（与contains_any相同）
+no_intersection 数组无交集 (AND NOT array_contains)
+not_contains    数据中不包含
+
+## 操作符说明
+1. 基础比较操作符适用于数值、字符串、日期类型
+2. 范围操作符需要提供两个值的数组: [min_value, max_value]
+3. 集合操作符需要提供值的数组: [value1, value2, value3]
+4. 数组操作符专门用于 ARRAY<STRING> 类型的字段
+5. not_contains 会根据字段类型自动选择 LIKE 或 array_contains
+6. 所有操作符都支持在复杂逻辑规则中使用（AND/OR/NOT）
+

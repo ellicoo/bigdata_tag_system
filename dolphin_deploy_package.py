@@ -411,15 +411,15 @@ if __name__ == "__main__":
 ### 1. 上传ZIP包到资源中心
 1. 登录海豚调度器Web界面
 2. 进入 **资源中心** → **文件管理**
-3. 上传 `tag_system_dolphin.zip`
+3. 上传 `bigdata_tag_system.zip`
 
 ### 2. 直接在资源中心解压
-1. 在资源中心中右键点击上传的`tag_system_dolphin.zip`
+1. 在资源中心中右键点击上传的`bigdata_tag_system.zip`
 2. 选择解压，或者创建Shell任务解压：
 ```bash
 #!/bin/bash
 cd {extract_path}
-unzip -o tag_system_dolphin.zip
+unzip -o bigdata_tag_system.zip
 echo "✅ 标签系统部署包解压完成到: {extract_path}"
 ```
 
@@ -550,7 +550,7 @@ pymysql>=1.0.0       # MySQL连接器
 ### 1. 上传到资源中心
 1. 登录海豚调度器Web界面
 2. 进入 **资源中心** → **文件管理**
-3. 上传 `tag_system_dolphin.zip`
+3. 上传 `bigdata_tag_system.zip`
 4. 直接在资源中心解压到 `/dolphinscheduler/default/resources/`
 
 ### 2. 依赖管理
@@ -629,7 +629,7 @@ client.triggerWorkflow("tag_system_compute", Map.of(
     
     def create_zip_package(self, custom_extract_path: str = None):
         """创建ZIP部署包，支持自定义解压路径"""
-        zip_path = self.output_dir / "tag_system_dolphin.zip"
+        zip_path = self.output_dir / "bigdata_tag_system.zip"
         
         print("📦 创建海豚调度器部署包...")
         

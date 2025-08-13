@@ -4,7 +4,7 @@
 标签计算引擎
 主要负责标签计算流程的编排和执行
 """
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Tuple
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import *
 
@@ -37,22 +37,22 @@ class TagEngine:
         self.hiveConfig = hiveConfig or {}
         self.mysqlConfig = mysqlConfig
         
-        # 初始化数据源管理器
+        # 初始化数据源管理器（HiveMeta内部自动处理分区）
         self.hiveMeta = HiveMeta(spark)
         self.mysqlMeta = MysqlMeta(spark, mysqlConfig)
         self.ruleParser = TagRuleParser()
         
         print("🚀 TagEngine初始化完成")
     
-    def computeTags(self, mode: str = "full", tagIds: Optional[List[int]] = None) -> bool:
-        """执行标签计算 - 简化的主流程编排
+    def computeTags(self, mode: str = "full", tagIds: Optional[List[int]] = None) -> Tuple[bool, List[int]]:
+        """执行标签计算 - 简化的主流程编排，返回失败标签ID
         
         Args:
             mode: 计算模式（full/specific）
             tagIds: 指定标签ID列表（仅在specific模式下有效）
             
         Returns:
-            bool: 计算是否成功
+            Tuple[bool, List[int]]: (计算是否成功, 失败的标签ID列表)
         """
         print(f"🚀 开始标签计算，模式: {mode}")
         
@@ -61,27 +61,34 @@ class TagEngine:
             rulesDF = self._loadTagRules(tagIds)
             if rulesDF.count() == 0:
                 print("⚠️  没有找到活跃的标签规则")
-                return True
+                return True, []
             
             # 2. 智能分组（基于表依赖）
             tagGroups = self._analyzeAndGroupTags(rulesDF)
             if not tagGroups:
                 print("⚠️  没有找到可计算的标签组")
-                return True
+                return True, []
             
-            # 3. 流水线处理所有标签组
-            success = self._processTagGroupsPipeline(tagGroups, rulesDF)
+            # 3. 流水线处理所有标签组，收集失败标签
+            success, failed_tag_ids = self._processTagGroupsPipeline(tagGroups, rulesDF)
             
             if success:
-                print("✅ 标签计算完成")
+                if failed_tag_ids:
+                    print(f"✅ 标签计算完成，{len(failed_tag_ids)} 个标签因表加载失败而跳过")
+                else:
+                    print("✅ 标签计算完成，所有标签计算成功")
+            else:
+                print(f"⚠️  标签计算部分失败，{len(failed_tag_ids)} 个标签失败")
             
-            return success
+            return success, failed_tag_ids
             
         except Exception as e:
             print(f"❌ 标签计算异常: {e}")
             import traceback
             traceback.print_exc()
-            return False
+            # 如果发生异常，尝试返回所有请求的标签ID作为失败
+            all_tag_ids = tagIds if tagIds else []
+            return False, all_tag_ids
     
     def healthCheck(self) -> bool:
         """系统健康检查 - 计算前的必要验证
@@ -130,11 +137,12 @@ class TagEngine:
         
         return tagGroups
     
-    def _processTagGroupsPipeline(self, tagGroups: List[TagGroup], rulesDF: DataFrame) -> bool:
-        """简化的流水线处理：计算标签组并写入MySQL"""
+    def _processTagGroupsPipeline(self, tagGroups: List[TagGroup], rulesDF: DataFrame) -> Tuple[bool, List[int]]:
+        """简化的流水线处理：计算标签组并写入MySQL，收集失败标签ID"""
         print(f"🚀 流水线处理 {len(tagGroups)} 个标签组...")
         
         successCount = 0
+        all_failed_tag_ids = []
         
         for i, group in enumerate(tagGroups):
             print(f"\n📦 处理标签组 {i+1}/{len(tagGroups)}: {group.name}")
@@ -143,8 +151,13 @@ class TagEngine:
                 # 过滤该组相关的标签规则
                 groupRulesDF = rulesDF.filter(col("tag_id").isin(group.tagIds))
                 
-                # 计算该组标签
-                groupResult = group.computeTags(self.hiveMeta, groupRulesDF)
+                # 计算该组标签，获取结果和失败的标签ID
+                groupResult, failed_tag_ids = group.computeTags(self.hiveMeta, groupRulesDF)
+                
+                # 收集失败的标签ID
+                if failed_tag_ids:
+                    all_failed_tag_ids.extend(failed_tag_ids)
+                    print(f"   ⚠️  标签组 {group.name} 中 {len(failed_tag_ids)} 个标签因表加载失败而跳过")
                 
                 if groupResult.count() == 0:
                     print(f"   ⚠️  标签组 {group.name} 无匹配用户，跳过")
@@ -155,14 +168,24 @@ class TagEngine:
                 if self._mergeAndSaveGroup(groupResult, group.name):
                     print(f"   ✅ 标签组 {group.name} 处理完成")
                     successCount += 1
+                else:
+                    # 如果写入失败，该组所有标签都算失败
+                    remaining_tag_ids = [tag_id for tag_id in group.tagIds if tag_id not in failed_tag_ids]
+                    all_failed_tag_ids.extend(remaining_tag_ids)
                 
                 # 清理缓存
                 self.hiveMeta.clearGroupCache(group.requiredTables)
                 
             except Exception as e:
                 print(f"   ❌ 标签组 {group.name} 处理失败: {e}")
+                # 异常时，该组所有标签都算失败
+                all_failed_tag_ids.extend(group.tagIds)
         
-        return successCount == len(tagGroups)
+        # 去重失败的标签ID
+        unique_failed_tag_ids = list(set(all_failed_tag_ids))
+        
+        success = successCount == len(tagGroups)
+        return success, unique_failed_tag_ids
     
     def _mergeAndSaveGroup(self, groupResult: DataFrame, groupName: str) -> bool:
         """合并标签并保存到MySQL"""

@@ -211,7 +211,7 @@ def create_test_tables(spark, sample_user_data):
     ])
     
     basic_df = spark.createDataFrame(sample_user_data["user_basic_info"], basic_schema)
-    basic_df.createOrReplaceTempView("tag_system.user_basic_info")
+    basic_df.createOrReplaceTempView("user_basic_info")
     
     # 创建user_asset_summary表
     asset_schema = StructType([
@@ -221,7 +221,7 @@ def create_test_tables(spark, sample_user_data):
     ])
     
     asset_df = spark.createDataFrame(sample_user_data["user_asset_summary"], asset_schema)
-    asset_df.createOrReplaceTempView("tag_system.user_asset_summary")
+    asset_df.createOrReplaceTempView("user_asset_summary")
     
     # 创建user_activity_summary表
     activity_schema = StructType([
@@ -231,7 +231,7 @@ def create_test_tables(spark, sample_user_data):
     ])
     
     activity_df = spark.createDataFrame(sample_user_data["user_activity_summary"], activity_schema)
-    activity_df.createOrReplaceTempView("tag_system.user_activity_summary")
+    activity_df.createOrReplaceTempView("user_activity_summary")
     
     return {
         "user_basic_info": basic_df,

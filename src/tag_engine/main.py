@@ -55,13 +55,14 @@ def load_mysql_config() -> Dict[str, str]:
     # 从环境变量或配置文件加载
     # 海豚调度器环境使用统一配置
     import os
-    
+
     return {
-        "host": os.getenv("MYSQL_HOST", "cex-mysql-test.c5mgk4qm8m2z.ap-southeast-1.rds.amazonaws.com"),
+        "host": os.getenv("MYSQL_HOST",
+                          "cex-mysql-ex-test-cluster.cluster-c5mgk4qm8m2z.ap-southeast-1.rds.amazonaws.com"),
         "port": int(os.getenv("MYSQL_PORT", "3358")),
         "database": os.getenv("MYSQL_DATABASE", "biz_statistics"),
-        "user": os.getenv("MYSQL_USER", "root"),
-        "password": os.getenv("MYSQL_PASSWORD", "ayjUzzH8b7gcQYRh"),
+        "user": os.getenv("MYSQL_USER", "ex_test_rw"),
+        "password": os.getenv("MYSQL_PASSWORD", "NqaBacRMzCKRRqfEWb"),
         "charset": "utf8mb4"
     }
 
@@ -87,7 +88,7 @@ def parse_tag_ids(tag_ids_str: Optional[str]) -> Optional[List[int]]:
 
 
 def generate_comprehensive_test_data(spark) -> bool:
-    """生成完整的测试数据，匹配json_demo.txt中的所有字段
+    """生成完整的测试数据，匹配新的DWS层表结构
     
     Args:
         spark: SparkSession
@@ -96,208 +97,344 @@ def generate_comprehensive_test_data(spark) -> bool:
         bool: 生成是否成功
     """
     try:
-        print("🏗️ 创建表结构...")
+        # 创建DWS数据库
+        spark.sql("CREATE DATABASE IF NOT EXISTS dws_user")
+        print("✅ 数据库 dws_user 创建成功")
         
-        # 1. 创建 user_basic_info 表
+        print("🏗️ 创建DWS层表结构...")
+        
+        # 1. 用户基础画像表
         spark.sql("""
-            CREATE TABLE IF NOT EXISTS tag_system.user_basic_info (
+            CREATE TABLE IF NOT EXISTS dws_user.dws_user_profile_df (
                 user_id STRING,
-                age INT,
+                register_time STRING,
+                register_source_channel STRING,
+                register_method STRING,
+                register_country STRING,
+                is_kyc_completed STRING,
+                kyc_country STRING,
+                is_2fa_enabled STRING,
                 user_level STRING,
-                registration_date DATE,
-                birthday DATE,
-                first_name STRING,
-                last_name STRING,
-                middle_name STRING,
-                phone_number STRING,
-                email STRING,
-                is_vip BOOLEAN,
-                is_banned BOOLEAN,
-                kyc_status STRING,
-                account_status STRING,
-                primary_status STRING,
-                secondary_status STRING
+                is_agent STRING
             ) USING HIVE
             STORED AS PARQUET
         """)
         
-        # 2. 创建 user_asset_summary 表
+        # 2. 用户资产财务表
         spark.sql("""
-            CREATE TABLE IF NOT EXISTS tag_system.user_asset_summary (
+            CREATE TABLE IF NOT EXISTS dws_user.dws_user_asset_df (
                 user_id STRING,
-                total_asset_value DECIMAL(18,2),
-                cash_balance DECIMAL(18,2),
-                debt_amount DECIMAL(18,2)
+                total_deposit_amount STRING,
+                total_withdraw_amount STRING,
+                net_deposit_amount STRING,
+                last_deposit_time STRING,
+                last_withdraw_time STRING,
+                withdraw_count_30d STRING,
+                deposit_fail_count STRING,
+                spot_position_value STRING,
+                contract_position_value STRING,
+                finance_position_value STRING,
+                onchain_position_value STRING,
+                current_total_position_value STRING,
+                spot_available_balance STRING,
+                contract_available_balance STRING,
+                onchain_available_balance STRING,
+                available_balance STRING,
+                spot_locked_amount STRING,
+                contract_locked_amount STRING,
+                finance_locked_amount STRING,
+                onchain_locked_amount STRING,
+                locked_amount STRING
             ) USING HIVE
             STORED AS PARQUET
         """)
         
-        # 3. 创建 user_activity_summary 表
+        # 3. 用户交易行为表
         spark.sql("""
-            CREATE TABLE IF NOT EXISTS tag_system.user_activity_summary (
+            CREATE TABLE IF NOT EXISTS dws_user.dws_user_trading_df (
                 user_id STRING,
-                trade_count_30d INT,
-                last_login_date DATE,
-                last_trade_date DATE
+                spot_trading_volume STRING,
+                contract_trading_volume STRING,
+                spot_recent_30d_volume STRING,
+                contract_recent_30d_volume STRING,
+                spot_trade_count STRING,
+                contract_trade_count STRING,
+                finance_trade_count STRING,
+                onchain_trade_count STRING,
+                first_trade_time STRING,
+                last_trade_time STRING,
+                has_contract_trading STRING,
+                contract_trading_style STRING,
+                has_finance_management STRING,
+                has_pending_orders STRING
             ) USING HIVE
             STORED AS PARQUET
         """)
         
-        # 4. 创建 user_risk_profile 表
+        # 4. 用户活跃行为表
         spark.sql("""
-            CREATE TABLE IF NOT EXISTS tag_system.user_risk_profile (
+            CREATE TABLE IF NOT EXISTS dws_user.dws_user_activity_df (
                 user_id STRING,
-                risk_score INT
+                days_since_register STRING,
+                days_since_last_login STRING,
+                last_login_time STRING,
+                last_activity_time STRING,
+                login_count_7d STRING,
+                login_ip_address STRING,
+                country_region_code STRING,
+                email_suffix STRING,
+                operating_system STRING
             ) USING HIVE
             STORED AS PARQUET
         """)
         
-        # 5. 创建 user_preferences 表
+        # 5. 用户风险风控表
         spark.sql("""
-            CREATE TABLE IF NOT EXISTS tag_system.user_preferences (
+            CREATE TABLE IF NOT EXISTS dws_user.dws_user_risk_df (
                 user_id STRING,
-                interested_products ARRAY<STRING>,
-                owned_products ARRAY<STRING>,
-                blacklisted_products ARRAY<STRING>,
-                active_products ARRAY<STRING>,
-                expired_products ARRAY<STRING>,
-                optional_services ARRAY<STRING>,
-                required_services ARRAY<STRING>
+                is_blacklist_user STRING,
+                is_high_risk_ip STRING,
+                channel_source STRING
             ) USING HIVE
             STORED AS PARQUET
         """)
         
-        print("✅ 表结构创建完成")
+        # 6. 用户营销激励表
+        spark.sql("""
+            CREATE TABLE IF NOT EXISTS dws_user.dws_user_marketing_df (
+                user_id STRING,
+                red_packet_count STRING,
+                successful_invites_count STRING,
+                commission_rate STRING,
+                total_commission_amount STRING
+            ) USING HIVE
+            STORED AS PARQUET
+        """)
         
-        # 生成多样化测试数据
-        print("📊 生成多样化测试数据...")
+        # 7. 用户行为偏好表
+        spark.sql("""
+            CREATE TABLE IF NOT EXISTS dws_user.dws_user_behavior_df (
+                user_id STRING,
+                current_holding_coins ARRAY<STRING>,
+                traded_coins_list ARRAY<STRING>,
+                device_fingerprint_list ARRAY<STRING>,
+                participated_activity_ids ARRAY<STRING>,
+                reward_claim_history ARRAY<STRING>,
+                used_coupon_types ARRAY<STRING>
+            ) USING HIVE
+            STORED AS PARQUET
+        """)
+        
+        print("✅ DWS层表结构创建完成")
+        
+        # 生成DWS层测试数据
+        print("📊 生成DWS层测试数据...")
         
         import random
         from datetime import datetime, timedelta
         
-        # 生成1000个用户的基础信息，确保数据多样性
-        basic_info_data = []
-        for i in range(1000):
+        # 生成1000个用户的数据
+        user_count = 1000
+        
+        # 1. 用户基础画像数据
+        profile_data = []
+        for i in range(user_count):
             user_id = f"user_{i+1:05d}"
-            age = random.randint(18, 80)
-            user_level = random.choice(["VIP1", "VIP2", "VIP3", "VIP4", "VIP5", "NORMAL"])
-            reg_date = datetime(2020, 1, 1) + timedelta(days=random.randint(0, 1500))
-            birthday = datetime(1943 + age, random.randint(1, 12), random.randint(1, 28))
+            register_time = (datetime(2020, 1, 1) + timedelta(days=random.randint(0, 1500))).strftime("%Y-%m-%d %H:%M:%S")
             
-            first_name = random.choice(["John", "Jane", "Mike", "Lisa", "Tom", "Alice", "Bob", "Carol", None])
-            last_name = random.choice(["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", None])
-            middle_name = random.choice(["A", "B", "C", None, None, None])  # 多数为空
-            
-            phone_prefix = random.choice(["+86", "+1", "+44"])
-            phone_number = f"{phone_prefix}{random.choice(['138', '139', '186'])}{random.randint(10000000, 99999999)}"
-            
-            email_domain = random.choice(["gmail.com", "yahoo.com", "hotmail.com", "temp.com"])
-            email = f"{user_id}@{email_domain}"
-            
-            is_vip = random.choice([True, False])
-            is_banned = random.choice([True, False, False, False])  # 大部分不被封禁
-            
-            kyc_status = random.choice(["verified", "pending", "rejected"])
-            account_status = random.choice(["active", "suspended", "banned", "normal"])
-            primary_status = random.choice(["gold", "silver", "bronze", None])
-            secondary_status = random.choice(["premium", "standard", None, None])  # 多数为空
-            
-            basic_info_data.append((
-                user_id, age, user_level, reg_date.date(), birthday.date(),
-                first_name, last_name, middle_name, phone_number, email,
-                is_vip, is_banned, kyc_status, account_status, primary_status, secondary_status
+            profile_data.append((
+                user_id,
+                register_time,
+                random.choice(["官网", "APP", "推荐", "广告"]),
+                random.choice(["邮箱", "手机"]),
+                random.choice(["CN", "US", "SG", "JP"]),
+                random.choice(["true", "false"]),
+                random.choice(["CN", "US", "SG", "JP"]),
+                random.choice(["true", "false"]),
+                random.choice(["VIP1", "VIP2", "VIP3", "VIP4", "NORMAL"]),
+                random.choice(["true", "false"])
             ))
         
-        basic_info_df = spark.createDataFrame(basic_info_data, [
-            "user_id", "age", "user_level", "registration_date", "birthday",
-            "first_name", "last_name", "middle_name", "phone_number", "email",
-            "is_vip", "is_banned", "kyc_status", "account_status", "primary_status", "secondary_status"
+        profile_df = spark.createDataFrame(profile_data, [
+            "user_id", "register_time", "register_source_channel", "register_method", "register_country",
+            "is_kyc_completed", "kyc_country", "is_2fa_enabled", "user_level", "is_agent"
         ])
         
-        # 生成资产数据
+        # 2. 用户资产数据
         asset_data = []
-        for i in range(1000):
+        for i in range(user_count):
             user_id = f"user_{i+1:05d}"
-            total_asset = random.choice([0, 100000, 50000, 200000, 1000, 500000])  # 包含精确匹配值
-            cash_balance = random.choice([0, 50000, 25000, 75000, 100000])  # 包含精确匹配值
-            debt_amount = random.choice([None, 0, 10000, 5000]) if random.random() > 0.3 else None
             
-            asset_data.append((user_id, float(total_asset), float(cash_balance), 
-                             float(debt_amount) if debt_amount is not None else None))
+            # 生成资产数据，使用字符串类型
+            spot_position = str(random.choice([0, 5000, 25000, 50000, 100000]))
+            contract_position = str(random.choice([0, 10000, 50000, 100000, 200000]))
+            finance_position = str(random.choice([0, 20000, 50000, 100000, 300000]))
+            onchain_position = str(random.choice([0, 5000, 10000, 25000, 50000]))
+            
+            total_position = str(int(spot_position) + int(contract_position) + int(finance_position) + int(onchain_position))
+            
+            asset_data.append((
+                user_id,
+                str(random.randint(0, 1000000)),  # total_deposit_amount
+                str(random.randint(0, 500000)),   # total_withdraw_amount
+                str(random.randint(-100000, 500000)),  # net_deposit_amount
+                (datetime.now() - timedelta(days=random.randint(1, 365))).strftime("%Y-%m-%d %H:%M:%S"),
+                (datetime.now() - timedelta(days=random.randint(1, 180))).strftime("%Y-%m-%d %H:%M:%S"),
+                str(random.randint(0, 10)),       # withdraw_count_30d
+                str(random.randint(0, 5)),        # deposit_fail_count
+                spot_position,
+                contract_position,
+                finance_position,
+                onchain_position,
+                total_position,
+                str(random.randint(0, 50000)),    # spot_available_balance
+                str(random.randint(0, 100000)),   # contract_available_balance
+                str(random.randint(0, 25000)),    # onchain_available_balance
+                str(random.randint(0, 175000)),   # available_balance
+                str(random.randint(0, 10000)),    # spot_locked_amount
+                str(random.randint(0, 50000)),    # contract_locked_amount
+                str(random.randint(0, 100000)),   # finance_locked_amount
+                str(random.randint(0, 25000)),    # onchain_locked_amount
+                str(random.randint(0, 185000))    # locked_amount
+            ))
         
-        asset_df = spark.createDataFrame(asset_data, ["user_id", "total_asset_value", "cash_balance", "debt_amount"])
+        asset_df = spark.createDataFrame(asset_data, [
+            "user_id", "total_deposit_amount", "total_withdraw_amount", "net_deposit_amount",
+            "last_deposit_time", "last_withdraw_time", "withdraw_count_30d", "deposit_fail_count",
+            "spot_position_value", "contract_position_value", "finance_position_value", "onchain_position_value", "current_total_position_value",
+            "spot_available_balance", "contract_available_balance", "onchain_available_balance", "available_balance",
+            "spot_locked_amount", "contract_locked_amount", "finance_locked_amount", "onchain_locked_amount", "locked_amount"
+        ])
         
-        # 生成活动数据
+        # 3. 用户交易行为数据
+        trading_data = []
+        for i in range(user_count):
+            user_id = f"user_{i+1:05d}"
+            
+            trading_data.append((
+                user_id,
+                str(random.randint(0, 500000)),   # spot_trading_volume
+                str(random.randint(0, 1000000)),  # contract_trading_volume
+                str(random.randint(0, 50000)),    # spot_recent_30d_volume
+                str(random.randint(0, 100000)),   # contract_recent_30d_volume
+                str(random.randint(0, 100)),      # spot_trade_count
+                str(random.randint(0, 200)),      # contract_trade_count
+                str(random.randint(0, 50)),       # finance_trade_count
+                str(random.randint(0, 20)),       # onchain_trade_count
+                (datetime.now() - timedelta(days=random.randint(30, 1000))).strftime("%Y-%m-%d %H:%M:%S"),
+                (datetime.now() - timedelta(days=random.randint(1, 30))).strftime("%Y-%m-%d %H:%M:%S"),
+                random.choice(["true", "false"]),
+                random.choice(["激进", "稳健", "保守"]),
+                random.choice(["true", "false"]),
+                random.choice(["true", "false"])
+            ))
+        
+        trading_df = spark.createDataFrame(trading_data, [
+            "user_id", "spot_trading_volume", "contract_trading_volume", "spot_recent_30d_volume", "contract_recent_30d_volume",
+            "spot_trade_count", "contract_trade_count", "finance_trade_count", "onchain_trade_count",
+            "first_trade_time", "last_trade_time", "has_contract_trading", "contract_trading_style", "has_finance_management", "has_pending_orders"
+        ])
+        
+        # 4. 用户活跃行为数据
         activity_data = []
-        for i in range(1000):
+        for i in range(user_count):
             user_id = f"user_{i+1:05d}"
-            trade_count = random.choice([0, 5, 10, 15, 1, 2])  # 包含精确匹配值
             
-            # 确保有用户匹配特定日期条件
-            if i < 50:  # 前50个用户有特定日期
-                last_login = datetime(2025, 1, 1)
-            elif i < 100:
-                last_login = datetime(2025, 7, 15)
-            else:
-                last_login = datetime(2024, 1, 1) + timedelta(days=random.randint(0, 500))
-            
-            # last_trade_date 部分为空
-            last_trade = None if random.random() > 0.7 else last_login - timedelta(days=random.randint(0, 30))
-            
-            activity_data.append((user_id, trade_count, last_login.date(), 
-                                last_trade.date() if last_trade else None))
+            activity_data.append((
+                user_id,
+                str(random.randint(1, 1500)),     # days_since_register
+                str(random.randint(0, 30)),       # days_since_last_login
+                (datetime.now() - timedelta(days=random.randint(0, 30))).strftime("%Y-%m-%d %H:%M:%S"),
+                (datetime.now() - timedelta(hours=random.randint(1, 72))).strftime("%Y-%m-%d %H:%M:%S"),
+                str(random.randint(0, 10)),       # login_count_7d
+                f"192.168.{random.randint(1, 255)}.{random.randint(1, 255)}",
+                random.choice(["CN", "US", "SG", "JP", "UK"]),
+                random.choice(["gmail.com", "yahoo.com", "qq.com", "163.com"]),
+                random.choice(["Windows", "macOS", "iOS", "Android", "Linux"])
+            ))
         
-        activity_df = spark.createDataFrame(activity_data, ["user_id", "trade_count_30d", "last_login_date", "last_trade_date"])
+        activity_df = spark.createDataFrame(activity_data, [
+            "user_id", "days_since_register", "days_since_last_login", "last_login_time", "last_activity_time",
+            "login_count_7d", "login_ip_address", "country_region_code", "email_suffix", "operating_system"
+        ])
         
-        # 生成风险档案数据
+        # 5. 用户风险数据
         risk_data = []
-        for i in range(1000):
-            user_id = f"user_{i+1:05d}"
-            risk_score = random.choice([10, 20, 30, 40, 50])  # 包含 <= 30 的值
-            risk_data.append((user_id, risk_score))
-        
-        risk_df = spark.createDataFrame(risk_data, ["user_id", "risk_score"])
-        
-        # 生成偏好数据
-        preferences_data = []
-        product_options = ["stocks", "bonds", "forex", "savings", "checking", "premium", "gold", "platinum", "high_risk", "speculative"]
-        service_options = ["advisory", "trading", "research", "premium_support"]
-        
-        for i in range(1000):
+        for i in range(user_count):
             user_id = f"user_{i+1:05d}"
             
-            # 确保不同的列表组合用于测试不同操作符
-            interested = random.sample(product_options[:4], random.randint(1, 3))
-            owned = random.sample(["savings", "checking", "premium"], random.randint(0, 2))
-            blacklisted = ["forex"] if random.random() > 0.8 else []
-            active = random.sample(["premium", "gold", "silver"], random.randint(0, 2))
-            expired = random.sample(["premium", "platinum"], random.randint(0, 1))
-            optional = [] if random.random() > 0.6 else random.sample(service_options, 1)
-            required = random.sample(service_options, random.randint(1, 2))
-            
-            preferences_data.append((user_id, interested, owned, blacklisted, active, expired, optional, required))
+            risk_data.append((
+                user_id,
+                random.choice(["true", "false", "false", "false"]),  # 大部分不是黑名单
+                random.choice(["true", "false", "false"]),           # 少数高风险IP
+                random.choice(["官网", "推荐", "广告", "合作伙伴"])
+            ))
         
-        preferences_df = spark.createDataFrame(preferences_data, [
-            "user_id", "interested_products", "owned_products", "blacklisted_products",
-            "active_products", "expired_products", "optional_services", "required_services"
+        risk_df = spark.createDataFrame(risk_data, [
+            "user_id", "is_blacklist_user", "is_high_risk_ip", "channel_source"
+        ])
+        
+        # 6. 用户营销数据
+        marketing_data = []
+        for i in range(user_count):
+            user_id = f"user_{i+1:05d}"
+            
+            marketing_data.append((
+                user_id,
+                str(random.randint(0, 20)),       # red_packet_count
+                str(random.randint(0, 10)),       # successful_invites_count
+                str(random.choice(["0.01", "0.02", "0.05", "0.1"])),  # commission_rate
+                str(random.randint(0, 10000))     # total_commission_amount
+            ))
+        
+        marketing_df = spark.createDataFrame(marketing_data, [
+            "user_id", "red_packet_count", "successful_invites_count", "commission_rate", "total_commission_amount"
+        ])
+        
+        # 7. 用户行为偏好数据
+        behavior_data = []
+        coins = ["BTC", "ETH", "BNB", "USDT", "ADA", "DOT", "LINK", "UNI"]
+        activities = ["新人活动", "交易赛", "理财活动", "推荐活动"]
+        rewards = ["现金", "代币", "手续费减免", "VIP权益"]
+        coupons = ["交易券", "理财券", "手续费券"]
+        
+        for i in range(user_count):
+            user_id = f"user_{i+1:05d}"
+            
+            behavior_data.append((
+                user_id,
+                random.sample(coins, random.randint(1, 4)),
+                random.sample(coins, random.randint(2, 6)),
+                [f"device_{random.randint(1000, 9999)}" for _ in range(random.randint(1, 3))],
+                random.sample(activities, random.randint(0, 2)),
+                random.sample(rewards, random.randint(0, 3)),
+                random.sample(coupons, random.randint(0, 2))
+            ))
+        
+        behavior_df = spark.createDataFrame(behavior_data, [
+            "user_id", "current_holding_coins", "traded_coins_list", "device_fingerprint_list",
+            "participated_activity_ids", "reward_claim_history", "used_coupon_types"
         ])
         
         # 插入数据
-        print("💾 插入测试数据...")
-        basic_info_df.write.mode("overwrite").insertInto("tag_system.user_basic_info")
-        asset_df.write.mode("overwrite").insertInto("tag_system.user_asset_summary")
-        activity_df.write.mode("overwrite").insertInto("tag_system.user_activity_summary")
-        risk_df.write.mode("overwrite").insertInto("tag_system.user_risk_profile")
-        preferences_df.write.mode("overwrite").insertInto("tag_system.user_preferences")
+        print("💾 插入DWS层测试数据...")
+        profile_df.write.mode("overwrite").insertInto("dws_user.dws_user_profile_df")
+        asset_df.write.mode("overwrite").insertInto("dws_user.dws_user_asset_df")
+        trading_df.write.mode("overwrite").insertInto("dws_user.dws_user_trading_df")
+        activity_df.write.mode("overwrite").insertInto("dws_user.dws_user_activity_df")
+        risk_df.write.mode("overwrite").insertInto("dws_user.dws_user_risk_df")
+        marketing_df.write.mode("overwrite").insertInto("dws_user.dws_user_marketing_df")
+        behavior_df.write.mode("overwrite").insertInto("dws_user.dws_user_behavior_df")
         
         # 验证数据
-        print("🔍 验证生成的测试数据...")
-        tables = ["user_basic_info", "user_asset_summary", "user_activity_summary", "user_risk_profile", "user_preferences"]
-        for table in tables:
-            count = spark.sql(f"SELECT COUNT(*) as cnt FROM tag_system.{table}").collect()[0]['cnt']
-            print(f"   📊 tag_system.{table}: {count} 条记录")
+        print("🔍 验证生成的DWS层测试数据...")
+        dws_tables = ["dws_user_profile_df", "dws_user_asset_df", "dws_user_trading_df", 
+                      "dws_user_activity_df", "dws_user_risk_df", "dws_user_marketing_df", "dws_user_behavior_df"]
+        for table in dws_tables:
+            count = spark.sql(f"SELECT COUNT(*) as cnt FROM dws_user.{table}").collect()[0]['cnt']
+            print(f"   📊 dws_user.{table}: {count} 条记录")
         
-        print("🎯 测试数据生成完成，已确保多样性匹配所有标签条件")
+        print("🎯 DWS层测试数据生成完成，已确保多样性匹配所有标签条件")
         return True
         
     except Exception as e:
@@ -364,7 +501,7 @@ def main():
         mysql_config = load_mysql_config()
         print(f"MySQL配置: {mysql_config['host']}:{mysql_config['port']}/{mysql_config['database']}")
         
-        # 3. 创建标签引擎
+        # 3. 创建标签引擎（HiveMeta内部自动处理当天分区）
         tag_engine = TagEngine(spark, mysqlConfig=mysql_config)
         
         # 4. 根据模式执行相应操作
@@ -376,7 +513,11 @@ def main():
             
         elif args.mode in ["full", "task-all"]:
             print("\n🚀 执行全量标签计算...")
-            success = tag_engine.computeTags(mode="task-all")
+            success, failed_tag_ids = tag_engine.computeTags(mode="task-all")
+            if failed_tag_ids:
+                print(f"⚠️  {len(failed_tag_ids)} 个标签因表加载失败而跳过: {failed_tag_ids}")
+            else:
+                print("✅ 所有标签计算成功")
             
         elif args.mode in ["specific", "task-tags"]:
             tag_ids = parse_tag_ids(args.tag_ids)
@@ -385,13 +526,18 @@ def main():
                 sys.exit(1)
             
             print(f"\n🎯 执行指定标签计算: {tag_ids}")
-            success = tag_engine.computeTags(mode="task-tags", tagIds=tag_ids)
+            success, failed_tag_ids = tag_engine.computeTags(mode="task-tags", tagIds=tag_ids)
+            if failed_tag_ids:
+                print(f"⚠️  {len(failed_tag_ids)} 个标签因表加载失败而跳过: {failed_tag_ids}")
+            else:
+                print("✅ 所有指定标签计算成功")
             
         elif args.mode == "generate-test-data":
             print("\n🧪 生成测试数据...")
             # 先创建数据库
             spark.sql("CREATE DATABASE IF NOT EXISTS tag_system")
-            print("✅ 数据库 tag_system 创建成功")
+            spark.sql("CREATE DATABASE IF NOT EXISTS dws_user")
+            print("✅ 数据库 tag_system 和 dws_user 创建成功")
             
             # 使用部署包中的测试数据生成器
             try:
