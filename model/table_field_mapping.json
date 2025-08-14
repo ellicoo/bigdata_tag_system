@@ -31,7 +31,8 @@
   "链上交易次数": "dws_user.dws_user_trading_df:onchain_trade_count",
   "红包领取次数": "dws_user.dws_user_marketing_df:red_packet_count",
   "好友邀请成功数": "dws_user.dws_user_marketing_df:successful_invites_count",
-  "返佣比例": "dws_user.dws_user_marketing_df:commission_rate",
+  "现货返佣比例": "dws_user.dws_user_marketing_df:spot_commission_rate",
+  "合约返佣比例": "dws_user.dws_user_marketing_df:contract_commission_rate",
   "返佣金额（累计）": "dws_user.dws_user_marketing_df:total_commission_amount",
   
   "登录IP地址": "dws_user.dws_user_activity_df:login_ip_address",
