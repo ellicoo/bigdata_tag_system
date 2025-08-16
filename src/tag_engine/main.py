@@ -56,6 +56,16 @@ def load_mysql_config() -> Dict[str, str]:
     # 海豚调度器环境使用统一配置
     import os
 
+    # return {
+    #     "host": os.getenv("MYSQL_HOST",
+    #                       "rm-3ns765y13i6wf0hp3.mysql.rds.aliyuncs.com"),
+    #     "port": int(os.getenv("MYSQL_PORT", "3358")),
+    #     "database": os.getenv("MYSQL_DATABASE", "biz_user"),
+    #     "user": os.getenv("MYSQL_USER", "dev_rw"),
+    #     "password": os.getenv("MYSQL_PASSWORD", "nLjE49a20!h6vhHF"),
+    #     "charset": "utf8mb4"
+    # }
+
     return {
         "host": os.getenv("MYSQL_HOST",
                           "cex-mysql-ex-test-cluster.cluster-c5mgk4qm8m2z.ap-southeast-1.rds.amazonaws.com"),
