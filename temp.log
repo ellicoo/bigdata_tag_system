@@ -1,278 +1,114 @@
-[LOG-PATH]: /data/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250814/18609694687872/20/16935/100147.log, [HOST]:  Host(ip=172.24.14.168, port=1234)
-[INFO] 2025-08-14 12:55:12.449 +0000 - ***********************************************************************************************
-[INFO] 2025-08-14 12:55:12.450 +0000 - *********************************  Initialize task context  ***********************************
-[INFO] 2025-08-14 12:55:12.450 +0000 - ***********************************************************************************************
-[INFO] 2025-08-14 12:55:12.450 +0000 - Begin to initialize task
-[INFO] 2025-08-14 12:55:12.450 +0000 - Set task startTime: 1755176112450
-[INFO] 2025-08-14 12:55:12.450 +0000 - Set task appId: 16935_100147
-[INFO] 2025-08-14 12:55:12.450 +0000 - End initialize task {
-  "taskInstanceId" : 100147,
-  "taskName" : "dws_user.dws_user_activity_df",
-  "firstSubmitTime" : 1755176112437,
-  "startTime" : 1755176112450,
-  "taskType" : "SPARK",
-  "workflowInstanceHost" : "172.24.13.145:5678",
-  "host" : "172.24.14.168:1234",
-  "logPath" : "/data/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250814/18609694687872/20/16935/100147.log",
-  "processId" : 0,
-  "processDefineCode" : 18609694687872,
-  "processDefineVersion" : 20,
-  "processInstanceId" : 16935,
-  "scheduleTime" : 1755176100000,
-  "executorId" : 6,
-  "cmdTypeIfComplement" : 6,
-  "tenantCode" : "default",
-  "processDefineId" : 0,
-  "projectId" : 0,
-  "projectCode" : 18540427537920,
-  "taskParams" : "{\"localParams\":[],\"rawScript\":\"SET spark.hadoop.hive.fetch.task.conversion=none;\\nSET spark.hadoop.hive.vectorized.execution.enabled=true;\\n\\n\\nwith users as (\\nselect\\nid as user_id,\\ncountrycode as country_region_code\\nfrom dwd_user.dwd_user_df \\nwhere dt='$[yyyy-MM-dd]'\\n),\\n-- 这个算最近7天登陆次数\\nlogin_count_7d as (\\nselect \\nuser_id,\\ncount(user_id) as login_count_7d \\nfrom dwd_user.dwd_login_records_di \\nwhere dt>='$[yyyy-MM-dd-6]' \\ngroup by user_id\\n),\\n\\nbase_lable AS (\\n  SELECT \\n    user_id,\\n    -- email,\\n    regexp_extract(email, '@.*', 0) AS email_suffix,\\n    -- reg_time,\\n    -- last_login_time as last_login_time,\\n    null as last_activity_time,\\n    -- 注册天数（向下取整）\\n    FLOOR((unix_timestamp(current_timestamp()) - unix_timestamp(reg_time)) / 86400) AS days_since_register,\\n    -- 最近登录天数\\n    FLOOR((unix_timestamp(current_timestamp()) - unix_timestamp(last_login_time)) / 86400) AS days_since_last_login,\\n    last_login_time as last_login_time,\\n    reg_ip AS login_ip_address\\n  FROM dwd_user.dwd_user_label_df \\n  WHERE dt='$[yyyy-MM-dd]'\\n)\\n\\nINSERT OVERWRITE TABLE dws_user.dws_user_activity_df\\nPARTITION (dt = '$[yyyy-MM-dd]')\\nSELECT \\n  a.user_id,\\n  a.days_since_register,\\n  a.days_since_last_login,\\n  a.last_login_time,\\n  a.last_activity_time,--本次不提供\\n  c.login_count_7d,\\n  a.login_ip_address,\\n  b.country_region_code,\\n  a.email_suffix,\\n  null as operating_system --本次不提供\\nFROM base_lable a\\nleft join users b\\non a.user_id=b.user_id\\nleft join login_count_7d c\\non a.user_id=c.user_id\\n\\n\\n\\n\",\"resourceList\":[],\"programType\":\"SQL\",\"mainClass\":\"\",\"deployMode\":\"client\",\"yarnQueue\":\"\",\"driverCores\":1,\"driverMemory\":\"512M\",\"numExecutors\":2,\"executorMemory\":\"2G\",\"executorCores\":2,\"sqlExecutionType\":\"SCRIPT\"}",
-  "prepareParamsMap" : {
-    "schedule_timezone" : {
-      "prop" : "schedule_timezone",
-      "direct" : "IN",
-      "type" : "VARCHAR",
-      "value" : "Asia/Shanghai"
-    },
-    "system.task.definition.name" : {
-      "prop" : "system.task.definition.name",
-      "direct" : "IN",
-      "type" : "VARCHAR",
-      "value" : "dws_user.dws_user_activity_df"
-    },
-    "system.project.name" : {
-      "prop" : "system.project.name",
-      "direct" : "IN",
-      "type" : "VARCHAR",
-      "value" : null
-    },
-    "system.project.code" : {
-      "prop" : "system.project.code",
-      "direct" : "IN",
-      "type" : "VARCHAR",
-      "value" : "18540427537920"
-    },
-    "system.workflow.instance.id" : {
-      "prop" : "system.workflow.instance.id",
-      "direct" : "IN",
-      "type" : "VARCHAR",
-      "value" : "16935"
-    },
-    "system.biz.curdate" : {
-      "prop" : "system.biz.curdate",
-      "direct" : "IN",
-      "type" : "VARCHAR",
-      "value" : "20250814"
-    },
-    "system.biz.date" : {
-      "prop" : "system.biz.date",
-      "direct" : "IN",
-      "type" : "VARCHAR",
-      "value" : "20250813"
-    },
-    "system.task.instance.id" : {
-      "prop" : "system.task.instance.id",
-      "direct" : "IN",
-      "type" : "VARCHAR",
-      "value" : "100147"
-    },
-    "system.workflow.definition.name" : {
-      "prop" : "system.workflow.definition.name",
-      "direct" : "IN",
-      "type" : "VARCHAR",
-      "value" : "Indicator_data"
-    },
-    "system.task.definition.code" : {
-      "prop" : "system.task.definition.code",
-      "direct" : "IN",
-      "type" : "VARCHAR",
-      "value" : "18634502333440"
-    },
-    "system.workflow.definition.code" : {
-      "prop" : "system.workflow.definition.code",
-      "direct" : "IN",
-      "type" : "VARCHAR",
-      "value" : "18609694687872"
-    },
-    "system.datetime" : {
-      "prop" : "system.datetime",
-      "direct" : null,
-      "type" : null,
-      "value" : "20250814125500"
-    }
-  },
-  "taskAppId" : "16935_100147",
-  "taskTimeout" : 2147483647,
-  "workerGroup" : "default",
-  "delayTime" : 0,
-  "currentExecutionStatus" : "SUBMITTED_SUCCESS",
-  "endTime" : 0,
-  "resources" : { },
-  "dryRun" : 0,
-  "paramsMap" : {
-    "system.datetime" : {
-      "prop" : "system.datetime",
-      "direct" : null,
-      "type" : null,
-      "value" : "20250814125500"
-    }
-  },
-  "cpuQuota" : -1,
-  "memoryMax" : -1,
-  "testFlag" : 0,
-  "logBufferEnable" : false,
-  "dispatchFailTimes" : 0
-}
-[INFO] 2025-08-14 12:55:12.451 +0000 - ***********************************************************************************************
-[INFO] 2025-08-14 12:55:12.451 +0000 - *********************************  Load task instance plugin  *********************************
-[INFO] 2025-08-14 12:55:12.451 +0000 - ***********************************************************************************************
-[INFO] 2025-08-14 12:55:12.451 +0000 - Send task status RUNNING_EXECUTION master: 172.24.14.168:1234
-[WARN] 2025-08-14 12:55:12.451 +0000 - Current tenant is default tenant, will use root to execute the task
-[INFO] 2025-08-14 12:55:12.451 +0000 - TenantCode: default check successfully
-[INFO] 2025-08-14 12:55:12.452 +0000 - WorkflowInstanceExecDir: /tmp/dolphinscheduler/exec/process/default/18540427537920/18609694687872_20/16935/100147 check successfully
-[INFO] 2025-08-14 12:55:12.452 +0000 - Download resources: {} successfully
-[INFO] 2025-08-14 12:55:12.452 +0000 - Download upstream files: [] successfully
-[INFO] 2025-08-14 12:55:12.452 +0000 - Task plugin instance: SPARK create successfully
-[INFO] 2025-08-14 12:55:12.452 +0000 - Initialize spark task params {
-  "localParams" : [ ],
-  "varPool" : null,
-  "mainJar" : null,
-  "mainClass" : "",
-  "deployMode" : "client",
-  "mainArgs" : null,
-  "driverCores" : 1,
-  "driverMemory" : "512M",
-  "numExecutors" : 2,
-  "executorCores" : 2,
-  "executorMemory" : "2G",
-  "appName" : null,
-  "yarnQueue" : "",
-  "others" : null,
-  "programType" : "SQL",
-  "rawScript" : "SET spark.hadoop.hive.fetch.task.conversion=none;\nSET spark.hadoop.hive.vectorized.execution.enabled=true;\n\n\nwith users as (\nselect\nid as user_id,\ncountrycode as country_region_code\nfrom dwd_user.dwd_user_df \nwhere dt='$[yyyy-MM-dd]'\n),\n-- 这个算最近7天登陆次数\nlogin_count_7d as (\nselect \nuser_id,\ncount(user_id) as login_count_7d \nfrom dwd_user.dwd_login_records_di \nwhere dt>='$[yyyy-MM-dd-6]' \ngroup by user_id\n),\n\nbase_lable AS (\n  SELECT \n    user_id,\n    -- email,\n    regexp_extract(email, '@.*', 0) AS email_suffix,\n    -- reg_time,\n    -- last_login_time as last_login_time,\n    null as last_activity_time,\n    -- 注册天数（向下取整）\n    FLOOR((unix_timestamp(current_timestamp()) - unix_timestamp(reg_time)) / 86400) AS days_since_register,\n    -- 最近登录天数\n    FLOOR((unix_timestamp(current_timestamp()) - unix_timestamp(last_login_time)) / 86400) AS days_since_last_login,\n    last_login_time as last_login_time,\n    reg_ip AS login_ip_address\n  FROM dwd_user.dwd_user_label_df \n  WHERE dt='$[yyyy-MM-dd]'\n)\n\nINSERT OVERWRITE TABLE dws_user.dws_user_activity_df\nPARTITION (dt = '$[yyyy-MM-dd]')\nSELECT \n  a.user_id,\n  a.days_since_register,\n  a.days_since_last_login,\n  a.last_login_time,\n  a.last_activity_time,--本次不提供\n  c.login_count_7d,\n  a.login_ip_address,\n  b.country_region_code,\n  a.email_suffix,\n  null as operating_system --本次不提供\nFROM base_lable a\nleft join users b\non a.user_id=b.user_id\nleft join login_count_7d c\non a.user_id=c.user_id\n\n\n\n",
-  "namespace" : null,
-  "resourceList" : [ ],
-  "sqlExecutionType" : "SCRIPT"
-}
-[INFO] 2025-08-14 12:55:12.452 +0000 - Success initialized task plugin instance successfully
-[INFO] 2025-08-14 12:55:12.452 +0000 - Set taskVarPool: null successfully
-[INFO] 2025-08-14 12:55:12.452 +0000 - ***********************************************************************************************
-[INFO] 2025-08-14 12:55:12.452 +0000 - *********************************  Execute task instance  *************************************
-[INFO] 2025-08-14 12:55:12.453 +0000 - ***********************************************************************************************
-[INFO] 2025-08-14 12:55:12.453 +0000 - raw script : SET spark.hadoop.hive.fetch.task.conversion=none;
-SET spark.hadoop.hive.vectorized.execution.enabled=true;
+✅ Spark会话创建完成，版本: 3.5.2-amzn-1
+	MySQL配置: rm-3ns765y13i6wf0hp3.mysql.rds.aliyuncs.com:3358/biz_user
+	🗄️  HiveMeta初始化完成，将使用分区: 2025-08-19
+	🔗 JDBC URL: jdbc:mysql://rm-3ns765y13i6wf0hp3.mysql.rds.aliyuncs.com:3358/biz_user?useSSL=false&useUnicode=true&connectionCollation=utf8mb4_unicode_ci&autoReconnect=true&useCursorFetch=true&serverTimezone=UTC
+	🔧 开始MySQL连接测试...
+	🔍 测试网络连通性: rm-3ns765y13i6wf0hp3.mysql.rds.aliyuncs.com:3358
+[INFO] 2025-08-19 10:29:11.025 +0000 -  ->
+	❌ 网络连接失败: rm-3ns765y13i6wf0hp3.mysql.rds.aliyuncs.com:3358 (错误码: 11)
+	   可能原因: 1) 安全组限制 2) 防火墙限制 3) 网络不通
+	❌ MySQL连接测试失败，但继续初始化
+	🗄️  MysqlMeta初始化完成
+	🔍 TagRuleParser初始化完成
+	🚀 TagEngine初始化完成
 
+	🎯 执行指定标签计算: [1, 2, 3, 4, 5]
+	🚀 开始标签计算，模式: task-tags
+	📋 加载标签规则...
+	📋 加载标签规则，指定标签: [1, 2, 3, 4, 5]
+[INFO] 2025-08-19 10:35:57.068 +0000 -  ->
+	❌ 加载标签规则失败: An error occurred while calling o262.load.
+	: java.sql.SQLNonTransientConnectionException: Could not create connection to database server. Attempted reconnect 3 times. Giving up.
+		at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:111)
+		at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:98)
+		at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:90)
+		at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:64)
+		at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:74)
+		at com.mysql.cj.jdbc.ConnectionImpl.connectWithRetries(ConnectionImpl.java:895)
+		at com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:820)
+		at com.mysql.cj.jdbc.ConnectionImpl.<init>(ConnectionImpl.java:446)
+		at com.mysql.cj.jdbc.ConnectionImpl.getInstance(ConnectionImpl.java:239)
+		at com.mysql.cj.jdbc.NonRegisteringDriver.connect(NonRegisteringDriver.java:188)
+		at org.apache.spark.sql.execution.datasources.jdbc.connection.BasicConnectionProvider.getConnection(BasicConnectionProvider.scala:49)
+		at org.apache.spark.sql.execution.datasources.jdbc.connection.ConnectionProviderBase.create(ConnectionProvider.scala:102)
+		at org.apache.spark.sql.jdbc.JdbcDialect.$anonfun$createConnectionFactory$1(JdbcDialects.scala:160)
+		at org.apache.spark.sql.jdbc.JdbcDialect.$anonfun$createConnectionFactory$1$adapted(JdbcDialects.scala:156)
+		at org.apache.spark.sql.execution.datasources.jdbc.JDBCRDD$.getQueryOutputSchema(JDBCRDD.scala:65)
+		at org.apache.spark.sql.execution.datasources.jdbc.JDBCRDD$.resolveTable(JDBCRDD.scala:60)
+		at org.apache.spark.sql.execution.datasources.jdbc.JDBCRelation$.getSchema(JDBCRelation.scala:241)
+		at org.apache.spark.sql.execution.datasources.jdbc.JdbcRelationProvider.createRelation(JdbcRelationProvider.scala:37)
+		at org.apache.spark.sql.execution.datasources.DataSource.resolveRelation(DataSource.scala:359)
+		at org.apache.spark.sql.execution.datasources.DataSource.resolveRelation(DataSource.scala:345)
+		at org.apache.spark.sql.DataFrameReader.loadV1Source(DataFrameReader.scala:272)
+		at org.apache.spark.sql.DataFrameReader.$anonfun$load$1(DataFrameReader.scala:210)
+		at scala.Option.getOrElse(Option.scala:189)
+		at org.apache.spark.sql.DataFrameReader.load(DataFrameReader.scala:210)
+		at org.apache.spark.sql.DataFrameReader.load(DataFrameReader.scala:174)
+		at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+		at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+		at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+		at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+		at py4j.reflection.MethodInvoker.invoke(MethodInvoker.java:244)
+		at py4j.reflection.ReflectionEngine.invoke(ReflectionEngine.java:374)
+		at py4j.Gateway.invoke(Gateway.java:282)
+		at py4j.commands.AbstractCommand.invokeMethod(AbstractCommand.java:132)
+		at py4j.commands.CallCommand.execute(CallCommand.java:79)
+		at py4j.ClientServerConnection.waitForCommands(ClientServerConnection.java:182)
+		at py4j.ClientServerConnection.run(ClientServerConnection.java:106)
+		at java.base/java.lang.Thread.run(Thread.java:840)
+	Caused by: com.mysql.cj.exceptions.CJCommunicationsException: Communications link failure
 
-with users as (
-select
-id as user_id,
-countrycode as country_region_code
-from dwd_user.dwd_user_df
-where dt='2025-08-14'
-),
--- 这个算最近7天登陆次数
-login_count_7d as (
-select
-user_id,
-count(user_id) as login_count_7d
-from dwd_user.dwd_login_records_di
-where dt>='2025-08-08'
-group by user_id
-),
+	The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+		at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+		at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:77)
+		at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+		at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:500)
+		at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:481)
+		at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:62)
+		at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:105)
+		at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:150)
+		at com.mysql.cj.exceptions.ExceptionFactory.createCommunicationsException(ExceptionFactory.java:166)
+		at com.mysql.cj.protocol.a.NativeSocketConnection.connect(NativeSocketConnection.java:89)
+		at com.mysql.cj.NativeSession.connect(NativeSession.java:121)
+		at com.mysql.cj.jdbc.ConnectionImpl.connectWithRetries(ConnectionImpl.java:839)
+		... 31 more
+	Caused by: java.net.ConnectException: Connection timed out
+		at java.base/sun.nio.ch.Net.connect0(Native Method)
+		at java.base/sun.nio.ch.Net.connect(Net.java:579)
+		at java.base/sun.nio.ch.Net.connect(Net.java:568)
+		at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:593)
+		at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327)
+		at java.base/java.net.Socket.connect(Socket.java:633)
+		at com.mysql.cj.protocol.StandardSocketFactory.connect(StandardSocketFactory.java:153)
+		at com.mysql.cj.protocol.a.NativeSocketConnection.connect(NativeSocketConnection.java:63)
+		... 33 more
 
-base_lable AS (
-  SELECT
-    user_id,
-    -- email,
-    regexp_extract(email, '@.*', 0) AS email_suffix,
-    -- reg_time,
-    -- last_login_time as last_login_time,
-    null as last_activity_time,
-    -- 注册天数（向下取整）
-    FLOOR((unix_timestamp(current_timestamp()) - unix_timestamp(reg_time)) / 86400) AS days_since_register,
-    -- 最近登录天数
-    FLOOR((unix_timestamp(current_timestamp()) - unix_timestamp(last_login_time)) / 86400) AS days_since_last_login,
-    last_login_time as last_login_time,
-    reg_ip AS login_ip_address
-  FROM dwd_user.dwd_user_label_df
-  WHERE dt='2025-08-14'
-)
+[INFO] 2025-08-19 10:36:03.069 +0000 -  ->
+	25/08/19 10:36:02 WARN TaskSetManager: Lost task 0.0 in stage 0.0 (TID 0) (ip-172-24-15-124.ap-southeast-1.compute.internal executor 101): org.apache.spark.api.python.PythonException: Traceback (most recent call last):
+	  File "/mnt1/yarn/usercache/root/appcache/application_1755501357359_1140/container_e06_1755501357359_1140_01_000165/pyspark.zip/pyspark/worker.py", line 1100, in main
+	    raise PySparkRuntimeError(
+	pyspark.errors.exceptions.base.PySparkRuntimeError: [PYTHON_VERSION_MISMATCH] Python in worker has different version (3, 9) than that in driver 3.12, PySpark cannot run with different minor versions.
+	Please check environment variables PYSPARK_PYTHON and PYSPARK_DRIVER_PYTHON are correctly set.
 
-INSERT OVERWRITE TABLE dws_user.dws_user_activity_df
-PARTITION (dt = '2025-08-14')
-SELECT
-  a.user_id,
-  a.days_since_register,
-  a.days_since_last_login,
-  a.last_login_time,
-  a.last_activity_time,--本次不提供
-  c.login_count_7d,
-  a.login_ip_address,
-  b.country_region_code,
-  a.email_suffix,
-  null as operating_system --本次不提供
-FROM base_lable a
-left join users b
-on a.user_id=b.user_id
-left join login_count_7d c
-on a.user_id=c.user_id
-
-
-
-
-[INFO] 2025-08-14 12:55:12.453 +0000 - task execute path : /tmp/dolphinscheduler/exec/process/default/18540427537920/18609694687872_20/16935/100147
-[INFO] 2025-08-14 12:55:12.453 +0000 - Final Shell file is :
-#!/bin/bash
-BASEDIR=$(cd `dirname $0`; pwd)
-cd $BASEDIR
-${SPARK_HOME}/bin/spark-sql --master yarn --deploy-mode client --conf spark.driver.cores=1 --conf spark.driver.memory=512M --conf spark.executor.instances=2 --conf spark.executor.cores=2 --conf spark.executor.memory=2G -f /tmp/dolphinscheduler/exec/process/default/18540427537920/18609694687872_20/16935/100147/16935_100147_node.sql
-[INFO] 2025-08-14 12:55:12.453 +0000 - Executing shell command : sudo -u root -i /tmp/dolphinscheduler/exec/process/default/18540427537920/18609694687872_20/16935/100147/16935_100147.sh
-[INFO] 2025-08-14 12:55:12.460 +0000 - process start, process id is: 3799432
-[INFO] 2025-08-14 12:55:14.461 +0000 -  ->
-	Setting default log level to "WARN".
-	To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
-[INFO] 2025-08-14 12:55:15.463 +0000 -  ->
-	25/08/14 12:55:14 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
-	25/08/14 12:55:14 WARN HiveConf: HiveConf of name hive.server2.thrift.url does not exist
-[INFO] 2025-08-14 12:55:16.463 +0000 -  ->
-	25/08/14 12:55:16 WARN Utils: Service 'SparkUI' could not bind on port 4040. Attempting port 4041.
-	25/08/14 12:55:16 WARN Utils: Service 'SparkUI' could not bind on port 4041. Attempting port 4042.
-	25/08/14 12:55:16 WARN Utils: Service 'SparkUI' could not bind on port 4042. Attempting port 4043.
-	25/08/14 12:55:16 WARN Utils: Service 'SparkUI' could not bind on port 4043. Attempting port 4044.
-[INFO] 2025-08-14 12:55:56.467 +0000 -  ->
-	Spark Web UI available at http://ip-172-24-13-28.ap-southeast-1.compute.internal:4044
-	Spark master: yarn, Application Id: application_1754991343133_1954
-[INFO] 2025-08-14 12:55:57.468 +0000 -  ->
-	spark.hadoop.hive.fetch.task.conversion	none
-	Time taken: 1.107 seconds, Fetched 1 row(s)
-	spark.hadoop.hive.vectorized.execution.enabled	true
-	Time taken: 0.033 seconds, Fetched 1 row(s)
-[INFO] 2025-08-14 12:55:59.471 +0000 -  ->
-	25/08/14 12:55:58 WARN SparkStringUtils: Truncated the string representation of a plan since it was too large. This behavior can be adjusted by setting 'spark.sql.debug.maxToStringFields'.
-[INFO] 2025-08-14 12:56:20.481 +0000 -  ->
-	25/08/14 12:56:19 WARN YarnScheduler: Initial job has not accepted any resources; check your cluster UI to ensure that workers are registered and have sufficient resources
-[INFO] 2025-08-14 12:56:47.484 +0000 -  ->
-	25/08/14 12:56:46 WARN TaskSetManager: Lost task 24.0 in stage 4.0 (TID 333) (ip-172-24-13-114.ap-southeast-1.compute.internal executor 20): org.apache.spark.sql.execution.datasources.FileDownloadException: Failed to download file path: s3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00023-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet, range: 0-1392129, partition values: [2025-08-14], isDataPresent: false, eTag: 27319f21f6a7f197166f1416e89b2d47-1
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.next(AsyncFileDownloader.scala:145)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.getNextFile(FileScanRDD.scala:465)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.nextIterator(FileScanRDD.scala:377)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.$anonfun$hasNext$1(FileScanRDD.scala:269)
-		at scala.runtime.java8.JFunction0$mcZ$sp.apply(JFunction0$mcZ$sp.java:23)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.hasNext(FileScanRDD.scala:269)
-		at org.apache.spark.sql.execution.FileSourceScanExec$$anon$1.hasNext(DataSourceScanExec.scala:761)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.columnartorow_nextBatch_0$(Unknown Source)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.processNext(Unknown Source)
+		at org.apache.spark.api.python.BasePythonRunner$ReaderIterator.handlePythonException(PythonRunner.scala:572)
+		at org.apache.spark.api.python.PythonRunner$$anon$3.read(PythonRunner.scala:784)
+		at org.apache.spark.api.python.PythonRunner$$anon$3.read(PythonRunner.scala:766)
+		at org.apache.spark.api.python.BasePythonRunner$ReaderIterator.hasNext(PythonRunner.scala:525)
+		at org.apache.spark.InterruptibleIterator.hasNext(InterruptibleIterator.scala:37)
+		at scala.collection.Iterator$$anon$11.hasNext(Iterator.scala:491)
+		at scala.collection.Iterator$$anon$10.hasNext(Iterator.scala:460)
+		at scala.collection.Iterator$$anon$10.hasNext(Iterator.scala:460)
+		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage1.hashAgg_doAggregateWithoutKey_0$(Unknown Source)
+		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage1.processNext(Unknown Source)
 		at org.apache.spark.sql.execution.BufferedRowIterator.hasNext(BufferedRowIterator.java:35)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.hasNext(Unknown Source)
+		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage1.hasNext(Unknown Source)
 		at org.apache.spark.sql.execution.WholeStageCodegenEvaluatorFactory$WholeStageCodegenPartitionEvaluator$$anon$1.hasNext(WholeStageCodegenEvaluatorFactory.scala:43)
-		at org.apache.spark.sql.execution.datasources.FileFormatWriter$.executeTask(FileFormatWriter.scala:386)
-		at org.apache.spark.sql.execution.datasources.WriteFilesExec.$anonfun$doExecuteWrite$1(WriteFiles.scala:100)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2(RDD.scala:894)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2$adapted(RDD.scala:894)
-		at org.apache.spark.rdd.MapPartitionsRDD.compute(MapPartitionsRDD.scala:61)
-		at org.apache.spark.rdd.RDD.computeOrReadCheckpoint(RDD.scala:368)
-		at org.apache.spark.rdd.RDD.iterator(RDD.scala:332)
-		at org.apache.spark.scheduler.ResultTask.runTask(ResultTask.scala:93)
+		at scala.collection.Iterator$$anon$10.hasNext(Iterator.scala:460)
+		at org.apache.spark.shuffle.sort.BypassMergeSortShuffleWriter.write(BypassMergeSortShuffleWriter.java:157)
+		at org.apache.spark.shuffle.ShuffleWriteProcessor.doWrite(ShuffleWriteProcessor.scala:45)
+		at org.apache.spark.shuffle.ShuffleWriteProcessor.write(ShuffleWriteProcessor.scala:69)
+		at org.apache.spark.scheduler.ShuffleMapTask.runTask(ShuffleMapTask.scala:104)
+		at org.apache.spark.scheduler.ShuffleMapTask.runTask(ShuffleMapTask.scala:54)
 		at org.apache.spark.TaskContext.runTaskWithListeners(TaskContext.scala:174)
 		at org.apache.spark.scheduler.Task.run(Task.scala:152)
 		at org.apache.spark.executor.Executor$TaskRunner.$anonfun$run$4(Executor.scala:632)
@@ -283,46 +119,34 @@ ${SPARK_HOME}/bin/spark-sql --master yarn --deploy-mode client --conf spark.driv
 		at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
 		at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
 		at java.base/java.lang.Thread.run(Thread.java:840)
-	Caused by: java.io.FileNotFoundException: No such file or directory 's3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00023-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet'
-		at com.amazon.ws.emr.hadoop.fs.s3n.S3NativeFileSystem.getFileStatus(S3NativeFileSystem.java:560)
-		at com.amazon.ws.emr.hadoop.fs.EmrFileSystem.getFileStatus(EmrFileSystem.java:623)
-		at org.apache.parquet.hadoop.util.HadoopInputFile.fromPath(HadoopInputFile.java:66)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.getFooterWithParams(ParquetFileFormat.scala:1001)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.callFooterRequest(ParquetFileFormat.scala:1019)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.requestFooter$1(ParquetFileFormat.scala:600)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.liftedTree1$1(ParquetFileFormat.scala:612)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.$anonfun$buildPrefetcherWithPartitionValues$1(ParquetFileFormat.scala:604)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD.$anonfun$compute$2(FileScanRDD.scala:232)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.$anonfun$downloadFile$2(AsyncFileDownloader.scala:94)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.org$apache$spark$sql$execution$datasources$AsyncFileDownloader$$downloadFile(AsyncFileDownloader.scala:94)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:72)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:71)
-		at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-		... 3 more
 
-	25/08/14 12:56:46 WARN TaskSetManager: Lost task 22.0 in stage 4.0 (TID 331) (ip-172-24-13-114.ap-southeast-1.compute.internal executor 40): org.apache.spark.sql.execution.datasources.FileDownloadException: Failed to download file path: s3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00024-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet, range: 0-1434856, partition values: [2025-08-14], isDataPresent: false, eTag: d2882679a25cba0f9c46430bc51df1f9-1
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.next(AsyncFileDownloader.scala:145)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.getNextFile(FileScanRDD.scala:465)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.nextIterator(FileScanRDD.scala:377)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.$anonfun$hasNext$1(FileScanRDD.scala:269)
-		at scala.runtime.java8.JFunction0$mcZ$sp.apply(JFunction0$mcZ$sp.java:23)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.hasNext(FileScanRDD.scala:269)
-		at org.apache.spark.sql.execution.FileSourceScanExec$$anon$1.hasNext(DataSourceScanExec.scala:761)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.columnartorow_nextBatch_0$(Unknown Source)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.processNext(Unknown Source)
+	25/08/19 10:36:02 ERROR TaskSetManager: Task 0 in stage 0.0 failed 4 times; aborting job
+	❌ 标签计算异常: An error occurred while calling o279.count.
+	: org.apache.spark.SparkException: Job aborted due to stage failure: Task 0 in stage 0.0 failed 4 times, most recent failure: Lost task 0.3 in stage 0.0 (TID 6) (ip-172-24-15-124.ap-southeast-1.compute.internal executor 101): org.apache.spark.api.python.PythonException: Traceback (most recent call last):
+	  File "/mnt1/yarn/usercache/root/appcache/application_1755501357359_1140/container_e06_1755501357359_1140_01_000165/pyspark.zip/pyspark/worker.py", line 1100, in main
+	    raise PySparkRuntimeError(
+	pyspark.errors.exceptions.base.PySparkRuntimeError: [PYTHON_VERSION_MISMATCH] Python in worker has different version (3, 9) than that in driver 3.12, PySpark cannot run with different minor versions.
+	Please check environment variables PYSPARK_PYTHON and PYSPARK_DRIVER_PYTHON are correctly set.
+
+		at org.apache.spark.api.python.BasePythonRunner$ReaderIterator.handlePythonException(PythonRunner.scala:572)
+		at org.apache.spark.api.python.PythonRunner$$anon$3.read(PythonRunner.scala:784)
+		at org.apache.spark.api.python.PythonRunner$$anon$3.read(PythonRunner.scala:766)
+		at org.apache.spark.api.python.BasePythonRunner$ReaderIterator.hasNext(PythonRunner.scala:525)
+		at org.apache.spark.InterruptibleIterator.hasNext(InterruptibleIterator.scala:37)
+		at scala.collection.Iterator$$anon$11.hasNext(Iterator.scala:491)
+		at scala.collection.Iterator$$anon$10.hasNext(Iterator.scala:460)
+		at scala.collection.Iterator$$anon$10.hasNext(Iterator.scala:460)
+		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage1.hashAgg_doAggregateWithoutKey_0$(Unknown Source)
+		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage1.processNext(Unknown Source)
 		at org.apache.spark.sql.execution.BufferedRowIterator.hasNext(BufferedRowIterator.java:35)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.hasNext(Unknown Source)
+		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage1.hasNext(Unknown Source)
 		at org.apache.spark.sql.execution.WholeStageCodegenEvaluatorFactory$WholeStageCodegenPartitionEvaluator$$anon$1.hasNext(WholeStageCodegenEvaluatorFactory.scala:43)
-		at org.apache.spark.sql.execution.datasources.FileFormatWriter$.executeTask(FileFormatWriter.scala:386)
-		at org.apache.spark.sql.execution.datasources.WriteFilesExec.$anonfun$doExecuteWrite$1(WriteFiles.scala:100)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2(RDD.scala:894)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2$adapted(RDD.scala:894)
-		at org.apache.spark.rdd.MapPartitionsRDD.compute(MapPartitionsRDD.scala:61)
-		at org.apache.spark.rdd.RDD.computeOrReadCheckpoint(RDD.scala:368)
-		at org.apache.spark.rdd.RDD.iterator(RDD.scala:332)
-		at org.apache.spark.scheduler.ResultTask.runTask(ResultTask.scala:93)
+		at scala.collection.Iterator$$anon$10.hasNext(Iterator.scala:460)
+		at org.apache.spark.shuffle.sort.BypassMergeSortShuffleWriter.write(BypassMergeSortShuffleWriter.java:157)
+		at org.apache.spark.shuffle.ShuffleWriteProcessor.doWrite(ShuffleWriteProcessor.scala:45)
+		at org.apache.spark.shuffle.ShuffleWriteProcessor.write(ShuffleWriteProcessor.scala:69)
+		at org.apache.spark.scheduler.ShuffleMapTask.runTask(ShuffleMapTask.scala:104)
+		at org.apache.spark.scheduler.ShuffleMapTask.runTask(ShuffleMapTask.scala:54)
 		at org.apache.spark.TaskContext.runTaskWithListeners(TaskContext.scala:174)
 		at org.apache.spark.scheduler.Task.run(Task.scala:152)
 		at org.apache.spark.executor.Executor$TaskRunner.$anonfun$run$4(Executor.scala:632)
@@ -333,721 +157,6 @@ ${SPARK_HOME}/bin/spark-sql --master yarn --deploy-mode client --conf spark.driv
 		at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
 		at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
 		at java.base/java.lang.Thread.run(Thread.java:840)
-	Caused by: java.io.FileNotFoundException: No such file or directory 's3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00024-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet'
-		at com.amazon.ws.emr.hadoop.fs.s3n.S3NativeFileSystem.getFileStatus(S3NativeFileSystem.java:560)
-		at com.amazon.ws.emr.hadoop.fs.EmrFileSystem.getFileStatus(EmrFileSystem.java:623)
-		at org.apache.parquet.hadoop.util.HadoopInputFile.fromPath(HadoopInputFile.java:66)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.getFooterWithParams(ParquetFileFormat.scala:1001)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.callFooterRequest(ParquetFileFormat.scala:1019)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.requestFooter$1(ParquetFileFormat.scala:600)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.liftedTree1$1(ParquetFileFormat.scala:612)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.$anonfun$buildPrefetcherWithPartitionValues$1(ParquetFileFormat.scala:604)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD.$anonfun$compute$2(FileScanRDD.scala:232)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.$anonfun$downloadFile$2(AsyncFileDownloader.scala:94)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.org$apache$spark$sql$execution$datasources$AsyncFileDownloader$$downloadFile(AsyncFileDownloader.scala:94)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:72)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:71)
-		at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-		... 3 more
-
-	25/08/14 12:56:46 WARN TaskSetManager: Lost task 12.0 in stage 4.0 (TID 321) (ip-172-24-14-121.ap-southeast-1.compute.internal executor 22): org.apache.spark.sql.execution.datasources.FileDownloadException: Failed to download file path: s3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00020-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet, range: 0-1453693, partition values: [2025-08-14], isDataPresent: false, eTag: 120208189a50fde9c3b77928dedb0b73-1
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.next(AsyncFileDownloader.scala:145)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.getNextFile(FileScanRDD.scala:465)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.nextIterator(FileScanRDD.scala:377)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.$anonfun$hasNext$1(FileScanRDD.scala:269)
-		at scala.runtime.java8.JFunction0$mcZ$sp.apply(JFunction0$mcZ$sp.java:23)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.hasNext(FileScanRDD.scala:269)
-		at org.apache.spark.sql.execution.FileSourceScanExec$$anon$1.hasNext(DataSourceScanExec.scala:761)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.columnartorow_nextBatch_0$(Unknown Source)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.processNext(Unknown Source)
-		at org.apache.spark.sql.execution.BufferedRowIterator.hasNext(BufferedRowIterator.java:35)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.hasNext(Unknown Source)
-		at org.apache.spark.sql.execution.WholeStageCodegenEvaluatorFactory$WholeStageCodegenPartitionEvaluator$$anon$1.hasNext(WholeStageCodegenEvaluatorFactory.scala:43)
-		at org.apache.spark.sql.execution.datasources.FileFormatWriter$.executeTask(FileFormatWriter.scala:386)
-		at org.apache.spark.sql.execution.datasources.WriteFilesExec.$anonfun$doExecuteWrite$1(WriteFiles.scala:100)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2(RDD.scala:894)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2$adapted(RDD.scala:894)
-		at org.apache.spark.rdd.MapPartitionsRDD.compute(MapPartitionsRDD.scala:61)
-		at org.apache.spark.rdd.RDD.computeOrReadCheckpoint(RDD.scala:368)
-		at org.apache.spark.rdd.RDD.iterator(RDD.scala:332)
-		at org.apache.spark.scheduler.ResultTask.runTask(ResultTask.scala:93)
-		at org.apache.spark.TaskContext.runTaskWithListeners(TaskContext.scala:174)
-		at org.apache.spark.scheduler.Task.run(Task.scala:152)
-		at org.apache.spark.executor.Executor$TaskRunner.$anonfun$run$4(Executor.scala:632)
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally(SparkErrorUtils.scala:64)
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally$(SparkErrorUtils.scala:61)
-		at org.apache.spark.util.Utils$.tryWithSafeFinally(Utils.scala:96)
-		at org.apache.spark.executor.Executor$TaskRunner.run(Executor.scala:635)
-		at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-		at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-		at java.base/java.lang.Thread.run(Thread.java:840)
-	Caused by: java.io.FileNotFoundException: No such file or directory 's3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00020-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet'
-		at com.amazon.ws.emr.hadoop.fs.s3n.S3NativeFileSystem.getFileStatus(S3NativeFileSystem.java:560)
-		at com.amazon.ws.emr.hadoop.fs.EmrFileSystem.getFileStatus(EmrFileSystem.java:623)
-		at org.apache.parquet.hadoop.util.HadoopInputFile.fromPath(HadoopInputFile.java:66)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.getFooterWithParams(ParquetFileFormat.scala:1001)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.callFooterRequest(ParquetFileFormat.scala:1019)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.requestFooter$1(ParquetFileFormat.scala:600)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.liftedTree1$1(ParquetFileFormat.scala:612)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.$anonfun$buildPrefetcherWithPartitionValues$1(ParquetFileFormat.scala:604)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD.$anonfun$compute$2(FileScanRDD.scala:232)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.$anonfun$downloadFile$2(AsyncFileDownloader.scala:94)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.org$apache$spark$sql$execution$datasources$AsyncFileDownloader$$downloadFile(AsyncFileDownloader.scala:94)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:72)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:71)
-		at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-		... 3 more
-
-	25/08/14 12:56:46 WARN TaskSetManager: Lost task 23.0 in stage 4.0 (TID 332) (ip-172-24-13-20.ap-southeast-1.compute.internal executor 9): org.apache.spark.sql.execution.datasources.FileDownloadException: Failed to download file path: s3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00003-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet, range: 0-1434680, partition values: [2025-08-14], isDataPresent: false, eTag: 1e66bda0676aa1abe6d4dfe3f9360ea7-1
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.next(AsyncFileDownloader.scala:145)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.getNextFile(FileScanRDD.scala:465)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.nextIterator(FileScanRDD.scala:377)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.$anonfun$hasNext$1(FileScanRDD.scala:269)
-		at scala.runtime.java8.JFunction0$mcZ$sp.apply(JFunction0$mcZ$sp.java:23)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.hasNext(FileScanRDD.scala:269)
-		at org.apache.spark.sql.execution.FileSourceScanExec$$anon$1.hasNext(DataSourceScanExec.scala:761)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.columnartorow_nextBatch_0$(Unknown Source)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.processNext(Unknown Source)
-		at org.apache.spark.sql.execution.BufferedRowIterator.hasNext(BufferedRowIterator.java:35)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.hasNext(Unknown Source)
-		at org.apache.spark.sql.execution.WholeStageCodegenEvaluatorFactory$WholeStageCodegenPartitionEvaluator$$anon$1.hasNext(WholeStageCodegenEvaluatorFactory.scala:43)
-		at org.apache.spark.sql.execution.datasources.FileFormatWriter$.executeTask(FileFormatWriter.scala:386)
-		at org.apache.spark.sql.execution.datasources.WriteFilesExec.$anonfun$doExecuteWrite$1(WriteFiles.scala:100)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2(RDD.scala:894)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2$adapted(RDD.scala:894)
-		at org.apache.spark.rdd.MapPartitionsRDD.compute(MapPartitionsRDD.scala:61)
-		at org.apache.spark.rdd.RDD.computeOrReadCheckpoint(RDD.scala:368)
-		at org.apache.spark.rdd.RDD.iterator(RDD.scala:332)
-		at org.apache.spark.scheduler.ResultTask.runTask(ResultTask.scala:93)
-		at org.apache.spark.TaskContext.runTaskWithListeners(TaskContext.scala:174)
-		at org.apache.spark.scheduler.Task.run(Task.scala:152)
-		at org.apache.spark.executor.Executor$TaskRunner.$anonfun$run$4(Executor.scala:632)
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally(SparkErrorUtils.scala:64)
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally$(SparkErrorUtils.scala:61)
-		at org.apache.spark.util.Utils$.tryWithSafeFinally(Utils.scala:96)
-		at org.apache.spark.executor.Executor$TaskRunner.run(Executor.scala:635)
-		at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-		at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-		at java.base/java.lang.Thread.run(Thread.java:840)
-	Caused by: java.io.FileNotFoundException: No such file or directory 's3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00003-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet'
-		at com.amazon.ws.emr.hadoop.fs.s3n.S3NativeFileSystem.getFileStatus(S3NativeFileSystem.java:560)
-		at com.amazon.ws.emr.hadoop.fs.EmrFileSystem.getFileStatus(EmrFileSystem.java:623)
-		at org.apache.parquet.hadoop.util.HadoopInputFile.fromPath(HadoopInputFile.java:66)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.getFooterWithParams(ParquetFileFormat.scala:1001)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.callFooterRequest(ParquetFileFormat.scala:1019)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.requestFooter$1(ParquetFileFormat.scala:600)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.liftedTree1$1(ParquetFileFormat.scala:612)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.$anonfun$buildPrefetcherWithPartitionValues$1(ParquetFileFormat.scala:604)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD.$anonfun$compute$2(FileScanRDD.scala:232)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.$anonfun$downloadFile$2(AsyncFileDownloader.scala:94)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.org$apache$spark$sql$execution$datasources$AsyncFileDownloader$$downloadFile(AsyncFileDownloader.scala:94)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:72)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:71)
-		at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-		... 3 more
-
-	25/08/14 12:56:46 WARN TaskSetManager: Lost task 11.0 in stage 4.0 (TID 320) (ip-172-24-14-121.ap-southeast-1.compute.internal executor 32): org.apache.spark.sql.execution.datasources.FileDownloadException: Failed to download file path: s3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00018-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet, range: 0-1454367, partition values: [2025-08-14], isDataPresent: false, eTag: c3caa1ae60f9d3d68d2bf177923aabc7-1
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.next(AsyncFileDownloader.scala:145)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.getNextFile(FileScanRDD.scala:465)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.nextIterator(FileScanRDD.scala:377)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.$anonfun$hasNext$1(FileScanRDD.scala:269)
-		at scala.runtime.java8.JFunction0$mcZ$sp.apply(JFunction0$mcZ$sp.java:23)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.hasNext(FileScanRDD.scala:269)
-		at org.apache.spark.sql.execution.FileSourceScanExec$$anon$1.hasNext(DataSourceScanExec.scala:761)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.columnartorow_nextBatch_0$(Unknown Source)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.processNext(Unknown Source)
-		at org.apache.spark.sql.execution.BufferedRowIterator.hasNext(BufferedRowIterator.java:35)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.hasNext(Unknown Source)
-		at org.apache.spark.sql.execution.WholeStageCodegenEvaluatorFactory$WholeStageCodegenPartitionEvaluator$$anon$1.hasNext(WholeStageCodegenEvaluatorFactory.scala:43)
-		at org.apache.spark.sql.execution.datasources.FileFormatWriter$.executeTask(FileFormatWriter.scala:386)
-		at org.apache.spark.sql.execution.datasources.WriteFilesExec.$anonfun$doExecuteWrite$1(WriteFiles.scala:100)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2(RDD.scala:894)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2$adapted(RDD.scala:894)
-		at org.apache.spark.rdd.MapPartitionsRDD.compute(MapPartitionsRDD.scala:61)
-		at org.apache.spark.rdd.RDD.computeOrReadCheckpoint(RDD.scala:368)
-		at org.apache.spark.rdd.RDD.iterator(RDD.scala:332)
-		at org.apache.spark.scheduler.ResultTask.runTask(ResultTask.scala:93)
-		at org.apache.spark.TaskContext.runTaskWithListeners(TaskContext.scala:174)
-		at org.apache.spark.scheduler.Task.run(Task.scala:152)
-		at org.apache.spark.executor.Executor$TaskRunner.$anonfun$run$4(Executor.scala:632)
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally(SparkErrorUtils.scala:64)
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally$(SparkErrorUtils.scala:61)
-		at org.apache.spark.util.Utils$.tryWithSafeFinally(Utils.scala:96)
-		at org.apache.spark.executor.Executor$TaskRunner.run(Executor.scala:635)
-		at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-		at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-		at java.base/java.lang.Thread.run(Thread.java:840)
-	Caused by: java.io.FileNotFoundException: No such file or directory 's3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00018-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet'
-		at com.amazon.ws.emr.hadoop.fs.s3n.S3NativeFileSystem.getFileStatus(S3NativeFileSystem.java:560)
-		at com.amazon.ws.emr.hadoop.fs.EmrFileSystem.getFileStatus(EmrFileSystem.java:623)
-		at org.apache.parquet.hadoop.util.HadoopInputFile.fromPath(HadoopInputFile.java:66)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.getFooterWithParams(ParquetFileFormat.scala:1001)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.callFooterRequest(ParquetFileFormat.scala:1019)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.requestFooter$1(ParquetFileFormat.scala:600)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.liftedTree1$1(ParquetFileFormat.scala:612)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.$anonfun$buildPrefetcherWithPartitionValues$1(ParquetFileFormat.scala:604)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD.$anonfun$compute$2(FileScanRDD.scala:232)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.$anonfun$downloadFile$2(AsyncFileDownloader.scala:94)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.org$apache$spark$sql$execution$datasources$AsyncFileDownloader$$downloadFile(AsyncFileDownloader.scala:94)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:72)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:71)
-		at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-		... 3 more
-
-	25/08/14 12:56:46 WARN TaskSetManager: Lost task 9.0 in stage 4.0 (TID 318) (ip-172-24-14-181.ap-southeast-1.compute.internal executor 19): org.apache.spark.sql.execution.datasources.FileDownloadException: Failed to download file path: s3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00014-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet, range: 0-1467558, partition values: [2025-08-14], isDataPresent: false, eTag: d5342ae091b9b49534f84812ca1adaa4-1
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.next(AsyncFileDownloader.scala:145)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.getNextFile(FileScanRDD.scala:465)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.nextIterator(FileScanRDD.scala:377)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.$anonfun$hasNext$1(FileScanRDD.scala:269)
-		at scala.runtime.java8.JFunction0$mcZ$sp.apply(JFunction0$mcZ$sp.java:23)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.hasNext(FileScanRDD.scala:269)
-		at org.apache.spark.sql.execution.FileSourceScanExec$$anon$1.hasNext(DataSourceScanExec.scala:761)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.columnartorow_nextBatch_0$(Unknown Source)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.processNext(Unknown Source)
-		at org.apache.spark.sql.execution.BufferedRowIterator.hasNext(BufferedRowIterator.java:35)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.hasNext(Unknown Source)
-		at org.apache.spark.sql.execution.WholeStageCodegenEvaluatorFactory$WholeStageCodegenPartitionEvaluator$$anon$1.hasNext(WholeStageCodegenEvaluatorFactory.scala:43)
-		at org.apache.spark.sql.execution.datasources.FileFormatWriter$.executeTask(FileFormatWriter.scala:386)
-		at org.apache.spark.sql.execution.datasources.WriteFilesExec.$anonfun$doExecuteWrite$1(WriteFiles.scala:100)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2(RDD.scala:894)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2$adapted(RDD.scala:894)
-		at org.apache.spark.rdd.MapPartitionsRDD.compute(MapPartitionsRDD.scala:61)
-		at org.apache.spark.rdd.RDD.computeOrReadCheckpoint(RDD.scala:368)
-		at org.apache.spark.rdd.RDD.iterator(RDD.scala:332)
-		at org.apache.spark.scheduler.ResultTask.runTask(ResultTask.scala:93)
-		at org.apache.spark.TaskContext.runTaskWithListeners(TaskContext.scala:174)
-		at org.apache.spark.scheduler.Task.run(Task.scala:152)
-		at org.apache.spark.executor.Executor$TaskRunner.$anonfun$run$4(Executor.scala:632)
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally(SparkErrorUtils.scala:64)
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally$(SparkErrorUtils.scala:61)
-		at org.apache.spark.util.Utils$.tryWithSafeFinally(Utils.scala:96)
-		at org.apache.spark.executor.Executor$TaskRunner.run(Executor.scala:635)
-		at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-		at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-		at java.base/java.lang.Thread.run(Thread.java:840)
-	Caused by: java.io.FileNotFoundException: No such file or directory 's3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00014-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet'
-		at com.amazon.ws.emr.hadoop.fs.s3n.S3NativeFileSystem.getFileStatus(S3NativeFileSystem.java:560)
-		at com.amazon.ws.emr.hadoop.fs.EmrFileSystem.getFileStatus(EmrFileSystem.java:623)
-		at org.apache.parquet.hadoop.util.HadoopInputFile.fromPath(HadoopInputFile.java:66)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.getFooterWithParams(ParquetFileFormat.scala:1001)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.callFooterRequest(ParquetFileFormat.scala:1019)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.requestFooter$1(ParquetFileFormat.scala:600)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.liftedTree1$1(ParquetFileFormat.scala:612)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.$anonfun$buildPrefetcherWithPartitionValues$1(ParquetFileFormat.scala:604)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD.$anonfun$compute$2(FileScanRDD.scala:232)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.$anonfun$downloadFile$2(AsyncFileDownloader.scala:94)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.org$apache$spark$sql$execution$datasources$AsyncFileDownloader$$downloadFile(AsyncFileDownloader.scala:94)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:72)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:71)
-		at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-		... 3 more
-
-	25/08/14 12:56:46 WARN TaskSetManager: Lost task 13.0 in stage 4.0 (TID 322) (ip-172-24-14-102.ap-southeast-1.compute.internal executor 18): org.apache.spark.sql.execution.datasources.FileDownloadException: Failed to download file path: s3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00011-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet, range: 0-1453571, partition values: [2025-08-14], isDataPresent: false, eTag: 9beadb376197d8309251b33caa3de72d-1
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.next(AsyncFileDownloader.scala:145)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.getNextFile(FileScanRDD.scala:465)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.nextIterator(FileScanRDD.scala:377)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.$anonfun$hasNext$1(FileScanRDD.scala:269)
-		at scala.runtime.java8.JFunction0$mcZ$sp.apply(JFunction0$mcZ$sp.java:23)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.hasNext(FileScanRDD.scala:269)
-		at org.apache.spark.sql.execution.FileSourceScanExec$$anon$1.hasNext(DataSourceScanExec.scala:761)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.columnartorow_nextBatch_0$(Unknown Source)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.processNext(Unknown Source)
-		at org.apache.spark.sql.execution.BufferedRowIterator.hasNext(BufferedRowIterator.java:35)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.hasNext(Unknown Source)
-		at org.apache.spark.sql.execution.WholeStageCodegenEvaluatorFactory$WholeStageCodegenPartitionEvaluator$$anon$1.hasNext(WholeStageCodegenEvaluatorFactory.scala:43)
-		at org.apache.spark.sql.execution.datasources.FileFormatWriter$.executeTask(FileFormatWriter.scala:386)
-		at org.apache.spark.sql.execution.datasources.WriteFilesExec.$anonfun$doExecuteWrite$1(WriteFiles.scala:100)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2(RDD.scala:894)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2$adapted(RDD.scala:894)
-		at org.apache.spark.rdd.MapPartitionsRDD.compute(MapPartitionsRDD.scala:61)
-		at org.apache.spark.rdd.RDD.computeOrReadCheckpoint(RDD.scala:368)
-		at org.apache.spark.rdd.RDD.iterator(RDD.scala:332)
-		at org.apache.spark.scheduler.ResultTask.runTask(ResultTask.scala:93)
-		at org.apache.spark.TaskContext.runTaskWithListeners(TaskContext.scala:174)
-		at org.apache.spark.scheduler.Task.run(Task.scala:152)
-		at org.apache.spark.executor.Executor$TaskRunner.$anonfun$run$4(Executor.scala:632)
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally(SparkErrorUtils.scala:64)
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally$(SparkErrorUtils.scala:61)
-		at org.apache.spark.util.Utils$.tryWithSafeFinally(Utils.scala:96)
-		at org.apache.spark.executor.Executor$TaskRunner.run(Executor.scala:635)
-		at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-		at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-		at java.base/java.lang.Thread.run(Thread.java:840)
-	Caused by: java.io.FileNotFoundException: No such file or directory 's3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00011-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet'
-		at com.amazon.ws.emr.hadoop.fs.s3n.S3NativeFileSystem.getFileStatus(S3NativeFileSystem.java:560)
-		at com.amazon.ws.emr.hadoop.fs.EmrFileSystem.getFileStatus(EmrFileSystem.java:623)
-		at org.apache.parquet.hadoop.util.HadoopInputFile.fromPath(HadoopInputFile.java:66)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.getFooterWithParams(ParquetFileFormat.scala:1001)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.callFooterRequest(ParquetFileFormat.scala:1019)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.requestFooter$1(ParquetFileFormat.scala:600)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.liftedTree1$1(ParquetFileFormat.scala:612)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.$anonfun$buildPrefetcherWithPartitionValues$1(ParquetFileFormat.scala:604)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD.$anonfun$compute$2(FileScanRDD.scala:232)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.$anonfun$downloadFile$2(AsyncFileDownloader.scala:94)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.org$apache$spark$sql$execution$datasources$AsyncFileDownloader$$downloadFile(AsyncFileDownloader.scala:94)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:72)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:71)
-		at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-		... 3 more
-
-	25/08/14 12:56:46 WARN TaskSetManager: Lost task 3.0 in stage 4.0 (TID 312) (ip-172-24-14-102.ap-southeast-1.compute.internal executor 13): org.apache.spark.sql.execution.datasources.FileDownloadException: Failed to download file path: s3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00006-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet, range: 0-1479169, partition values: [2025-08-14], isDataPresent: false, eTag: 6866ab3fe5d5358095353c0a5ab1a490-1
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.next(AsyncFileDownloader.scala:145)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.getNextFile(FileScanRDD.scala:465)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.nextIterator(FileScanRDD.scala:377)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.$anonfun$hasNext$1(FileScanRDD.scala:269)
-		at scala.runtime.java8.JFunction0$mcZ$sp.apply(JFunction0$mcZ$sp.java:23)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.hasNext(FileScanRDD.scala:269)
-		at org.apache.spark.sql.execution.FileSourceScanExec$$anon$1.hasNext(DataSourceScanExec.scala:761)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.columnartorow_nextBatch_0$(Unknown Source)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.processNext(Unknown Source)
-		at org.apache.spark.sql.execution.BufferedRowIterator.hasNext(BufferedRowIterator.java:35)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.hasNext(Unknown Source)
-		at org.apache.spark.sql.execution.WholeStageCodegenEvaluatorFactory$WholeStageCodegenPartitionEvaluator$$anon$1.hasNext(WholeStageCodegenEvaluatorFactory.scala:43)
-		at org.apache.spark.sql.execution.datasources.FileFormatWriter$.executeTask(FileFormatWriter.scala:386)
-		at org.apache.spark.sql.execution.datasources.WriteFilesExec.$anonfun$doExecuteWrite$1(WriteFiles.scala:100)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2(RDD.scala:894)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2$adapted(RDD.scala:894)
-		at org.apache.spark.rdd.MapPartitionsRDD.compute(MapPartitionsRDD.scala:61)
-		at org.apache.spark.rdd.RDD.computeOrReadCheckpoint(RDD.scala:368)
-		at org.apache.spark.rdd.RDD.iterator(RDD.scala:332)
-		at org.apache.spark.scheduler.ResultTask.runTask(ResultTask.scala:93)
-		at org.apache.spark.TaskContext.runTaskWithListeners(TaskContext.scala:174)
-		at org.apache.spark.scheduler.Task.run(Task.scala:152)
-		at org.apache.spark.executor.Executor$TaskRunner.$anonfun$run$4(Executor.scala:632)
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally(SparkErrorUtils.scala:64)
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally$(SparkErrorUtils.scala:61)
-		at org.apache.spark.util.Utils$.tryWithSafeFinally(Utils.scala:96)
-		at org.apache.spark.executor.Executor$TaskRunner.run(Executor.scala:635)
-		at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-		at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-		at java.base/java.lang.Thread.run(Thread.java:840)
-	Caused by: java.io.FileNotFoundException: No such file or directory 's3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00006-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet'
-		at com.amazon.ws.emr.hadoop.fs.s3n.S3NativeFileSystem.getFileStatus(S3NativeFileSystem.java:560)
-		at com.amazon.ws.emr.hadoop.fs.EmrFileSystem.getFileStatus(EmrFileSystem.java:623)
-		at org.apache.parquet.hadoop.util.HadoopInputFile.fromPath(HadoopInputFile.java:66)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.getFooterWithParams(ParquetFileFormat.scala:1001)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.callFooterRequest(ParquetFileFormat.scala:1019)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.requestFooter$1(ParquetFileFormat.scala:600)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.liftedTree1$1(ParquetFileFormat.scala:612)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.$anonfun$buildPrefetcherWithPartitionValues$1(ParquetFileFormat.scala:604)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD.$anonfun$compute$2(FileScanRDD.scala:232)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.$anonfun$downloadFile$2(AsyncFileDownloader.scala:94)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.org$apache$spark$sql$execution$datasources$AsyncFileDownloader$$downloadFile(AsyncFileDownloader.scala:94)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:72)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:71)
-		at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-		... 3 more
-
-	25/08/14 12:56:46 WARN TaskSetManager: Lost task 17.0 in stage 4.0 (TID 326) (ip-172-24-14-63.ap-southeast-1.compute.internal executor 14): org.apache.spark.sql.execution.datasources.FileDownloadException: Failed to download file path: s3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00001-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet, range: 0-1452308, partition values: [2025-08-14], isDataPresent: false, eTag: 5cc38a6cb29dcb50e9dc9f6f2808c0cc-1
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.next(AsyncFileDownloader.scala:145)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.getNextFile(FileScanRDD.scala:465)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.nextIterator(FileScanRDD.scala:377)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.$anonfun$hasNext$1(FileScanRDD.scala:269)
-		at scala.runtime.java8.JFunction0$mcZ$sp.apply(JFunction0$mcZ$sp.java:23)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.hasNext(FileScanRDD.scala:269)
-		at org.apache.spark.sql.execution.FileSourceScanExec$$anon$1.hasNext(DataSourceScanExec.scala:761)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.columnartorow_nextBatch_0$(Unknown Source)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.processNext(Unknown Source)
-		at org.apache.spark.sql.execution.BufferedRowIterator.hasNext(BufferedRowIterator.java:35)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.hasNext(Unknown Source)
-		at org.apache.spark.sql.execution.WholeStageCodegenEvaluatorFactory$WholeStageCodegenPartitionEvaluator$$anon$1.hasNext(WholeStageCodegenEvaluatorFactory.scala:43)
-		at org.apache.spark.sql.execution.datasources.FileFormatWriter$.executeTask(FileFormatWriter.scala:386)
-		at org.apache.spark.sql.execution.datasources.WriteFilesExec.$anonfun$doExecuteWrite$1(WriteFiles.scala:100)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2(RDD.scala:894)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2$adapted(RDD.scala:894)
-		at org.apache.spark.rdd.MapPartitionsRDD.compute(MapPartitionsRDD.scala:61)
-		at org.apache.spark.rdd.RDD.computeOrReadCheckpoint(RDD.scala:368)
-		at org.apache.spark.rdd.RDD.iterator(RDD.scala:332)
-		at org.apache.spark.scheduler.ResultTask.runTask(ResultTask.scala:93)
-		at org.apache.spark.TaskContext.runTaskWithListeners(TaskContext.scala:174)
-		at org.apache.spark.scheduler.Task.run(Task.scala:152)
-		at org.apache.spark.executor.Executor$TaskRunner.$anonfun$run$4(Executor.scala:632)
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally(SparkErrorUtils.scala:64)
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally$(SparkErrorUtils.scala:61)
-		at org.apache.spark.util.Utils$.tryWithSafeFinally(Utils.scala:96)
-		at org.apache.spark.executor.Executor$TaskRunner.run(Executor.scala:635)
-		at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-		at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-		at java.base/java.lang.Thread.run(Thread.java:840)
-	Caused by: java.io.FileNotFoundException: No such file or directory 's3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00001-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet'
-		at com.amazon.ws.emr.hadoop.fs.s3n.S3NativeFileSystem.getFileStatus(S3NativeFileSystem.java:560)
-		at com.amazon.ws.emr.hadoop.fs.EmrFileSystem.getFileStatus(EmrFileSystem.java:623)
-		at org.apache.parquet.hadoop.util.HadoopInputFile.fromPath(HadoopInputFile.java:66)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.getFooterWithParams(ParquetFileFormat.scala:1001)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.callFooterRequest(ParquetFileFormat.scala:1019)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.requestFooter$1(ParquetFileFormat.scala:600)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.liftedTree1$1(ParquetFileFormat.scala:612)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.$anonfun$buildPrefetcherWithPartitionValues$1(ParquetFileFormat.scala:604)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD.$anonfun$compute$2(FileScanRDD.scala:232)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.$anonfun$downloadFile$2(AsyncFileDownloader.scala:94)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.org$apache$spark$sql$execution$datasources$AsyncFileDownloader$$downloadFile(AsyncFileDownloader.scala:94)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:72)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:71)
-		at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-		... 3 more
-
-	25/08/14 12:56:47 WARN TaskSetManager: Lost task 1.0 in stage 4.0 (TID 310) (ip-172-24-14-63.ap-southeast-1.compute.internal executor 7): org.apache.spark.sql.execution.datasources.FileDownloadException: Failed to download file path: s3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00019-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet, range: 0-1485557, partition values: [2025-08-14], isDataPresent: false, eTag: a73b1d6ce4019b7446c8ef6b1292bd73-1
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.next(AsyncFileDownloader.scala:145)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.getNextFile(FileScanRDD.scala:465)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.nextIterator(FileScanRDD.scala:377)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.$anonfun$hasNext$1(FileScanRDD.scala:269)
-		at scala.runtime.java8.JFunction0$mcZ$sp.apply(JFunction0$mcZ$sp.java:23)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.hasNext(FileScanRDD.scala:269)
-		at org.apache.spark.sql.execution.FileSourceScanExec$$anon$1.hasNext(DataSourceScanExec.scala:761)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.columnartorow_nextBatch_0$(Unknown Source)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.processNext(Unknown Source)
-		at org.apache.spark.sql.execution.BufferedRowIterator.hasNext(BufferedRowIterator.java:35)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.hasNext(Unknown Source)
-		at org.apache.spark.sql.execution.WholeStageCodegenEvaluatorFactory$WholeStageCodegenPartitionEvaluator$$anon$1.hasNext(WholeStageCodegenEvaluatorFactory.scala:43)
-		at org.apache.spark.sql.execution.datasources.FileFormatWriter$.executeTask(FileFormatWriter.scala:386)
-		at org.apache.spark.sql.execution.datasources.WriteFilesExec.$anonfun$doExecuteWrite$1(WriteFiles.scala:100)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2(RDD.scala:894)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2$adapted(RDD.scala:894)
-		at org.apache.spark.rdd.MapPartitionsRDD.compute(MapPartitionsRDD.scala:61)
-		at org.apache.spark.rdd.RDD.computeOrReadCheckpoint(RDD.scala:368)
-		at org.apache.spark.rdd.RDD.iterator(RDD.scala:332)
-		at org.apache.spark.scheduler.ResultTask.runTask(ResultTask.scala:93)
-		at org.apache.spark.TaskContext.runTaskWithListeners(TaskContext.scala:174)
-		at org.apache.spark.scheduler.Task.run(Task.scala:152)
-		at org.apache.spark.executor.Executor$TaskRunner.$anonfun$run$4(Executor.scala:632)
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally(SparkErrorUtils.scala:64)
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally$(SparkErrorUtils.scala:61)
-		at org.apache.spark.util.Utils$.tryWithSafeFinally(Utils.scala:96)
-		at org.apache.spark.executor.Executor$TaskRunner.run(Executor.scala:635)
-		at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-		at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-		at java.base/java.lang.Thread.run(Thread.java:840)
-	Caused by: java.io.FileNotFoundException: No such file or directory 's3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00019-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet'
-		at com.amazon.ws.emr.hadoop.fs.s3n.S3NativeFileSystem.getFileStatus(S3NativeFileSystem.java:560)
-		at com.amazon.ws.emr.hadoop.fs.EmrFileSystem.getFileStatus(EmrFileSystem.java:623)
-		at org.apache.parquet.hadoop.util.HadoopInputFile.fromPath(HadoopInputFile.java:66)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.getFooterWithParams(ParquetFileFormat.scala:1001)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.callFooterRequest(ParquetFileFormat.scala:1019)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.requestFooter$1(ParquetFileFormat.scala:600)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.liftedTree1$1(ParquetFileFormat.scala:612)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.$anonfun$buildPrefetcherWithPartitionValues$1(ParquetFileFormat.scala:604)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD.$anonfun$compute$2(FileScanRDD.scala:232)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.$anonfun$downloadFile$2(AsyncFileDownloader.scala:94)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.org$apache$spark$sql$execution$datasources$AsyncFileDownloader$$downloadFile(AsyncFileDownloader.scala:94)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:72)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:71)
-		at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-		... 3 more
-
-	25/08/14 12:56:47 ERROR TaskSetManager: Task 17 in stage 4.0 failed 4 times; aborting job
-	25/08/14 12:56:47 ERROR FileFormatWriter: Aborting job cbb0fc80-0a7f-4286-99c6-87e39f20f931.
-	org.apache.spark.SparkException: Job aborted due to stage failure: Task 17 in stage 4.0 failed 4 times, most recent failure: Lost task 17.3 in stage 4.0 (TID 350) (ip-172-24-14-121.ap-southeast-1.compute.internal executor 32): org.apache.spark.sql.execution.datasources.FileDownloadException: Failed to download file path: s3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00001-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet, range: 0-1452308, partition values: [2025-08-14], isDataPresent: false, eTag: 5cc38a6cb29dcb50e9dc9f6f2808c0cc-1
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.next(AsyncFileDownloader.scala:145)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.getNextFile(FileScanRDD.scala:465)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.nextIterator(FileScanRDD.scala:377)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.$anonfun$hasNext$1(FileScanRDD.scala:269)
-		at scala.runtime.java8.JFunction0$mcZ$sp.apply(JFunction0$mcZ$sp.java:23)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.hasNext(FileScanRDD.scala:269)
-		at org.apache.spark.sql.execution.FileSourceScanExec$$anon$1.hasNext(DataSourceScanExec.scala:761)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.columnartorow_nextBatch_0$(Unknown Source)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.processNext(Unknown Source)
-		at org.apache.spark.sql.execution.BufferedRowIterator.hasNext(BufferedRowIterator.java:35)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.hasNext(Unknown Source)
-		at org.apache.spark.sql.execution.WholeStageCodegenEvaluatorFactory$WholeStageCodegenPartitionEvaluator$$anon$1.hasNext(WholeStageCodegenEvaluatorFactory.scala:43)
-		at org.apache.spark.sql.execution.datasources.FileFormatWriter$.executeTask(FileFormatWriter.scala:386)
-		at org.apache.spark.sql.execution.datasources.WriteFilesExec.$anonfun$doExecuteWrite$1(WriteFiles.scala:100)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2(RDD.scala:894)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2$adapted(RDD.scala:894)
-		at org.apache.spark.rdd.MapPartitionsRDD.compute(MapPartitionsRDD.scala:61)
-		at org.apache.spark.rdd.RDD.computeOrReadCheckpoint(RDD.scala:368)
-		at org.apache.spark.rdd.RDD.iterator(RDD.scala:332)
-		at org.apache.spark.scheduler.ResultTask.runTask(ResultTask.scala:93)
-		at org.apache.spark.TaskContext.runTaskWithListeners(TaskContext.scala:174)
-		at org.apache.spark.scheduler.Task.run(Task.scala:152)
-		at org.apache.spark.executor.Executor$TaskRunner.$anonfun$run$4(Executor.scala:632)
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally(SparkErrorUtils.scala:64)
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally$(SparkErrorUtils.scala:61)
-		at org.apache.spark.util.Utils$.tryWithSafeFinally(Utils.scala:96)
-		at org.apache.spark.executor.Executor$TaskRunner.run(Executor.scala:635)
-		at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-		at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-		at java.base/java.lang.Thread.run(Thread.java:840)
-	Caused by: java.io.FileNotFoundException: No such file or directory 's3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00001-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet'
-		at com.amazon.ws.emr.hadoop.fs.s3n.S3NativeFileSystem.getFileStatus(S3NativeFileSystem.java:560)
-		at com.amazon.ws.emr.hadoop.fs.EmrFileSystem.getFileStatus(EmrFileSystem.java:623)
-		at org.apache.parquet.hadoop.util.HadoopInputFile.fromPath(HadoopInputFile.java:66)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.getFooterWithParams(ParquetFileFormat.scala:1001)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.callFooterRequest(ParquetFileFormat.scala:1019)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.requestFooter$1(ParquetFileFormat.scala:600)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.liftedTree1$1(ParquetFileFormat.scala:612)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.$anonfun$buildPrefetcherWithPartitionValues$1(ParquetFileFormat.scala:604)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD.$anonfun$compute$2(FileScanRDD.scala:232)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.$anonfun$downloadFile$2(AsyncFileDownloader.scala:94)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.org$apache$spark$sql$execution$datasources$AsyncFileDownloader$$downloadFile(AsyncFileDownloader.scala:94)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:72)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:71)
-		at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-		... 3 more
-
-	Driver stacktrace:
-		at org.apache.spark.scheduler.DAGScheduler.failJobAndIndependentStages(DAGScheduler.scala:3083) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.scheduler.DAGScheduler.$anonfun$abortStage$2(DAGScheduler.scala:3019) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.scheduler.DAGScheduler.$anonfun$abortStage$2$adapted(DAGScheduler.scala:3018) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at scala.collection.mutable.ResizableArray.foreach(ResizableArray.scala:62) ~[scala-library-2.12.18.jar:?]
-		at scala.collection.mutable.ResizableArray.foreach$(ResizableArray.scala:55) ~[scala-library-2.12.18.jar:?]
-		at scala.collection.mutable.ArrayBuffer.foreach(ArrayBuffer.scala:49) ~[scala-library-2.12.18.jar:?]
-		at org.apache.spark.scheduler.DAGScheduler.abortStage(DAGScheduler.scala:3018) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.scheduler.DAGScheduler.$anonfun$handleTaskSetFailed$1(DAGScheduler.scala:1324) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.scheduler.DAGScheduler.$anonfun$handleTaskSetFailed$1$adapted(DAGScheduler.scala:1324) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at scala.Option.foreach(Option.scala:407) ~[scala-library-2.12.18.jar:?]
-		at org.apache.spark.scheduler.DAGScheduler.handleTaskSetFailed(DAGScheduler.scala:1324) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.doOnReceive(DAGScheduler.scala:3301) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:3235) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:3224) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.util.EventLoop$$anon$1.run(EventLoop.scala:49) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.scheduler.DAGScheduler.runJob(DAGScheduler.scala:1047) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.SparkContext.runJob(SparkContext.scala:2501) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.datasources.FileFormatWriter$.$anonfun$executeWrite$4(FileFormatWriter.scala:307) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.datasources.FileFormatWriter$.writeAndCommit(FileFormatWriter.scala:271) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.datasources.FileFormatWriter$.executeWrite(FileFormatWriter.scala:304) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.datasources.FileFormatWriter$.write(FileFormatWriter.scala:190) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.datasources.InsertIntoHadoopFsRelationCommand.run(InsertIntoHadoopFsRelationCommand.scala:197) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.command.DataWritingCommandExec.sideEffectResult$lzycompute(commands.scala:113) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.command.DataWritingCommandExec.sideEffectResult(commands.scala:111) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.command.DataWritingCommandExec.executeCollect(commands.scala:125) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.adaptive.AdaptiveSparkPlanExec.$anonfun$executeCollect$1(AdaptiveSparkPlanExec.scala:545) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.adaptive.AdaptiveSparkPlanExec.withFinalPlanUpdate(AdaptiveSparkPlanExec.scala:584) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.adaptive.AdaptiveSparkPlanExec.executeCollect(AdaptiveSparkPlanExec.scala:545) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.QueryExecution$$anonfun$eagerlyExecuteCommands$1.$anonfun$applyOrElse$1(QueryExecution.scala:126) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.catalyst.QueryPlanningTracker$.withTracker(QueryPlanningTracker.scala:108) ~[spark-catalyst_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.SQLExecution$.withTracker(SQLExecution.scala:384) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.SQLExecution$.executeQuery$1(SQLExecution.scala:157) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.SQLExecution$.$anonfun$withNewExecutionId$10(SQLExecution.scala:220) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.catalyst.QueryPlanningTracker$.withTracker(QueryPlanningTracker.scala:108) ~[spark-catalyst_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.SQLExecution$.withTracker(SQLExecution.scala:384) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.SQLExecution$.$anonfun$withNewExecutionId$9(SQLExecution.scala:220) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.SQLExecution$.withSQLConfPropagated(SQLExecution.scala:405) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.SQLExecution$.$anonfun$withNewExecutionId$1(SQLExecution.scala:219) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.SparkSession.withActive(SparkSession.scala:901) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.SQLExecution$.withNewExecutionId(SQLExecution.scala:83) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.SQLExecution$.withNewExecutionId(SQLExecution.scala:74) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.QueryExecution$$anonfun$eagerlyExecuteCommands$1.applyOrElse(QueryExecution.scala:123) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.QueryExecution$$anonfun$eagerlyExecuteCommands$1.applyOrElse(QueryExecution.scala:114) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.catalyst.trees.TreeNode.$anonfun$transformDownWithPruning$1(TreeNode.scala:520) ~[spark-catalyst_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.catalyst.trees.CurrentOrigin$.withOrigin(origin.scala:77) ~[spark-sql-api_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.catalyst.trees.TreeNode.transformDownWithPruning(TreeNode.scala:520) ~[spark-catalyst_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.catalyst.plans.logical.LogicalPlan.org$apache$spark$sql$catalyst$plans$logical$AnalysisHelper$$super$transformDownWithPruning(LogicalPlan.scala:34) ~[spark-catalyst_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.catalyst.plans.logical.AnalysisHelper.transformDownWithPruning(AnalysisHelper.scala:297) ~[spark-catalyst_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.catalyst.plans.logical.AnalysisHelper.transformDownWithPruning$(AnalysisHelper.scala:293) ~[spark-catalyst_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.catalyst.plans.logical.LogicalPlan.transformDownWithPruning(LogicalPlan.scala:34) ~[spark-catalyst_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.catalyst.plans.logical.LogicalPlan.transformDownWithPruning(LogicalPlan.scala:34) ~[spark-catalyst_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.catalyst.trees.TreeNode.transformDown(TreeNode.scala:496) ~[spark-catalyst_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.QueryExecution.eagerlyExecuteCommands(QueryExecution.scala:114) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.QueryExecution.commandExecuted$lzycompute(QueryExecution.scala:101) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.QueryExecution.commandExecuted(QueryExecution.scala:99) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.Dataset.<init>(Dataset.scala:223) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.Dataset$.$anonfun$ofRows$2(Dataset.scala:103) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.SparkSession.withActive(SparkSession.scala:901) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.Dataset$.ofRows(Dataset.scala:99) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.SparkSession.$anonfun$sql$4(SparkSession.scala:692) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.SparkSession.withActive(SparkSession.scala:901) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.SparkSession.sql(SparkSession.scala:683) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.SparkSession.sql(SparkSession.scala:714) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.SparkSession.sql(SparkSession.scala:745) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.SQLContext.sql(SQLContext.scala:651) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.hive.thriftserver.SparkSQLDriver.run(SparkSQLDriver.scala:68) ~[spark-hive-thriftserver_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.hive.thriftserver.SparkSQLCLIDriver.processCmd(SparkSQLCLIDriver.scala:501) ~[spark-hive-thriftserver_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.hive.thriftserver.SparkSQLCLIDriver.$anonfun$processLine$1(SparkSQLCLIDriver.scala:619) ~[spark-hive-thriftserver_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.hive.thriftserver.SparkSQLCLIDriver.$anonfun$processLine$1$adapted(SparkSQLCLIDriver.scala:613) ~[spark-hive-thriftserver_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at scala.collection.Iterator.foreach(Iterator.scala:943) [scala-library-2.12.18.jar:?]
-		at scala.collection.Iterator.foreach$(Iterator.scala:943) [scala-library-2.12.18.jar:?]
-		at scala.collection.AbstractIterator.foreach(Iterator.scala:1431) [scala-library-2.12.18.jar:?]
-		at scala.collection.IterableLike.foreach(IterableLike.scala:74) [scala-library-2.12.18.jar:?]
-		at scala.collection.IterableLike.foreach$(IterableLike.scala:73) [scala-library-2.12.18.jar:?]
-		at scala.collection.AbstractIterable.foreach(Iterable.scala:56) [scala-library-2.12.18.jar:?]
-		at org.apache.spark.sql.hive.thriftserver.SparkSQLCLIDriver.processLine(SparkSQLCLIDriver.scala:613) [spark-hive-thriftserver_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.hadoop.hive.cli.CliDriver.processLine(CliDriver.java:337) [hive-cli-2.3.9-amzn-4.jar:2.3.9-amzn-4]
-		at org.apache.hadoop.hive.cli.CliDriver.processReader(CliDriver.java:475) [hive-cli-2.3.9-amzn-4.jar:2.3.9-amzn-4]
-		at org.apache.hadoop.hive.cli.CliDriver.processFile(CliDriver.java:491) [hive-cli-2.3.9-amzn-4.jar:2.3.9-amzn-4]
-		at org.apache.spark.sql.hive.thriftserver.SparkSQLCLIDriver$.main(SparkSQLCLIDriver.scala:229) [spark-hive-thriftserver_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.hive.thriftserver.SparkSQLCLIDriver.main(SparkSQLCLIDriver.scala) [spark-hive-thriftserver_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?]
-		at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?]
-		at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?]
-		at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?]
-		at org.apache.spark.deploy.JavaMainApplication.start(SparkApplication.scala:52) [spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.deploy.SparkSubmit.org$apache$spark$deploy$SparkSubmit$$runMain(SparkSubmit.scala:1100) [spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.deploy.SparkSubmit.doRunMain$1(SparkSubmit.scala:194) [spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.deploy.SparkSubmit.submit(SparkSubmit.scala:217) [spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.deploy.SparkSubmit.doSubmit(SparkSubmit.scala:91) [spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.deploy.SparkSubmit$$anon$2.doSubmit(SparkSubmit.scala:1192) [spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.deploy.SparkSubmit$.main(SparkSubmit.scala:1201) [spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.deploy.SparkSubmit.main(SparkSubmit.scala) [spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-	Caused by: org.apache.spark.sql.execution.datasources.FileDownloadException: Failed to download file path: s3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00001-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet, range: 0-1452308, partition values: [2025-08-14], isDataPresent: false, eTag: 5cc38a6cb29dcb50e9dc9f6f2808c0cc-1
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.next(AsyncFileDownloader.scala:145) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.getNextFile(FileScanRDD.scala:465) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.nextIterator(FileScanRDD.scala:377) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.$anonfun$hasNext$1(FileScanRDD.scala:269) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at scala.runtime.java8.JFunction0$mcZ$sp.apply(JFunction0$mcZ$sp.java:23) ~[scala-library-2.12.18.jar:?]
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.hasNext(FileScanRDD.scala:269) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.FileSourceScanExec$$anon$1.hasNext(DataSourceScanExec.scala:761) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.columnartorow_nextBatch_0$(Unknown Source) ~[?:?]
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.processNext(Unknown Source) ~[?:?]
-		at org.apache.spark.sql.execution.BufferedRowIterator.hasNext(BufferedRowIterator.java:35) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.hasNext(Unknown Source) ~[?:?]
-		at org.apache.spark.sql.execution.WholeStageCodegenEvaluatorFactory$WholeStageCodegenPartitionEvaluator$$anon$1.hasNext(WholeStageCodegenEvaluatorFactory.scala:43) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.datasources.FileFormatWriter$.executeTask(FileFormatWriter.scala:386) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.datasources.WriteFilesExec.$anonfun$doExecuteWrite$1(WriteFiles.scala:100) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2(RDD.scala:894) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2$adapted(RDD.scala:894) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.rdd.MapPartitionsRDD.compute(MapPartitionsRDD.scala:61) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.rdd.RDD.computeOrReadCheckpoint(RDD.scala:368) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.rdd.RDD.iterator(RDD.scala:332) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.scheduler.ResultTask.runTask(ResultTask.scala:93) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.TaskContext.runTaskWithListeners(TaskContext.scala:174) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.scheduler.Task.run(Task.scala:152) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.executor.Executor$TaskRunner.$anonfun$run$4(Executor.scala:632) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally(SparkErrorUtils.scala:64) ~[spark-common-utils_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally$(SparkErrorUtils.scala:61) ~[spark-common-utils_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.util.Utils$.tryWithSafeFinally(Utils.scala:96) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.executor.Executor$TaskRunner.run(Executor.scala:635) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) ~[?:?]
-		at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) ~[?:?]
-		at java.lang.Thread.run(Thread.java:840) ~[?:?]
-	Caused by: java.io.FileNotFoundException: No such file or directory 's3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00001-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet'
-		at com.amazon.ws.emr.hadoop.fs.s3n.S3NativeFileSystem.getFileStatus(S3NativeFileSystem.java:560) ~[emrfs-hadoop-assembly-2.66.0.jar:?]
-		at com.amazon.ws.emr.hadoop.fs.EmrFileSystem.getFileStatus(EmrFileSystem.java:623) ~[emrfs-hadoop-assembly-2.66.0.jar:?]
-		at org.apache.parquet.hadoop.util.HadoopInputFile.fromPath(HadoopInputFile.java:66) ~[parquet-hadoop-1.13.1-amzn-3.jar:1.13.1-amzn-3]
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.getFooterWithParams(ParquetFileFormat.scala:1001) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.callFooterRequest(ParquetFileFormat.scala:1019) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.requestFooter$1(ParquetFileFormat.scala:600) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.liftedTree1$1(ParquetFileFormat.scala:612) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.$anonfun$buildPrefetcherWithPartitionValues$1(ParquetFileFormat.scala:604) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.datasources.FileScanRDD.$anonfun$compute$2(FileScanRDD.scala:232) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.$anonfun$downloadFile$2(AsyncFileDownloader.scala:94) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41) ~[spark-core_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.org$apache$spark$sql$execution$datasources$AsyncFileDownloader$$downloadFile(AsyncFileDownloader.scala:94) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:72) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:71) ~[spark-sql_2.12-3.5.2-amzn-1.jar:3.5.2-amzn-1]
-		at java.util.concurrent.FutureTask.run(FutureTask.java:264) ~[?:?]
-		at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) ~[?:?]
-		at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) ~[?:?]
-		at java.lang.Thread.run(Thread.java:840) ~[?:?]
-	Job aborted due to stage failure: Task 17 in stage 4.0 failed 4 times, most recent failure: Lost task 17.3 in stage 4.0 (TID 350) (ip-172-24-14-121.ap-southeast-1.compute.internal executor 32): org.apache.spark.sql.execution.datasources.FileDownloadException: Failed to download file path: s3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00001-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet, range: 0-1452308, partition values: [2025-08-14], isDataPresent: false, eTag: 5cc38a6cb29dcb50e9dc9f6f2808c0cc-1
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.next(AsyncFileDownloader.scala:145)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.getNextFile(FileScanRDD.scala:465)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.nextIterator(FileScanRDD.scala:377)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.$anonfun$hasNext$1(FileScanRDD.scala:269)
-		at scala.runtime.java8.JFunction0$mcZ$sp.apply(JFunction0$mcZ$sp.java:23)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.hasNext(FileScanRDD.scala:269)
-		at org.apache.spark.sql.execution.FileSourceScanExec$$anon$1.hasNext(DataSourceScanExec.scala:761)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.columnartorow_nextBatch_0$(Unknown Source)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.processNext(Unknown Source)
-		at org.apache.spark.sql.execution.BufferedRowIterator.hasNext(BufferedRowIterator.java:35)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.hasNext(Unknown Source)
-		at org.apache.spark.sql.execution.WholeStageCodegenEvaluatorFactory$WholeStageCodegenPartitionEvaluator$$anon$1.hasNext(WholeStageCodegenEvaluatorFactory.scala:43)
-		at org.apache.spark.sql.execution.datasources.FileFormatWriter$.executeTask(FileFormatWriter.scala:386)
-		at org.apache.spark.sql.execution.datasources.WriteFilesExec.$anonfun$doExecuteWrite$1(WriteFiles.scala:100)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2(RDD.scala:894)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2$adapted(RDD.scala:894)
-		at org.apache.spark.rdd.MapPartitionsRDD.compute(MapPartitionsRDD.scala:61)
-		at org.apache.spark.rdd.RDD.computeOrReadCheckpoint(RDD.scala:368)
-		at org.apache.spark.rdd.RDD.iterator(RDD.scala:332)
-		at org.apache.spark.scheduler.ResultTask.runTask(ResultTask.scala:93)
-		at org.apache.spark.TaskContext.runTaskWithListeners(TaskContext.scala:174)
-		at org.apache.spark.scheduler.Task.run(Task.scala:152)
-		at org.apache.spark.executor.Executor$TaskRunner.$anonfun$run$4(Executor.scala:632)
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally(SparkErrorUtils.scala:64)
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally$(SparkErrorUtils.scala:61)
-		at org.apache.spark.util.Utils$.tryWithSafeFinally(Utils.scala:96)
-		at org.apache.spark.executor.Executor$TaskRunner.run(Executor.scala:635)
-		at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-		at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-		at java.base/java.lang.Thread.run(Thread.java:840)
-	Caused by: java.io.FileNotFoundException: No such file or directory 's3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00001-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet'
-		at com.amazon.ws.emr.hadoop.fs.s3n.S3NativeFileSystem.getFileStatus(S3NativeFileSystem.java:560)
-		at com.amazon.ws.emr.hadoop.fs.EmrFileSystem.getFileStatus(EmrFileSystem.java:623)
-		at org.apache.parquet.hadoop.util.HadoopInputFile.fromPath(HadoopInputFile.java:66)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.getFooterWithParams(ParquetFileFormat.scala:1001)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.callFooterRequest(ParquetFileFormat.scala:1019)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.requestFooter$1(ParquetFileFormat.scala:600)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.liftedTree1$1(ParquetFileFormat.scala:612)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.$anonfun$buildPrefetcherWithPartitionValues$1(ParquetFileFormat.scala:604)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD.$anonfun$compute$2(FileScanRDD.scala:232)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.$anonfun$downloadFile$2(AsyncFileDownloader.scala:94)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.org$apache$spark$sql$execution$datasources$AsyncFileDownloader$$downloadFile(AsyncFileDownloader.scala:94)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:72)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:71)
-		at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-		... 3 more
-
-	Driver stacktrace:
-	org.apache.spark.SparkException: Job aborted due to stage failure: Task 17 in stage 4.0 failed 4 times, most recent failure: Lost task 17.3 in stage 4.0 (TID 350) (ip-172-24-14-121.ap-southeast-1.compute.internal executor 32): org.apache.spark.sql.execution.datasources.FileDownloadException: Failed to download file path: s3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00001-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet, range: 0-1452308, partition values: [2025-08-14], isDataPresent: false, eTag: 5cc38a6cb29dcb50e9dc9f6f2808c0cc-1
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.next(AsyncFileDownloader.scala:145)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.getNextFile(FileScanRDD.scala:465)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.nextIterator(FileScanRDD.scala:377)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.$anonfun$hasNext$1(FileScanRDD.scala:269)
-		at scala.runtime.java8.JFunction0$mcZ$sp.apply(JFunction0$mcZ$sp.java:23)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.hasNext(FileScanRDD.scala:269)
-		at org.apache.spark.sql.execution.FileSourceScanExec$$anon$1.hasNext(DataSourceScanExec.scala:761)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.columnartorow_nextBatch_0$(Unknown Source)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.processNext(Unknown Source)
-		at org.apache.spark.sql.execution.BufferedRowIterator.hasNext(BufferedRowIterator.java:35)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.hasNext(Unknown Source)
-		at org.apache.spark.sql.execution.WholeStageCodegenEvaluatorFactory$WholeStageCodegenPartitionEvaluator$$anon$1.hasNext(WholeStageCodegenEvaluatorFactory.scala:43)
-		at org.apache.spark.sql.execution.datasources.FileFormatWriter$.executeTask(FileFormatWriter.scala:386)
-		at org.apache.spark.sql.execution.datasources.WriteFilesExec.$anonfun$doExecuteWrite$1(WriteFiles.scala:100)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2(RDD.scala:894)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2$adapted(RDD.scala:894)
-		at org.apache.spark.rdd.MapPartitionsRDD.compute(MapPartitionsRDD.scala:61)
-		at org.apache.spark.rdd.RDD.computeOrReadCheckpoint(RDD.scala:368)
-		at org.apache.spark.rdd.RDD.iterator(RDD.scala:332)
-		at org.apache.spark.scheduler.ResultTask.runTask(ResultTask.scala:93)
-		at org.apache.spark.TaskContext.runTaskWithListeners(TaskContext.scala:174)
-		at org.apache.spark.scheduler.Task.run(Task.scala:152)
-		at org.apache.spark.executor.Executor$TaskRunner.$anonfun$run$4(Executor.scala:632)
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally(SparkErrorUtils.scala:64)
-		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally$(SparkErrorUtils.scala:61)
-		at org.apache.spark.util.Utils$.tryWithSafeFinally(Utils.scala:96)
-		at org.apache.spark.executor.Executor$TaskRunner.run(Executor.scala:635)
-		at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-		at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-		at java.base/java.lang.Thread.run(Thread.java:840)
-	Caused by: java.io.FileNotFoundException: No such file or directory 's3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00001-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet'
-		at com.amazon.ws.emr.hadoop.fs.s3n.S3NativeFileSystem.getFileStatus(S3NativeFileSystem.java:560)
-		at com.amazon.ws.emr.hadoop.fs.EmrFileSystem.getFileStatus(EmrFileSystem.java:623)
-		at org.apache.parquet.hadoop.util.HadoopInputFile.fromPath(HadoopInputFile.java:66)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.getFooterWithParams(ParquetFileFormat.scala:1001)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.callFooterRequest(ParquetFileFormat.scala:1019)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.requestFooter$1(ParquetFileFormat.scala:600)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.liftedTree1$1(ParquetFileFormat.scala:612)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.$anonfun$buildPrefetcherWithPartitionValues$1(ParquetFileFormat.scala:604)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD.$anonfun$compute$2(FileScanRDD.scala:232)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.$anonfun$downloadFile$2(AsyncFileDownloader.scala:94)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.org$apache$spark$sql$execution$datasources$AsyncFileDownloader$$downloadFile(AsyncFileDownloader.scala:94)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:72)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:71)
-		at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-		... 3 more
 
 	Driver stacktrace:
 		at org.apache.spark.scheduler.DAGScheduler.failJobAndIndependentStages(DAGScheduler.scala:3083)
@@ -1065,20 +174,20 @@ ${SPARK_HOME}/bin/spark-sql --master yarn --deploy-mode client --conf spark.driv
 		at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:3235)
 		at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:3224)
 		at org.apache.spark.util.EventLoop$$anon$1.run(EventLoop.scala:49)
-		at org.apache.spark.scheduler.DAGScheduler.runJob(DAGScheduler.scala:1047)
-		at org.apache.spark.SparkContext.runJob(SparkContext.scala:2501)
-		at org.apache.spark.sql.execution.datasources.FileFormatWriter$.$anonfun$executeWrite$4(FileFormatWriter.scala:307)
-		at org.apache.spark.sql.execution.datasources.FileFormatWriter$.writeAndCommit(FileFormatWriter.scala:271)
-		at org.apache.spark.sql.execution.datasources.FileFormatWriter$.executeWrite(FileFormatWriter.scala:304)
-		at org.apache.spark.sql.execution.datasources.FileFormatWriter$.write(FileFormatWriter.scala:190)
-		at org.apache.spark.sql.execution.datasources.InsertIntoHadoopFsRelationCommand.run(InsertIntoHadoopFsRelationCommand.scala:197)
-		at org.apache.spark.sql.execution.command.DataWritingCommandExec.sideEffectResult$lzycompute(commands.scala:113)
-		at org.apache.spark.sql.execution.command.DataWritingCommandExec.sideEffectResult(commands.scala:111)
-		at org.apache.spark.sql.execution.command.DataWritingCommandExec.executeCollect(commands.scala:125)
-		at org.apache.spark.sql.execution.adaptive.AdaptiveSparkPlanExec.$anonfun$executeCollect$1(AdaptiveSparkPlanExec.scala:545)
-		at org.apache.spark.sql.execution.adaptive.AdaptiveSparkPlanExec.withFinalPlanUpdate(AdaptiveSparkPlanExec.scala:584)
+		at org.apache.spark.sql.execution.adaptive.AdaptiveExecutor.checkNoFailures(AdaptiveExecutor.scala:175)
+		at org.apache.spark.sql.execution.adaptive.AdaptiveExecutor.doRun(AdaptiveExecutor.scala:97)
+		at org.apache.spark.sql.execution.adaptive.AdaptiveExecutor.tryRunningAndGetFuture(AdaptiveExecutor.scala:75)
+		at org.apache.spark.sql.execution.adaptive.AdaptiveExecutor.execute(AdaptiveExecutor.scala:59)
+		at org.apache.spark.sql.execution.adaptive.AdaptiveSparkPlanExec.$anonfun$getFinalPhysicalPlan$1(AdaptiveSparkPlanExec.scala:290)
+		at org.apache.spark.sql.SparkSession.withActive(SparkSession.scala:901)
+		at org.apache.spark.sql.execution.adaptive.AdaptiveSparkPlanExec.getFinalPhysicalPlan(AdaptiveSparkPlanExec.scala:289)
+		at org.apache.spark.sql.execution.adaptive.AdaptiveSparkPlanExec.withFinalPlanUpdate(AdaptiveSparkPlanExec.scala:583)
 		at org.apache.spark.sql.execution.adaptive.AdaptiveSparkPlanExec.executeCollect(AdaptiveSparkPlanExec.scala:545)
-		at org.apache.spark.sql.execution.QueryExecution$$anonfun$eagerlyExecuteCommands$1.$anonfun$applyOrElse$1(QueryExecution.scala:126)
+		at org.apache.spark.sql.Dataset.$anonfun$count$1(Dataset.scala:3662)
+		at org.apache.spark.sql.Dataset.$anonfun$count$1$adapted(Dataset.scala:3661)
+		at org.apache.spark.sql.Dataset.$anonfun$withAction$2(Dataset.scala:4392)
+		at org.apache.spark.sql.execution.QueryExecution$.withInternalError(QueryExecution.scala:711)
+		at org.apache.spark.sql.Dataset.$anonfun$withAction$1(Dataset.scala:4390)
 		at org.apache.spark.sql.catalyst.QueryPlanningTracker$.withTracker(QueryPlanningTracker.scala:108)
 		at org.apache.spark.sql.execution.SQLExecution$.withTracker(SQLExecution.scala:384)
 		at org.apache.spark.sql.execution.SQLExecution$.executeQuery$1(SQLExecution.scala:157)
@@ -1091,80 +200,45 @@ ${SPARK_HOME}/bin/spark-sql --master yarn --deploy-mode client --conf spark.driv
 		at org.apache.spark.sql.SparkSession.withActive(SparkSession.scala:901)
 		at org.apache.spark.sql.execution.SQLExecution$.withNewExecutionId(SQLExecution.scala:83)
 		at org.apache.spark.sql.execution.SQLExecution$.withNewExecutionId(SQLExecution.scala:74)
-		at org.apache.spark.sql.execution.QueryExecution$$anonfun$eagerlyExecuteCommands$1.applyOrElse(QueryExecution.scala:123)
-		at org.apache.spark.sql.execution.QueryExecution$$anonfun$eagerlyExecuteCommands$1.applyOrElse(QueryExecution.scala:114)
-		at org.apache.spark.sql.catalyst.trees.TreeNode.$anonfun$transformDownWithPruning$1(TreeNode.scala:520)
-		at org.apache.spark.sql.catalyst.trees.CurrentOrigin$.withOrigin(origin.scala:77)
-		at org.apache.spark.sql.catalyst.trees.TreeNode.transformDownWithPruning(TreeNode.scala:520)
-		at org.apache.spark.sql.catalyst.plans.logical.LogicalPlan.org$apache$spark$sql$catalyst$plans$logical$AnalysisHelper$$super$transformDownWithPruning(LogicalPlan.scala:34)
-		at org.apache.spark.sql.catalyst.plans.logical.AnalysisHelper.transformDownWithPruning(AnalysisHelper.scala:297)
-		at org.apache.spark.sql.catalyst.plans.logical.AnalysisHelper.transformDownWithPruning$(AnalysisHelper.scala:293)
-		at org.apache.spark.sql.catalyst.plans.logical.LogicalPlan.transformDownWithPruning(LogicalPlan.scala:34)
-		at org.apache.spark.sql.catalyst.plans.logical.LogicalPlan.transformDownWithPruning(LogicalPlan.scala:34)
-		at org.apache.spark.sql.catalyst.trees.TreeNode.transformDown(TreeNode.scala:496)
-		at org.apache.spark.sql.execution.QueryExecution.eagerlyExecuteCommands(QueryExecution.scala:114)
-		at org.apache.spark.sql.execution.QueryExecution.commandExecuted$lzycompute(QueryExecution.scala:101)
-		at org.apache.spark.sql.execution.QueryExecution.commandExecuted(QueryExecution.scala:99)
-		at org.apache.spark.sql.Dataset.<init>(Dataset.scala:223)
-		at org.apache.spark.sql.Dataset$.$anonfun$ofRows$2(Dataset.scala:103)
-		at org.apache.spark.sql.SparkSession.withActive(SparkSession.scala:901)
-		at org.apache.spark.sql.Dataset$.ofRows(Dataset.scala:99)
-		at org.apache.spark.sql.SparkSession.$anonfun$sql$4(SparkSession.scala:692)
-		at org.apache.spark.sql.SparkSession.withActive(SparkSession.scala:901)
-		at org.apache.spark.sql.SparkSession.sql(SparkSession.scala:683)
-		at org.apache.spark.sql.SparkSession.sql(SparkSession.scala:714)
-		at org.apache.spark.sql.SparkSession.sql(SparkSession.scala:745)
-		at org.apache.spark.sql.SQLContext.sql(SQLContext.scala:651)
-		at org.apache.spark.sql.hive.thriftserver.SparkSQLDriver.run(SparkSQLDriver.scala:68)
-		at org.apache.spark.sql.hive.thriftserver.SparkSQLCLIDriver.processCmd(SparkSQLCLIDriver.scala:501)
-		at org.apache.spark.sql.hive.thriftserver.SparkSQLCLIDriver.$anonfun$processLine$1(SparkSQLCLIDriver.scala:619)
-		at org.apache.spark.sql.hive.thriftserver.SparkSQLCLIDriver.$anonfun$processLine$1$adapted(SparkSQLCLIDriver.scala:613)
-		at scala.collection.Iterator.foreach(Iterator.scala:943)
-		at scala.collection.Iterator.foreach$(Iterator.scala:943)
-		at scala.collection.AbstractIterator.foreach(Iterator.scala:1431)
-		at scala.collection.IterableLike.foreach(IterableLike.scala:74)
-		at scala.collection.IterableLike.foreach$(IterableLike.scala:73)
-		at scala.collection.AbstractIterable.foreach(Iterable.scala:56)
-		at org.apache.spark.sql.hive.thriftserver.SparkSQLCLIDriver.processLine(SparkSQLCLIDriver.scala:613)
-		at org.apache.hadoop.hive.cli.CliDriver.processLine(CliDriver.java:337)
-		at org.apache.hadoop.hive.cli.CliDriver.processReader(CliDriver.java:475)
-		at org.apache.hadoop.hive.cli.CliDriver.processFile(CliDriver.java:491)
-		at org.apache.spark.sql.hive.thriftserver.SparkSQLCLIDriver$.main(SparkSQLCLIDriver.scala:229)
-		at org.apache.spark.sql.hive.thriftserver.SparkSQLCLIDriver.main(SparkSQLCLIDriver.scala)
+		at org.apache.spark.sql.Dataset.withAction(Dataset.scala:4390)
+		at org.apache.spark.sql.Dataset.count(Dataset.scala:3661)
 		at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 		at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 		at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
 		at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-		at org.apache.spark.deploy.JavaMainApplication.start(SparkApplication.scala:52)
-		at org.apache.spark.deploy.SparkSubmit.org$apache$spark$deploy$SparkSubmit$$runMain(SparkSubmit.scala:1100)
-		at org.apache.spark.deploy.SparkSubmit.doRunMain$1(SparkSubmit.scala:194)
-		at org.apache.spark.deploy.SparkSubmit.submit(SparkSubmit.scala:217)
-		at org.apache.spark.deploy.SparkSubmit.doSubmit(SparkSubmit.scala:91)
-		at org.apache.spark.deploy.SparkSubmit$$anon$2.doSubmit(SparkSubmit.scala:1192)
-		at org.apache.spark.deploy.SparkSubmit$.main(SparkSubmit.scala:1201)
-		at org.apache.spark.deploy.SparkSubmit.main(SparkSubmit.scala)
-	Caused by: org.apache.spark.sql.execution.datasources.FileDownloadException: Failed to download file path: s3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00001-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet, range: 0-1452308, partition values: [2025-08-14], isDataPresent: false, eTag: 5cc38a6cb29dcb50e9dc9f6f2808c0cc-1
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.next(AsyncFileDownloader.scala:145)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.getNextFile(FileScanRDD.scala:465)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.nextIterator(FileScanRDD.scala:377)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.$anonfun$hasNext$1(FileScanRDD.scala:269)
-		at scala.runtime.java8.JFunction0$mcZ$sp.apply(JFunction0$mcZ$sp.java:23)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD$$anon$1.hasNext(FileScanRDD.scala:269)
-		at org.apache.spark.sql.execution.FileSourceScanExec$$anon$1.hasNext(DataSourceScanExec.scala:761)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.columnartorow_nextBatch_0$(Unknown Source)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.processNext(Unknown Source)
+		at py4j.reflection.MethodInvoker.invoke(MethodInvoker.java:244)
+		at py4j.reflection.ReflectionEngine.invoke(ReflectionEngine.java:374)
+		at py4j.Gateway.invoke(Gateway.java:282)
+		at py4j.commands.AbstractCommand.invokeMethod(AbstractCommand.java:132)
+		at py4j.commands.CallCommand.execute(CallCommand.java:79)
+		at py4j.ClientServerConnection.waitForCommands(ClientServerConnection.java:182)
+		at py4j.ClientServerConnection.run(ClientServerConnection.java:106)
+		at java.base/java.lang.Thread.run(Thread.java:840)
+	Caused by: org.apache.spark.api.python.PythonException: Traceback (most recent call last):
+	  File "/mnt1/yarn/usercache/root/appcache/application_1755501357359_1140/container_e06_1755501357359_1140_01_000165/pyspark.zip/pyspark/worker.py", line 1100, in main
+	    raise PySparkRuntimeError(
+	pyspark.errors.exceptions.base.PySparkRuntimeError: [PYTHON_VERSION_MISMATCH] Python in worker has different version (3, 9) than that in driver 3.12, PySpark cannot run with different minor versions.
+	Please check environment variables PYSPARK_PYTHON and PYSPARK_DRIVER_PYTHON are correctly set.
+
+		at org.apache.spark.api.python.BasePythonRunner$ReaderIterator.handlePythonException(PythonRunner.scala:572)
+		at org.apache.spark.api.python.PythonRunner$$anon$3.read(PythonRunner.scala:784)
+		at org.apache.spark.api.python.PythonRunner$$anon$3.read(PythonRunner.scala:766)
+		at org.apache.spark.api.python.BasePythonRunner$ReaderIterator.hasNext(PythonRunner.scala:525)
+		at org.apache.spark.InterruptibleIterator.hasNext(InterruptibleIterator.scala:37)
+		at scala.collection.Iterator$$anon$11.hasNext(Iterator.scala:491)
+		at scala.collection.Iterator$$anon$10.hasNext(Iterator.scala:460)
+		at scala.collection.Iterator$$anon$10.hasNext(Iterator.scala:460)
+		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage1.hashAgg_doAggregateWithoutKey_0$(Unknown Source)
+		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage1.processNext(Unknown Source)
 		at org.apache.spark.sql.execution.BufferedRowIterator.hasNext(BufferedRowIterator.java:35)
-		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage4.hasNext(Unknown Source)
+		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage1.hasNext(Unknown Source)
 		at org.apache.spark.sql.execution.WholeStageCodegenEvaluatorFactory$WholeStageCodegenPartitionEvaluator$$anon$1.hasNext(WholeStageCodegenEvaluatorFactory.scala:43)
-		at org.apache.spark.sql.execution.datasources.FileFormatWriter$.executeTask(FileFormatWriter.scala:386)
-		at org.apache.spark.sql.execution.datasources.WriteFilesExec.$anonfun$doExecuteWrite$1(WriteFiles.scala:100)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2(RDD.scala:894)
-		at org.apache.spark.rdd.RDD.$anonfun$mapPartitionsInternal$2$adapted(RDD.scala:894)
-		at org.apache.spark.rdd.MapPartitionsRDD.compute(MapPartitionsRDD.scala:61)
-		at org.apache.spark.rdd.RDD.computeOrReadCheckpoint(RDD.scala:368)
-		at org.apache.spark.rdd.RDD.iterator(RDD.scala:332)
-		at org.apache.spark.scheduler.ResultTask.runTask(ResultTask.scala:93)
+		at scala.collection.Iterator$$anon$10.hasNext(Iterator.scala:460)
+		at org.apache.spark.shuffle.sort.BypassMergeSortShuffleWriter.write(BypassMergeSortShuffleWriter.java:157)
+		at org.apache.spark.shuffle.ShuffleWriteProcessor.doWrite(ShuffleWriteProcessor.scala:45)
+		at org.apache.spark.shuffle.ShuffleWriteProcessor.write(ShuffleWriteProcessor.scala:69)
+		at org.apache.spark.scheduler.ShuffleMapTask.runTask(ShuffleMapTask.scala:104)
+		at org.apache.spark.scheduler.ShuffleMapTask.runTask(ShuffleMapTask.scala:54)
 		at org.apache.spark.TaskContext.runTaskWithListeners(TaskContext.scala:174)
 		at org.apache.spark.scheduler.Task.run(Task.scala:152)
 		at org.apache.spark.executor.Executor$TaskRunner.$anonfun$run$4(Executor.scala:632)
@@ -1175,32 +249,170 @@ ${SPARK_HOME}/bin/spark-sql --master yarn --deploy-mode client --conf spark.driv
 		at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
 		at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
 		at java.base/java.lang.Thread.run(Thread.java:840)
-	Caused by: java.io.FileNotFoundException: No such file or directory 's3://exchanges-flink-prod/batch/data/dwd/dwd_user/dwd_user_label_df/dt=2025-08-14/part-00001-0def1400-1f60-4f45-a942-e970027ae45a.c000.snappy.parquet'
-		at com.amazon.ws.emr.hadoop.fs.s3n.S3NativeFileSystem.getFileStatus(S3NativeFileSystem.java:560)
-		at com.amazon.ws.emr.hadoop.fs.EmrFileSystem.getFileStatus(EmrFileSystem.java:623)
-		at org.apache.parquet.hadoop.util.HadoopInputFile.fromPath(HadoopInputFile.java:66)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.getFooterWithParams(ParquetFileFormat.scala:1001)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.callFooterRequest(ParquetFileFormat.scala:1019)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.requestFooter$1(ParquetFileFormat.scala:600)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.liftedTree1$1(ParquetFileFormat.scala:612)
-		at org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat.$anonfun$buildPrefetcherWithPartitionValues$1(ParquetFileFormat.scala:604)
-		at org.apache.spark.sql.execution.datasources.FileScanRDD.$anonfun$compute$2(FileScanRDD.scala:232)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.$anonfun$downloadFile$2(AsyncFileDownloader.scala:94)
-		at org.apache.spark.util.FileAccessContext$.withContext(FileAccessContext.scala:41)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader.org$apache$spark$sql$execution$datasources$AsyncFileDownloader$$downloadFile(AsyncFileDownloader.scala:94)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:72)
-		at org.apache.spark.sql.execution.datasources.AsyncFileDownloader$$anon$1.call(AsyncFileDownloader.scala:71)
-		at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-		... 3 more
-[INFO] 2025-08-14 12:56:47.494 +0000 - process has exited. execute path:/tmp/dolphinscheduler/exec/process/default/18540427537920/18609694687872_20/16935/100147, processId:3799432 ,exitStatusCode:1 ,processWaitForStatus:true ,processExitValue:1
-[INFO] 2025-08-14 12:56:47.494 +0000 - Start finding appId in /data/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250814/18609694687872/20/16935/100147.log, fetch way: log
-[INFO] 2025-08-14 12:56:47.495 +0000 - Find appId: application_1754991343133_1954 from /data/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250814/18609694687872/20/16935/100147.log
-[INFO] 2025-08-14 12:56:47.495 +0000 - ***********************************************************************************************
-[INFO] 2025-08-14 12:56:47.495 +0000 - *********************************  Finalize task instance  ************************************
-[INFO] 2025-08-14 12:56:47.495 +0000 - ***********************************************************************************************
-[INFO] 2025-08-14 12:56:47.495 +0000 - Upload output files: [] successfully
-[INFO] 2025-08-14 12:56:47.495 +0000 - Send task execute status: FAILURE to master : 172.24.14.168:1234
-[INFO] 2025-08-14 12:56:47.495 +0000 - Remove the current task execute context from worker cache
-[INFO] 2025-08-14 12:56:47.495 +0000 - The current execute mode isn't develop mode, will clear the task execute file: /tmp/dolphinscheduler/exec/process/default/18540427537920/18609694687872_20/16935/100147
-[INFO] 2025-08-14 12:56:47.496 +0000 - Success clear the task execute file: /tmp/dolphinscheduler/exec/process/default/18540427537920/18609694687872_20/16935/100147
-[INFO] 2025-08-14 12:56:47.496 +0000 - FINALIZE_SESSION
+
+	Traceback (most recent call last):
+	  File "/tmp/spark-efb33bc3-d290-49ee-bc75-5c78da371320/bigdata_tag_system.zip/src/tag_engine/engine/TagEngine.py", line 62, in computeTags
+	    if rulesDF.count() == 0:
+	       ^^^^^^^^^^^^^^^
+	  File "/mnt/spark/python/lib/pyspark.zip/pyspark/sql/dataframe.py", line 1241, in count
+	    return int(self._jdf.count())
+	               ^^^^^^^^^^^^^^^^^
+	  File "/mnt/spark/python/lib/py4j-0.10.9.7-src.zip/py4j/java_gateway.py", line 1322, in __call__
+	    return_value = get_return_value(
+	                   ^^^^^^^^^^^^^^^^^
+	  File "/mnt/spark/python/lib/pyspark.zip/pyspark/errors/exceptions/captured.py", line 179, in deco
+	    return f(*a, **kw)
+	           ^^^^^^^^^^^
+	  File "/mnt/spark/python/lib/py4j-0.10.9.7-src.zip/py4j/protocol.py", line 326, in get_return_value
+	    raise Py4JJavaError(
+	py4j.protocol.Py4JJavaError: An error occurred while calling o279.count.
+	: org.apache.spark.SparkException: Job aborted due to stage failure: Task 0 in stage 0.0 failed 4 times, most recent failure: Lost task 0.3 in stage 0.0 (TID 6) (ip-172-24-15-124.ap-southeast-1.compute.internal executor 101): org.apache.spark.api.python.PythonException: Traceback (most recent call last):
+	  File "/mnt1/yarn/usercache/root/appcache/application_1755501357359_1140/container_e06_1755501357359_1140_01_000165/pyspark.zip/pyspark/worker.py", line 1100, in main
+	    raise PySparkRuntimeError(
+	pyspark.errors.exceptions.base.PySparkRuntimeError: [PYTHON_VERSION_MISMATCH] Python in worker has different version (3, 9) than that in driver 3.12, PySpark cannot run with different minor versions.
+	Please check environment variables PYSPARK_PYTHON and PYSPARK_DRIVER_PYTHON are correctly set.
+
+		at org.apache.spark.api.python.BasePythonRunner$ReaderIterator.handlePythonException(PythonRunner.scala:572)
+		at org.apache.spark.api.python.PythonRunner$$anon$3.read(PythonRunner.scala:784)
+		at org.apache.spark.api.python.PythonRunner$$anon$3.read(PythonRunner.scala:766)
+		at org.apache.spark.api.python.BasePythonRunner$ReaderIterator.hasNext(PythonRunner.scala:525)
+		at org.apache.spark.InterruptibleIterator.hasNext(InterruptibleIterator.scala:37)
+		at scala.collection.Iterator$$anon$11.hasNext(Iterator.scala:491)
+		at scala.collection.Iterator$$anon$10.hasNext(Iterator.scala:460)
+		at scala.collection.Iterator$$anon$10.hasNext(Iterator.scala:460)
+		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage1.hashAgg_doAggregateWithoutKey_0$(Unknown Source)
+		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage1.processNext(Unknown Source)
+		at org.apache.spark.sql.execution.BufferedRowIterator.hasNext(BufferedRowIterator.java:35)
+		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage1.hasNext(Unknown Source)
+		at org.apache.spark.sql.execution.WholeStageCodegenEvaluatorFactory$WholeStageCodegenPartitionEvaluator$$anon$1.hasNext(WholeStageCodegenEvaluatorFactory.scala:43)
+		at scala.collection.Iterator$$anon$10.hasNext(Iterator.scala:460)
+		at org.apache.spark.shuffle.sort.BypassMergeSortShuffleWriter.write(BypassMergeSortShuffleWriter.java:157)
+		at org.apache.spark.shuffle.ShuffleWriteProcessor.doWrite(ShuffleWriteProcessor.scala:45)
+		at org.apache.spark.shuffle.ShuffleWriteProcessor.write(ShuffleWriteProcessor.scala:69)
+		at org.apache.spark.scheduler.ShuffleMapTask.runTask(ShuffleMapTask.scala:104)
+		at org.apache.spark.scheduler.ShuffleMapTask.runTask(ShuffleMapTask.scala:54)
+		at org.apache.spark.TaskContext.runTaskWithListeners(TaskContext.scala:174)
+		at org.apache.spark.scheduler.Task.run(Task.scala:152)
+		at org.apache.spark.executor.Executor$TaskRunner.$anonfun$run$4(Executor.scala:632)
+		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally(SparkErrorUtils.scala:64)
+		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally$(SparkErrorUtils.scala:61)
+		at org.apache.spark.util.Utils$.tryWithSafeFinally(Utils.scala:96)
+		at org.apache.spark.executor.Executor$TaskRunner.run(Executor.scala:635)
+		at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+		at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+		at java.base/java.lang.Thread.run(Thread.java:840)
+
+	Driver stacktrace:
+		at org.apache.spark.scheduler.DAGScheduler.failJobAndIndependentStages(DAGScheduler.scala:3083)
+		at org.apache.spark.scheduler.DAGScheduler.$anonfun$abortStage$2(DAGScheduler.scala:3019)
+		at org.apache.spark.scheduler.DAGScheduler.$anonfun$abortStage$2$adapted(DAGScheduler.scala:3018)
+		at scala.collection.mutable.ResizableArray.foreach(ResizableArray.scala:62)
+		at scala.collection.mutable.ResizableArray.foreach$(ResizableArray.scala:55)
+		at scala.collection.mutable.ArrayBuffer.foreach(ArrayBuffer.scala:49)
+		at org.apache.spark.scheduler.DAGScheduler.abortStage(DAGScheduler.scala:3018)
+		at org.apache.spark.scheduler.DAGScheduler.$anonfun$handleTaskSetFailed$1(DAGScheduler.scala:1324)
+		at org.apache.spark.scheduler.DAGScheduler.$anonfun$handleTaskSetFailed$1$adapted(DAGScheduler.scala:1324)
+		at scala.Option.foreach(Option.scala:407)
+		at org.apache.spark.scheduler.DAGScheduler.handleTaskSetFailed(DAGScheduler.scala:1324)
+		at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.doOnReceive(DAGScheduler.scala:3301)
+		at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:3235)
+		at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:3224)
+		at org.apache.spark.util.EventLoop$$anon$1.run(EventLoop.scala:49)
+		at org.apache.spark.sql.execution.adaptive.AdaptiveExecutor.checkNoFailures(AdaptiveExecutor.scala:175)
+		at org.apache.spark.sql.execution.adaptive.AdaptiveExecutor.doRun(AdaptiveExecutor.scala:97)
+		at org.apache.spark.sql.execution.adaptive.AdaptiveExecutor.tryRunningAndGetFuture(AdaptiveExecutor.scala:75)
+		at org.apache.spark.sql.execution.adaptive.AdaptiveExecutor.execute(AdaptiveExecutor.scala:59)
+		at org.apache.spark.sql.execution.adaptive.AdaptiveSparkPlanExec.$anonfun$getFinalPhysicalPlan$1(AdaptiveSparkPlanExec.scala:290)
+		at org.apache.spark.sql.SparkSession.withActive(SparkSession.scala:901)
+		at org.apache.spark.sql.execution.adaptive.AdaptiveSparkPlanExec.getFinalPhysicalPlan(AdaptiveSparkPlanExec.scala:289)
+		at org.apache.spark.sql.execution.adaptive.AdaptiveSparkPlanExec.withFinalPlanUpdate(AdaptiveSparkPlanExec.scala:583)
+		at org.apache.spark.sql.execution.adaptive.AdaptiveSparkPlanExec.executeCollect(AdaptiveSparkPlanExec.scala:545)
+		at org.apache.spark.sql.Dataset.$anonfun$count$1(Dataset.scala:3662)
+		at org.apache.spark.sql.Dataset.$anonfun$count$1$adapted(Dataset.scala:3661)
+		at org.apache.spark.sql.Dataset.$anonfun$withAction$2(Dataset.scala:4392)
+		at org.apache.spark.sql.execution.QueryExecution$.withInternalError(QueryExecution.scala:711)
+		at org.apache.spark.sql.Dataset.$anonfun$withAction$1(Dataset.scala:4390)
+		at org.apache.spark.sql.catalyst.QueryPlanningTracker$.withTracker(QueryPlanningTracker.scala:108)
+		at org.apache.spark.sql.execution.SQLExecution$.withTracker(SQLExecution.scala:384)
+		at org.apache.spark.sql.execution.SQLExecution$.executeQuery$1(SQLExecution.scala:157)
+		at org.apache.spark.sql.execution.SQLExecution$.$anonfun$withNewExecutionId$10(SQLExecution.scala:220)
+		at org.apache.spark.sql.catalyst.QueryPlanningTracker$.withTracker(QueryPlanningTracker.scala:108)
+		at org.apache.spark.sql.execution.SQLExecution$.withTracker(SQLExecution.scala:384)
+		at org.apache.spark.sql.execution.SQLExecution$.$anonfun$withNewExecutionId$9(SQLExecution.scala:220)
+		at org.apache.spark.sql.execution.SQLExecution$.withSQLConfPropagated(SQLExecution.scala:405)
+		at org.apache.spark.sql.execution.SQLExecution$.$anonfun$withNewExecutionId$1(SQLExecution.scala:219)
+		at org.apache.spark.sql.SparkSession.withActive(SparkSession.scala:901)
+		at org.apache.spark.sql.execution.SQLExecution$.withNewExecutionId(SQLExecution.scala:83)
+		at org.apache.spark.sql.execution.SQLExecution$.withNewExecutionId(SQLExecution.scala:74)
+		at org.apache.spark.sql.Dataset.withAction(Dataset.scala:4390)
+		at org.apache.spark.sql.Dataset.count(Dataset.scala:3661)
+		at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+		at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+		at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+		at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+		at py4j.reflection.MethodInvoker.invoke(MethodInvoker.java:244)
+		at py4j.reflection.ReflectionEngine.invoke(ReflectionEngine.java:374)
+		at py4j.Gateway.invoke(Gateway.java:282)
+		at py4j.commands.AbstractCommand.invokeMethod(AbstractCommand.java:132)
+		at py4j.commands.CallCommand.execute(CallCommand.java:79)
+		at py4j.ClientServerConnection.waitForCommands(ClientServerConnection.java:182)
+		at py4j.ClientServerConnection.run(ClientServerConnection.java:106)
+		at java.base/java.lang.Thread.run(Thread.java:840)
+	Caused by: org.apache.spark.api.python.PythonException: Traceback (most recent call last):
+	  File "/mnt1/yarn/usercache/root/appcache/application_1755501357359_1140/container_e06_1755501357359_1140_01_000165/pyspark.zip/pyspark/worker.py", line 1100, in main
+	    raise PySparkRuntimeError(
+	pyspark.errors.exceptions.base.PySparkRuntimeError: [PYTHON_VERSION_MISMATCH] Python in worker has different version (3, 9) than that in driver 3.12, PySpark cannot run with different minor versions.
+	Please check environment variables PYSPARK_PYTHON and PYSPARK_DRIVER_PYTHON are correctly set.
+
+		at org.apache.spark.api.python.BasePythonRunner$ReaderIterator.handlePythonException(PythonRunner.scala:572)
+		at org.apache.spark.api.python.PythonRunner$$anon$3.read(PythonRunner.scala:784)
+		at org.apache.spark.api.python.PythonRunner$$anon$3.read(PythonRunner.scala:766)
+		at org.apache.spark.api.python.BasePythonRunner$ReaderIterator.hasNext(PythonRunner.scala:525)
+		at org.apache.spark.InterruptibleIterator.hasNext(InterruptibleIterator.scala:37)
+		at scala.collection.Iterator$$anon$11.hasNext(Iterator.scala:491)
+		at scala.collection.Iterator$$anon$10.hasNext(Iterator.scala:460)
+		at scala.collection.Iterator$$anon$10.hasNext(Iterator.scala:460)
+		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage1.hashAgg_doAggregateWithoutKey_0$(Unknown Source)
+		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage1.processNext(Unknown Source)
+		at org.apache.spark.sql.execution.BufferedRowIterator.hasNext(BufferedRowIterator.java:35)
+		at org.apache.spark.sql.catalyst.expressions.GeneratedClass$GeneratedIteratorForCodegenStage1.hasNext(Unknown Source)
+		at org.apache.spark.sql.execution.WholeStageCodegenEvaluatorFactory$WholeStageCodegenPartitionEvaluator$$anon$1.hasNext(WholeStageCodegenEvaluatorFactory.scala:43)
+		at scala.collection.Iterator$$anon$10.hasNext(Iterator.scala:460)
+		at org.apache.spark.shuffle.sort.BypassMergeSortShuffleWriter.write(BypassMergeSortShuffleWriter.java:157)
+		at org.apache.spark.shuffle.ShuffleWriteProcessor.doWrite(ShuffleWriteProcessor.scala:45)
+		at org.apache.spark.shuffle.ShuffleWriteProcessor.write(ShuffleWriteProcessor.scala:69)
+		at org.apache.spark.scheduler.ShuffleMapTask.runTask(ShuffleMapTask.scala:104)
+		at org.apache.spark.scheduler.ShuffleMapTask.runTask(ShuffleMapTask.scala:54)
+		at org.apache.spark.TaskContext.runTaskWithListeners(TaskContext.scala:174)
+		at org.apache.spark.scheduler.Task.run(Task.scala:152)
+		at org.apache.spark.executor.Executor$TaskRunner.$anonfun$run$4(Executor.scala:632)
+		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally(SparkErrorUtils.scala:64)
+		at org.apache.spark.util.SparkErrorUtils.tryWithSafeFinally$(SparkErrorUtils.scala:61)
+		at org.apache.spark.util.Utils$.tryWithSafeFinally(Utils.scala:96)
+		at org.apache.spark.executor.Executor$TaskRunner.run(Executor.scala:635)
+		at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+		at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+		at java.base/java.lang.Thread.run(Thread.java:840)
+
+	⚠️  5 个标签因表加载失败而跳过: [1, 2, 3, 4, 5]
+
+	============================================================
+	❌ 任务执行失败
+	============================================================
+	🧹 HiveMeta缓存已清理
+	🧹 TagEngine资源清理完成
+	🧹 关闭Spark会话...
+[INFO] 2025-08-19 10:36:04.073 +0000 -  ->
+	👋 程序退出
+[INFO] 2025-08-19 10:36:04.073 +0000 - process has exited. execute path:/tmp/dolphinscheduler/exec/process/default/18540427537920/18540583925120_73/18099/108110, processId:4158829 ,exitStatusCode:1 ,processWaitForStatus:true ,processExitValue:1
+[INFO] 2025-08-19 10:36:04.074 +0000 - Start finding appId in /data/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250819/18540583925120/73/18099/108110.log, fetch way: log
+[INFO] 2025-08-19 10:36:04.074 +0000 - Find appId: application_1755501357359_1140 from /data/installed/dolphinscheduler/apache-dolphinscheduler-3.2.0-bin/worker-server/logs/20250819/18540583925120/73/18099/108110.log
+[INFO] 2025-08-19 10:36:04.075 +0000 - ***********************************************************************************************
+[INFO] 2025-08-19 10:36:04.075 +0000 - *********************************  Finalize task instance  ************************************
+[INFO] 2025-08-19 10:36:04.075 +0000 - ***********************************************************************************************
+[INFO] 2025-08-19 10:36:04.075 +0000 - Upload output files: [] successfully
+[INFO] 2025-08-19 10:36:04.075 +0000 - Send task execute status: FAILURE to master : 172.24.14.168:1234
+[INFO] 2025-08-19 10:36:04.075 +0000 - Remove the current task execute context from worker cache
+[INFO] 2025-08-19 10:36:04.075 +0000 - The current execute mode isn't develop mode, will clear the task execute file: /tmp/dolphinscheduler/exec/process/default/18540427537920/18540583925120_73/18099/108110
+[INFO] 2025-08-19 10:36:04.076 +0000 - Success clear the task execute file: /tmp/dolphinscheduler/exec/process/default/18540427537920/18540583925120_73/18099/108110
+[INFO] 2025-08-19 10:36:04.076 +0000 - FINALIZE_SESSION

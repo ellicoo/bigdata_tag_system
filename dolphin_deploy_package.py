@@ -635,13 +635,17 @@ client.triggerWorkflow("tag_system_compute", Map.of(
         
         with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zip_file:
             
-            # 添加src目录
+            # 添加src目录（包括依赖）
             src_dir = self.project_root / "src"
             if src_dir.exists():
-                for file_path in src_dir.rglob("*.py"):
-                    arc_name = f"src/{file_path.relative_to(src_dir)}"
-                    zip_file.write(file_path, arc_name)
-                    print(f"  ✅ 添加源码: {arc_name}")
+                for file_path in src_dir.rglob("*"):
+                    if file_path.is_file():  # 只添加文件，自动创建目录结构
+                        arc_name = f"src/{file_path.relative_to(src_dir)}"
+                        zip_file.write(file_path, arc_name)
+                        if file_path.suffix == ".py":
+                            print(f"  ✅ 添加源码: {arc_name}")
+                        else:
+                            print(f"  📦 添加依赖文件: {arc_name}")
             
             # 不创建重复的main.py，保持原有的src目录结构
             # 用户应该直接使用: bigdata_tag_system/src/tag_engine/main.py
