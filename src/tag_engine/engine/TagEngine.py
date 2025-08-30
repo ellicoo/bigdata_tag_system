@@ -159,13 +159,24 @@ class TagEngine:
                     all_failed_tag_ids.extend(failed_tag_ids)
                     print(f"   ⚠️  标签组 {group.name} 中 {len(failed_tag_ids)} 个标签因表加载失败而跳过")
                 
-                if groupResult.count() == 0:
-                    print(f"   ⚠️  标签组 {group.name} 无匹配用户，跳过")
+                # 📝 注意：不再跳过无匹配用户的情况，因为需要处理标签移除
+                # 只有当完全没有计算结果时才跳过（例如表加载全部失败）
+                if groupResult.count() == 0 and not failed_tag_ids:
+                    print(f"   ⚠️  标签组 {group.name} 无计算结果，跳过")
                     successCount += 1
                     continue
+                elif groupResult.count() == 0 and failed_tag_ids:
+                    print(f"   📝 标签组 {group.name} 因表加载失败无计算结果，但继续处理以便移除相关标签")
+                else:
+                    tagged_users = groupResult.filter(size(col("tag_ids_array")) > 0).count()
+                    total_users = groupResult.count()
+                    print(f"   📊 标签组 {group.name} 计算结果: {total_users} 个用户（{tagged_users} 个有标签，{total_users - tagged_users} 个无标签）")
                 
-                # 合并并写入MySQL
-                if self._mergeAndSaveGroup(groupResult, group.name):
+                # 🎯 获取本次计算的标签ID范围（排除失败的标签）
+                successful_tag_ids = [tag_id for tag_id in group.tagIds if tag_id not in failed_tag_ids]
+                
+                # 合并并写入MySQL - 传入计算范围支持智能标签替换
+                if self._mergeAndSaveGroup(groupResult, group.name, successful_tag_ids):
                     print(f"   ✅ 标签组 {group.name} 处理完成")
                     successCount += 1
                 else:
@@ -187,46 +198,77 @@ class TagEngine:
         success = successCount == len(tagGroups)
         return success, unique_failed_tag_ids
     
-    def _mergeAndSaveGroup(self, groupResult: DataFrame, groupName: str) -> bool:
-        """合并标签并保存到MySQL"""
+    def _mergeAndSaveGroup(self, groupResult: DataFrame, groupName: str, computed_tag_ids: List[int] = None) -> bool:
+        """智能合并标签并保存到MySQL - 支持标签移除"""
         try:
-            # 加载现有标签
+            # 加载现有标签（包括所有用户）
             existingTagsDF = self.mysqlMeta.loadExistingTags()
             
-            # LEFT JOIN 合并
+            # 🚀 关键改进：使用FULL JOIN确保覆盖所有相关用户
             joinedDF = groupResult.alias("new").join(
                 existingTagsDF.alias("existing"),
                 col("new.user_id") == col("existing.user_id"),
-                "left"
+                "full"  # FULL JOIN - 确保处理所有相关用户
             )
             
-            # 使用SparkUdfs模块合并标签
-            from ..utils.SparkUdfs import array_to_json
-            finalDF = joinedDF.withColumn(
-                "final_tag_ids",
-                merge_with_existing_tags(
-                    col("new.tag_ids_array"),
-                    col("existing.existing_tag_ids")
+            print(f"   🔗 FULL JOIN完成，处理用户数: {joinedDF.count()}")
+            
+            # 导入智能标签处理函数
+            from ..utils.SparkUdfs import array_to_json, replace_computed_tags, merge_with_existing_tags
+            
+            # 🎯 智能标签替换：根据是否提供计算范围选择策略
+            if computed_tag_ids:
+                print(f"   🎯 使用智能替换模式，本次计算标签范围: {computed_tag_ids}")
+                # 创建计算范围列
+                computed_scope_lit = lit(computed_tag_ids)
+                
+                finalDF = joinedDF.withColumn(
+                    "final_tag_ids",
+                    replace_computed_tags(
+                        col("new.tag_ids_array"),         # 本次计算结果
+                        col("existing.existing_tag_ids"), # 现有标签  
+                        computed_scope_lit                # 本次计算范围
+                    )
+                ).withColumn(
+                    "final_tag_ids_json",
+                    array_to_json(col("final_tag_ids"))
                 )
-            ).withColumn(
-                "final_tag_ids_json",
-                array_to_json(col("final_tag_ids"))
+            else:
+                print(f"   📝 使用传统合并模式（向后兼容）")
+                finalDF = joinedDF.withColumn(
+                    "final_tag_ids",
+                    merge_with_existing_tags(
+                        col("new.tag_ids_array"),
+                        col("existing.existing_tag_ids")
+                    )
+                ).withColumn(
+                    "final_tag_ids_json",
+                    array_to_json(col("final_tag_ids"))
+                )
+            
+            # 🚀 智能过滤：只更新需要更新的用户
+            # 条件：有最终标签 或 有历史标签（需要移除标签的用户）
+            filteredDF = finalDF.filter(
+                (size(col("final_tag_ids")) > 0) |  # 有最终标签
+                (col("existing.existing_tag_ids").isNotNull())  # 或有历史标签需要处理
             ).select(
-                col("new.user_id").alias("user_id"),
+                coalesce(col("new.user_id"), col("existing.user_id")).alias("user_id"),
                 col("final_tag_ids_json")
             )
             
             # 写入MySQL
-            success = self.mysqlMeta.writeTagResults(finalDF)
+            success = self.mysqlMeta.writeTagResults(filteredDF)
             
             if success:
-                userCount = finalDF.count()
-                print(f"   ✅ {groupName}: {userCount} 个用户")
+                userCount = filteredDF.count()
+                print(f"   ✅ {groupName}: {userCount} 个用户标签更新成功")
             
             return success
             
         except Exception as e:
             print(f"   ❌ {groupName} 保存失败: {e}")
+            import traceback
+            traceback.print_exc()
             return False
     
     

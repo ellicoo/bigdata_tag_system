@@ -185,18 +185,19 @@ class TagGroup:
         from ..utils.tagExpressionUtils import buildParallelTagExpression
         combined_tags_expr = buildParallelTagExpression(tag_conditions)
         
-        # 一次性为所有用户计算其匹配的标签数组，并过滤掉空数组用户
-        # 🔧 关键修复：先计算标签，再选择需要的字段，避免过早丢弃业务字段
+        # 一次性为所有用户计算其匹配的标签数组
+        # 🔧 关键修复：保留所有用户包括无匹配标签的用户，支持标签移除逻辑
         userTagsDF = joinedDF.withColumn("tag_ids_array", combined_tags_expr) \
-                           .select("user_id", "tag_ids_array") \
-                           .filter(size(col("tag_ids_array")) > 0)
+                           .select("user_id", "tag_ids_array")
+        # 📝 注意：不再过滤空数组用户，让后续逻辑处理标签移除
         
         # 统计结果
         try:
-            userCount = userTagsDF.count()
-            print(f"   ✅ 并行计算并聚合完成: {userCount} 个有标签用户")
+            totalUserCount = userTagsDF.count()
+            taggedUserCount = userTagsDF.filter(size(col("tag_ids_array")) > 0).count()
+            print(f"   ✅ 并行计算完成: {totalUserCount} 个用户（{taggedUserCount} 个有标签，{totalUserCount - taggedUserCount} 个无标签但保留用于标签移除）")
         except:
-            print(f"   ✅ 并行计算并聚合完成")
+            print(f"   ✅ 并行计算完成")
         
         return userTagsDF
     
