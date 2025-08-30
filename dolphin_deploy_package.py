@@ -19,372 +19,54 @@ class DolphinGUIDeployPackager:
         self.output_dir.mkdir(exist_ok=True)
     
     
-    def create_hive_test_tables(self) -> str:
-        """创建Hive测试表SQL - 基于现有建表语句"""
-        sql_content = '''-- 标签系统测试表
--- 基于现有 crate_table_demo.sql 格式
-
--- 用户基本信息表
-CREATE EXTERNAL TABLE IF NOT EXISTS tag_system.user_basic_info (
-    user_id string COMMENT '用户ID',
-    age int COMMENT '年龄',
-    user_level string COMMENT '用户等级',
-    kyc_status string COMMENT 'KYC状态',
-    registration_date string COMMENT '注册日期',
-    risk_score double COMMENT '风险评分'
-) COMMENT '用户基本信息表'
-PARTITIONED BY (`dt` string)
-ROW FORMAT SERDE
-    'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
-STORED AS INPUTFORMAT
-    'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat'
-OUTPUTFORMAT
-    'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'
-LOCATION
-    's3://exchanges-flink-test/batch/data/tag_system/user_basic_info/';
-
--- 用户资产汇总表
-CREATE EXTERNAL TABLE IF NOT EXISTS tag_system.user_asset_summary (
-    user_id string COMMENT '用户ID',
-    total_asset_value double COMMENT '总资产价值',
-    cash_balance double COMMENT '现金余额'
-) COMMENT '用户资产汇总表'
-PARTITIONED BY (`dt` string)
-ROW FORMAT SERDE
-    'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
-STORED AS INPUTFORMAT
-    'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat'
-OUTPUTFORMAT
-    'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'
-LOCATION
-    's3://exchanges-flink-test/batch/data/tag_system/user_asset_summary/';
-
--- 用户活动汇总表
-CREATE EXTERNAL TABLE IF NOT EXISTS tag_system.user_activity_summary (
-    user_id string COMMENT '用户ID',
-    trade_count_30d int COMMENT '30天交易次数',
-    last_login_date string COMMENT '最后登录日期'
-) COMMENT '用户活动汇总表'
-PARTITIONED BY (`dt` string)
-ROW FORMAT SERDE
-    'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
-STORED AS INPUTFORMAT
-    'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat'
-OUTPUTFORMAT
-    'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'
-LOCATION
-    's3://exchanges-flink-test/batch/data/tag_system/user_activity_summary/';
-'''
-        return sql_content
     
-    def create_test_data_generator(self) -> str:
-        """创建测试数据生成器"""
-        generator_content = '''#!/usr/bin/env python3
-"""
-海豚调度器测试数据生成器
-直接写入Hive表，基于现有Spark能力
-"""
-
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import *
-from pyspark.sql.types import *
-import random
-from datetime import datetime, timedelta
-
-def create_spark_session():
-    """创建Spark会话 - 基于现有HiveToKafka.py模式"""
-    spark = SparkSession.builder \\
-        .appName("TagSystemTestDataGenerator") \\
-        .enableHiveSupport() \\
-        .getOrCreate()
-    return spark
-
-def generate_test_data(spark, dt='2025-01-20'):
-    """生成测试数据并写入Hive表"""
-    
-    print(f"🚀 生成测试数据，日期: {dt}")
-    
-    # 生成用户基本信息测试数据
-    user_basic_data = []
-    for i in range(1000):
-        user_id = f"user_{i:06d}"
-        age = random.randint(18, 65)
-        user_level = random.choice(['VIP1', 'VIP2', 'VIP3', 'NORMAL'])
-        kyc_status = random.choice(['verified', 'pending', 'rejected'])
-        registration_date = (datetime.now() - timedelta(days=random.randint(1, 1000))).strftime('%Y-%m-%d')
-        risk_score = random.uniform(0, 100)
-        
-        user_basic_data.append((user_id, age, user_level, kyc_status, registration_date, risk_score))
-    
-    # 创建DataFrame并写入Hive
-    user_basic_schema = StructType([
-        StructField("user_id", StringType(), True),
-        StructField("age", IntegerType(), True), 
-        StructField("user_level", StringType(), True),
-        StructField("kyc_status", StringType(), True),
-        StructField("registration_date", StringType(), True),
-        StructField("risk_score", DoubleType(), True)
-    ])
-    
-    user_basic_df = spark.createDataFrame(user_basic_data, user_basic_schema)
-    user_basic_df = user_basic_df.withColumn("dt", lit(dt))
-    
-    # 写入Hive表
-    user_basic_df.write \\
-        .mode("overwrite") \\
-        .partitionBy("dt") \\
-        .saveAsTable("tag_system.user_basic_info")
-    
-    print("✅ 用户基本信息测试数据生成完成")
-    
-    # 生成用户资产数据
-    user_asset_data = []
-    for i in range(1000):
-        user_id = f"user_{i:06d}"
-        total_asset = random.uniform(1000, 1000000)
-        cash_balance = random.uniform(100, total_asset * 0.5)
-        
-        user_asset_data.append((user_id, total_asset, cash_balance))
-    
-    user_asset_schema = StructType([
-        StructField("user_id", StringType(), True),
-        StructField("total_asset_value", DoubleType(), True),
-        StructField("cash_balance", DoubleType(), True)
-    ])
-    
-    user_asset_df = spark.createDataFrame(user_asset_data, user_asset_schema)
-    user_asset_df = user_asset_df.withColumn("dt", lit(dt))
-    
-    user_asset_df.write \\
-        .mode("overwrite") \\
-        .partitionBy("dt") \\
-        .saveAsTable("tag_system.user_asset_summary")
-    
-    print("✅ 用户资产测试数据生成完成")
-    
-    # 生成用户活动数据
-    user_activity_data = []
-    for i in range(1000):
-        user_id = f"user_{i:06d}"
-        trade_count = random.randint(0, 100)
-        last_login = (datetime.now() - timedelta(days=random.randint(0, 30))).strftime('%Y-%m-%d')
-        
-        user_activity_data.append((user_id, trade_count, last_login))
-    
-    user_activity_schema = StructType([
-        StructField("user_id", StringType(), True),
-        StructField("trade_count_30d", IntegerType(), True),
-        StructField("last_login_date", StringType(), True)
-    ])
-    
-    user_activity_df = spark.createDataFrame(user_activity_data, user_activity_schema)
-    user_activity_df = user_activity_df.withColumn("dt", lit(dt))
-    
-    user_activity_df.write \\
-        .mode("overwrite") \\
-        .partitionBy("dt") \\
-        .saveAsTable("tag_system.user_activity_summary")
-    
-    print("✅ 用户活动测试数据生成完成")
-    
-    # 验证数据
-    print("\\n📊 数据验证:")
-    print(f"用户基本信息表记录数: {spark.table('tag_system.user_basic_info').count()}")
-    print(f"用户资产表记录数: {spark.table('tag_system.user_asset_summary').count()}")
-    print(f"用户活动表记录数: {spark.table('tag_system.user_activity_summary').count()}")
-
-if __name__ == "__main__":
-    spark = create_spark_session()
-    
-    try:
-        # 创建数据库
-        spark.sql("CREATE DATABASE IF NOT EXISTS tag_system")
-        print("✅ 数据库 tag_system 创建成功")
-        
-        # 生成测试数据
-        generate_test_data(spark)
-        
-        print("🎉 测试数据生成完成！")
-        
-    finally:
-        spark.stop()
-'''
-        return generator_content
     
     def create_main_entry(self) -> str:
-        """创建主程序入口 - 用于海豚调度器主程序参数"""
+        """创建主程序入口 - 支持多环境配置的包装器"""
         main_content = '''#!/usr/bin/env python3
 """
-海豚调度器主程序入口
-支持通过海豚调度器图形界面的主程序参数执行
+海豚调度器主程序入口（多环境支持版）
+直接调用 src/tag_engine/main.py，支持完整的环境配置功能
 """
 
 import sys
 import os
-import argparse
-from pyspark.sql import SparkSession
-
-# 添加项目路径
-current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(current_dir)
-
-def create_spark_session():
-    """创建Spark会话 - 基于现有HiveToKafka.py模式"""
-    spark = SparkSession.builder \\
-        .appName("BigDataTagSystem-Dolphin") \\
-        .enableHiveSupport() \\
-        .getOrCreate()
-    return spark
+import subprocess
 
 def main():
-    """主程序入口"""
-    parser = argparse.ArgumentParser(description="海豚调度器标签系统")
-    parser.add_argument("--mode", required=True, choices=[
-        "health", "task-all", "task-tags", "task-users", "list-tasks", "generate-test-data"
-    ], help="执行模式")
-    parser.add_argument("--tag-ids", help="标签ID列表，逗号分隔")
-    parser.add_argument("--user-ids", help="用户ID列表，逗号分隔")
-    parser.add_argument("--dt", default="2025-01-20", help="数据日期")
+    """主程序入口 - 直接转发到实际的main.py"""
     
-    args = parser.parse_args()
+    # 获取当前脚本所在目录
+    current_dir = os.path.dirname(os.path.abspath(__file__))
     
-    print(f"🚀 海豚调度器标签系统启动")
-    print(f"📋 执行模式: {args.mode}")
+    # 构建实际main.py的路径
+    actual_main_py = os.path.join(current_dir, "src", "tag_engine", "main.py")
     
-    # 创建Spark会话
-    spark = create_spark_session()
+    if not os.path.exists(actual_main_py):
+        print(f"❌ 找不到主程序文件: {actual_main_py}")
+        print("请确认部署包已正确解压")
+        return 1
+    
+    print("🚀 海豚调度器标签系统启动（多环境版）")
+    print(f"🔄 转发到: {actual_main_py}")
+    print(f"📋 传递参数: {' '.join(sys.argv[1:])}")
     
     try:
-        if args.mode == "generate-test-data":
-            # 生成测试数据
-            from generate_test_data import generate_test_data
-            generate_test_data(spark, args.dt)
-            
-        elif args.mode == "health":
-            # 健康检查
-            print("🔍 执行系统健康检查...")
-            
-            # 检查Hive表访问
-            try:
-                spark.sql("SHOW DATABASES").show()
-                print("✅ Hive访问正常")
-            except Exception as e:
-                print(f"❌ Hive访问失败: {e}")
-                return 1
-            
-            # 检查MySQL连接
-            try:
-                from src.tag_engine.engine.TagEngine import TagEngine
-                
-                # 创建MySQL配置
-                mysql_config = {
-                    'host': os.getenv('MYSQL_HOST', 'localhost'),
-                    'port': int(os.getenv('MYSQL_PORT', '3306')),
-                    'database': os.getenv('MYSQL_DATABASE', 'tag_system'),
-                    'user': os.getenv('MYSQL_USER', 'root'),
-                    'password': os.getenv('MYSQL_PASSWORD', 'password')
-                }
-                
-                # 执行健康检查
-                engine = TagEngine(spark, mysqlConfig=mysql_config)
-                health_ok = engine.healthCheck()
-                
-                if health_ok:
-                    print("✅ 系统健康检查通过")
-                else:
-                    print("❌ 系统健康检查失败")
-                    return 1
-                
-            except Exception as e:
-                print(f"❌ 健康检查异常: {e}")
-                return 1
-            
-            print("🎉 系统健康检查通过")
-            
-        elif args.mode == "task-all":
-            # 全量标签计算
-            print("🏷️ 执行全量标签计算...")
-            from src.tag_engine.engine.TagEngine import TagEngine
-            
-            # 创建MySQL配置
-            mysql_config = {
-                'host': os.getenv('MYSQL_HOST', 'localhost'),
-                'port': int(os.getenv('MYSQL_PORT', '3306')),
-                'database': os.getenv('MYSQL_DATABASE', 'tag_system'),
-                'user': os.getenv('MYSQL_USER', 'root'),
-                'password': os.getenv('MYSQL_PASSWORD', 'password')
-            }
-            
-            # 执行标签计算
-            engine = TagEngine(spark, mysqlConfig=mysql_config)
-            success = engine.computeTags(mode="full")
-            if not success:
-                return 1
-                    
-        elif args.mode == "task-tags":
-            # 指定标签计算
-            if not args.tag_ids:
-                print("❌ 指定标签模式需要提供 --tag-ids 参数")
-                return 1
-                
-            tag_ids = [int(x.strip()) for x in args.tag_ids.split(',')]
-            print(f"🎯 执行指定标签计算: {tag_ids}")
-            
-            from src.tag_engine.engine.TagEngine import TagEngine
-            
-            # 创建MySQL配置
-            mysql_config = {
-                'host': os.getenv('MYSQL_HOST', 'localhost'),
-                'port': int(os.getenv('MYSQL_PORT', '3306')),
-                'database': os.getenv('MYSQL_DATABASE', 'tag_system'),
-                'user': os.getenv('MYSQL_USER', 'root'),
-                'password': os.getenv('MYSQL_PASSWORD', 'password')
-            }
-            
-            # 执行标签计算
-            engine = TagEngine(spark, mysqlConfig=mysql_config)
-            success = engine.computeTags(mode="specific", tagIds=tag_ids)
-            if not success:
-                return 1
-                    
-        elif args.mode == "list-tasks":
-            # 列出可用标签任务
-            print("📋 列出所有可用标签...")
-            from src.tag_engine.meta.MysqlMeta import MysqlMeta
-            
-            # 创建MySQL配置
-            mysql_config = {
-                'host': os.getenv('MYSQL_HOST', 'localhost'),
-                'port': int(os.getenv('MYSQL_PORT', '3306')),
-                'database': os.getenv('MYSQL_DATABASE', 'tag_system'),
-                'user': os.getenv('MYSQL_USER', 'root'),
-                'password': os.getenv('MYSQL_PASSWORD', 'password')
-            }
-            
-            # 查询所有标签
-            mysql_meta = MysqlMeta(spark, mysql_config)
-            rules_df = mysql_meta.loadTagRules()
-            
-            print("📋 可用标签任务:")
-            rules_data = rules_df.collect()
-            for row in rules_data:
-                print(f"  标签ID {row['tag_id']}: {row['tag_name']} - {row['description']}")
-                
-        else:
-            print(f"❌ 不支持的模式: {args.mode}")
-            return 1
-            
-        print("✅ 任务执行成功")
-        return 0
+        # 构建完整的命令
+        cmd = [sys.executable, actual_main_py] + sys.argv[1:]
+        
+        # 执行实际的main.py，传递所有参数
+        result = subprocess.run(cmd, 
+                              cwd=current_dir,  # 设置工作目录
+                              env=os.environ.copy())  # 传递所有环境变量
+        
+        return result.returncode
         
     except Exception as e:
-        print(f"❌ 任务执行失败: {e}")
+        print(f"❌ 执行主程序时出错: {e}")
         import traceback
         traceback.print_exc()
         return 1
-        
-    finally:
-        spark.stop()
 
 if __name__ == "__main__":
     exit_code = main()
@@ -394,32 +76,30 @@ if __name__ == "__main__":
     
     
     def create_optimized_deploy_guide(self, custom_extract_path: str = None) -> str:
-        """创建优化的部署指南"""
+        """创建优化的部署指南 - 支持多环境配置"""
         extract_path = custom_extract_path or "/dolphinscheduler/default/resources/"
         
-        guide = f'''# 🐬 海豚调度器图形界面部署指南
+        guide = f'''# 🐬 海豚调度器图形界面部署指南（精简生产版）
 
-## 📦 部署包内容（精简版）
-- `main.py` - 主程序入口（使用src.config.base.MySQLConfig统一配置）
-- `src/` - 项目源码（直接读取Hive表，移除S3依赖）
-- `generate_test_data.py` - 测试数据生成器
-- `create_test_tables.sql` - 测试表创建SQL
+## 📦 部署包内容
+- `src/` - 项目源码（完整模块化结构）
+- `src/config/config.yaml` - 多环境配置文件（dev/test/pre/prod）
 - `requirements.txt` - Python依赖
 
-## 🚀 UI界面部署步骤（推荐）
+## 🚀 UI界面部署步骤
 
 ### 1. 上传ZIP包到资源中心
 1. 登录海豚调度器Web界面
 2. 进入 **资源中心** → **文件管理**
-3. 上传 `bigdata_tag_system.zip`
+3. 上传 `bigdata_tag_system_test.zip`
 
 ### 2. 直接在资源中心解压
-1. 在资源中心中右键点击上传的`bigdata_tag_system.zip`
+1. 在资源中心中右键点击上传的ZIP包
 2. 选择解压，或者创建Shell任务解压：
 ```bash
 #!/bin/bash
 cd {extract_path}
-unzip -o bigdata_tag_system.zip
+unzip -o bigdata_tag_system_test.zip
 echo "✅ 标签系统部署包解压完成到: {extract_path}"
 ```
 
@@ -427,7 +107,7 @@ echo "✅ 标签系统部署包解压完成到: {extract_path}"
 1. 创建新工作流："标签计算任务"
 2. 添加Spark节点：
    - **主程序**: `{extract_path}src/tag_engine/main.py`
-   - **主程序参数**: `--mode health --verbose`
+   - **主程序参数**: `--mode health --env test --verbose`
    - **Spark任务名称**: BigDataTagSystem-Dolphin
 
 ### 4. Spark任务配置
@@ -440,80 +120,145 @@ echo "✅ 标签系统部署包解压完成到: {extract_path}"
 
 **高级配置**:
 - YARN队列: default
-- 主程序参数示例:
-  - 健康检查: `--mode health`
-  - 全量标签: `--mode task-all`
-  - 指定标签: `--mode task-tags --tag-ids 1,2,3`
 
 ## 🎯 支持的执行模式
 
 ### 健康检查模式
 ```bash
---mode health
+--mode health --env test
 ```
 验证Hive和MySQL连接
 
-### 测试数据生成
-```bash
---mode generate-test-data --dt 2025-01-20
-```
-生成测试数据到Hive表
-
 ### 全量标签计算
 ```bash
---mode task-all
+--mode task-all --env prod
 ```
 计算所有用户的所有标签
 
 ### 指定标签计算
 ```bash
---mode task-tags --tag-ids 1,2,3
+--mode task-tags --tag-ids 1,2,3 --env prod
 ```
 计算指定标签ID的标签
 
 ### 任务列表查看
 ```bash
---mode list-tasks
+--mode list-tasks --env test
 ```
 查看所有可用的标签任务
+
+## 🔧 多环境配置系统
+
+### 支持的环境
+- `dev`: 开发环境
+- `test`: 测试环境（默认）
+- `pre`: 预发环境
+- `prod`: 生产环境
+
+### 环境配置文件
+配置文件位置: `src/config/config.yaml`
+```yaml
+# 测试环境示例
+test:
+  mysql:
+    host: cex-mysql-ex-test-cluster.cluster-c5mgk4qm8m2z.ap-southeast-1.rds.amazonaws.com
+    port: 3358
+    database: biz_user
+    user: ex_test_rw
+    password: NqaBacRMzCKRRqfEWb
+  spark:
+    app_name: TagComputeEngine-Test
+  hive:
+    database: dws_user
+```
+
+### 环境变量覆盖
+系统支持环境变量覆盖配置：
+```bash
+export MYSQL_HOST="your-host"
+export MYSQL_PORT="3306"
+export MYSQL_DATABASE="your-db"
+export MYSQL_USER="your-user"
+export MYSQL_PASSWORD="your-password"
+```
 
 ## 💡 最佳实践
 
 ### 1. 参数化工作流
 在工作流中使用全局参数:
+- `environment`: 环境配置 (dev/test/pre/prod)
 - `tag_ids`: 标签ID列表
-- `data_date`: 数据日期
 - `mode`: 执行模式
 
-### 2. 依赖管理
-无需额外安装Python依赖，使用集群预装的PySpark环境
+### 2. 环境管理策略
+- **测试环境**: 使用 `--env test` 进行功能验证
+- **生产环境**: 使用 `--env prod` 执行正式任务
+- **配置隔离**: 每个环境独立的MySQL和Spark配置
 
 ### 3. 错误处理
 - 设置任务失败重试次数: 2
 - 设置任务超时时间: 30分钟
 - 配置告警通知
+- 使用 `--verbose` 获取详细日志
 
 ### 4. 监控建议
 - 定期执行健康检查任务
 - 监控MySQL标签数据增长
 - 查看Spark UI资源使用情况
+- 跟踪不同环境的任务执行状态
 
 ## 🔧 故障排除
 
+### 配置文件问题
+```bash
+# 检查配置文件是否存在
+ls -la {extract_path}src/config/config.yaml
+
+# 验证YAML语法
+python3 -c "import yaml; yaml.safe_load(open('{extract_path}src/config/config.yaml'))"
+```
+
 ### MySQL连接问题
 - 检查网络连通性
-- 验证用户名密码
-- 确认数据库权限
+- 验证用户名密码和数据库权限
+- 确认环境配置正确性
 
 ### Hive表访问问题
 - 验证表是否存在
 - 检查分区数据
 - 确认权限配置
 
-### 性能优化
+### 环境切换问题
+- 确保使用正确的 `--env` 参数
+- 检查对应环境的配置项是否完整
+- 验证环境变量覆盖是否生效
+
+## ⚡ 性能优化
+
+### 生产环境优化配置
+生产环境已预配置性能优化项：
+```yaml
+prod:
+  spark:
+    configs:
+      spark.sql.adaptive.advisoryPartitionSizeInBytes: 128MB
+      spark.sql.adaptive.coalescePartitions.minPartitionSize: 20MB
+```
+
+### 资源调优建议
 - 根据数据量调整Executor配置
 - 考虑增加并行度
 - 优化SQL查询逻辑
+- 使用适当的Spark配置参数
+
+## 🚀 升级说明
+
+### 从旧版本升级
+1. 备份现有部署
+2. 上传新的部署包
+3. 更新工作流配置，添加 `--env` 参数
+4. 测试健康检查功能
+5. 逐步迁移到新的配置系统
 '''
         return guide
     
@@ -539,10 +284,7 @@ pymysql>=1.0.0       # MySQL连接器
         guide = '''# 🐬 海豚调度器图形界面部署指南
 
 ## 📦 部署包内容
-- `main.py` - 主程序入口
-- `src/` - 项目源码
-- `generate_test_data.py` - 测试数据生成器
-- `create_test_tables.sql` - 测试表创建SQL
+- `src/` - 项目源码（包含配置管理）
 - `requirements.txt` - Python依赖
 
 ## 🚀 部署步骤
@@ -562,17 +304,7 @@ pip3 install pymysql
 echo "✅ 安装MySQL连接器完成"
 ```
 
-### 3. 创建测试表和数据
-创建Spark任务执行：
-```bash
-# 主程序参数
---mode generate-test-data --dt 2025-01-20
-
-# 或者先创建表
-spark-sql -f create_test_tables.sql
-```
-
-### 4. 健康检查
+### 3. 健康检查
 创建Spark任务测试：
 ```bash
 # 主程序参数  
@@ -595,9 +327,6 @@ spark-sql -f create_test_tables.sql
 ```bash
 # 健康检查
 --mode health
-
-# 生成测试数据
---mode generate-test-data --dt 2025-01-20
 
 # 全量标签计算
 --mode task-all
@@ -647,19 +376,11 @@ client.triggerWorkflow("tag_system_compute", Map.of(
                         else:
                             print(f"  📦 添加依赖文件: {arc_name}")
             
-            # 不创建重复的main.py，保持原有的src目录结构
-            # 用户应该直接使用: bigdata_tag_system/src/tag_engine/main.py
-            print("  ✅ 保持原有目录结构，main.py位置: src/tag_engine/main.py")
+            # 保持干净的项目结构，只有一个主程序入口
+            print("  ✅ 主程序位置: src/tag_engine/main.py")
             
-            # 添加测试数据生成器
-            test_generator = self.create_test_data_generator()
-            zip_file.writestr("generate_test_data.py", test_generator)
-            print("  ✅ 添加测试数据生成器: generate_test_data.py")
-            
-            # 添加建表SQL
-            create_tables_sql = self.create_hive_test_tables()
-            zip_file.writestr("create_test_tables.sql", create_tables_sql)
-            print("  ✅ 添加建表SQL: create_test_tables.sql")
+            # 配置文件已经在src目录遍历时添加过了，不需要重复添加
+            print("  ✅ 配置文件已包含: src/config/config.yaml")
             
             # 添加依赖文件
             requirements = self.create_requirements()

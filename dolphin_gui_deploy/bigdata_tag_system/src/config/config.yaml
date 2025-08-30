@@ -1,0 +1,89 @@
+# 标签系统多环境配置文件
+# 支持环境：dev(开发)、test(测试)、pre(预发)、prod(生产)
+
+# 开发环境配置
+dev:
+  mysql:
+    host: rm-3ns765y13i6wf0hp3.mysql.rds.aliyuncs.com
+    port: 3358
+    database: biz_user
+    user: dev_rw
+    password: nLjE49a20!h6vhHF
+    charset: utf8mb4
+  
+  spark:
+    app_name: TagComputeEngine-Dev
+    configs:
+      spark.sql.adaptive.enabled: "true"
+      spark.sql.adaptive.coalescePartitions.enabled: "true"
+      spark.sql.adaptive.skewJoin.enabled: "true"
+      spark.serializer: org.apache.spark.serializer.KryoSerializer
+  
+  hive:
+    database: dws_user
+
+# 测试环境配置
+test:
+  mysql:
+    host: cex-mysql-ex-test-cluster.cluster-c5mgk4qm8m2z.ap-southeast-1.rds.amazonaws.com
+    port: 3358
+    database: biz_user
+    user: ex_test_rw
+    password: NqaBacRMzCKRRqfEWb
+    charset: utf8mb4
+  
+  spark:
+    app_name: TagComputeEngine-Test
+    configs:
+      spark.sql.adaptive.enabled: "true"
+      spark.sql.adaptive.coalescePartitions.enabled: "true"
+      spark.sql.adaptive.skewJoin.enabled: "true"
+      spark.serializer: org.apache.spark.serializer.KryoSerializer
+  
+  hive:
+    database: dws_user
+
+# 预发环境配置
+pre:
+  mysql:
+    host: cex-mysql-ex-pre-aurora-cluster.cluster-c5mgk4qm8m2z.ap-southeast-1.rds.amazonaws.com
+    port: 3358
+    database: biz_user
+    user: biz_user_rw
+    password: kWPOmxpp3aLS7sKi
+    charset: utf8mb4
+  
+  spark:
+    app_name: TagComputeEngine-Pre
+    configs:
+      spark.sql.adaptive.enabled: "true"
+      spark.sql.adaptive.coalescePartitions.enabled: "true"
+      spark.sql.adaptive.skewJoin.enabled: "true"
+      spark.serializer: org.apache.spark.serializer.KryoSerializer
+  
+  hive:
+    database: dws_user
+
+# 生产环境配置
+prod:
+  mysql:
+    host: cex-db-biz-prod.cluster-c5mgk4qm8m2z.ap-southeast-1.rds.amazonaws.com
+    port: 3358
+    database: biz_user
+    user: bigdata_biz_user_rw
+    password: sqinM4bzmBjE7SL
+    charset: utf8mb4
+  
+  spark:
+    app_name: TagComputeEngine-Prod
+    configs:
+      spark.sql.adaptive.enabled: "true"
+      spark.sql.adaptive.coalescePartitions.enabled: "true"
+      spark.sql.adaptive.skewJoin.enabled: "true"
+      spark.serializer: org.apache.spark.serializer.KryoSerializer
+      # 生产环境额外优化配置
+      # spark.sql.adaptive.advisoryPartitionSizeInBytes: 128MB
+      # spark.sql.adaptive.coalescePartitions.minPartitionSize: 20MB
+  
+  hive:
+    database: dws_user

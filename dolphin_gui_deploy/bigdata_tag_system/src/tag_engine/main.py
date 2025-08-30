@@ -3,157 +3,109 @@
 """
 标签计算系统命令行入口
 支持多种执行模式和参数配置
+支持多环境配置：dev/test/pre/prod
 """
 import sys
 import os
 import argparse
+import yaml
 from typing import List, Optional, Dict
 from pyspark.sql import SparkSession
 
-# 智能导入策略 - 支持Client/Cluster双模式
-current_dir = os.path.dirname(os.path.abspath(__file__))
-
-# 动态导入TagEngine
-TagEngine = None
-import_success = False
-
-# 策略1: 尝试绝对路径导入（Client模式）
+# 导入TagEngine
 try:
+    from tag_engine.engine.TagEngine import TagEngine
+except ImportError:
+    # 添加项目根路径到sys.path以支持从项目根目录执行
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
     from src.tag_engine.engine.TagEngine import TagEngine
-    import_success = True
-    print("✅ 绝对路径导入成功")
-except ImportError as e:
-    print(f"❌ 绝对路径导入失败: {e}")
-
-# 策略2: 添加当前目录到sys.path，然后尝试相对导入（Cluster模式）
-if not import_success:
-    try:
-        # 添加当前包目录到Python路径
-        package_root = os.path.dirname(current_dir)  # src目录
-        if package_root not in sys.path:
-            sys.path.insert(0, package_root)
-        
-        from tag_engine.engine.TagEngine import TagEngine
-        import_success = True
-        print("✅ 包级导入成功")
-    except Exception as e:
-        print(f"❌ 包级导入失败: {e}")
-
-# 策略3: 尝试从ZIP文件导入（Cluster ZIP模式）
-if not import_success:
-    try:
-        # 查找ZIP文件路径
-        for path in sys.path:
-            if 'bigdata_tag_system.zip' in path:
-                zip_path = path
-                print(f"🔍 找到ZIP文件: {zip_path}")
-                
-                # 添加ZIP内的src目录到路径
-                zip_src_path = zip_path + "/src"
-                if zip_src_path not in sys.path:
-                    sys.path.insert(0, zip_src_path)
-                    print(f"🔍 添加ZIP src路径: {zip_src_path}")
-                
-                from tag_engine.engine.TagEngine import TagEngine
-                import_success = True
-                print("✅ ZIP文件导入成功")
-                break
-    except Exception as e:
-        print(f"❌ ZIP文件导入失败: {e}")
-
-# 策略4: 尝试工作目录导入（最后的尝试）
-if not import_success:
-    try:
-        # 检查工作目录下是否有解压的文件
-        cwd = os.getcwd()
-        print(f"🔍 当前工作目录: {cwd}")
-        
-        # 尝试添加可能的解压路径
-        possible_paths = [
-            os.path.join(cwd, "src"),
-            os.path.join(cwd, "bigdata_tag_system", "src"),
-            cwd
-        ]
-        
-        for path in possible_paths:
-            if os.path.exists(path):
-                engine_path = os.path.join(path, "tag_engine", "engine", "TagEngine.py")
-                if os.path.exists(engine_path):
-                    if path not in sys.path:
-                        sys.path.insert(0, path)
-                        print(f"🔍 添加工作目录路径: {path}")
-                    
-                    from tag_engine.engine.TagEngine import TagEngine
-                    import_success = True
-                    print("✅ 工作目录导入成功")
-                    break
-    except Exception as e:
-        print(f"❌ 工作目录导入失败: {e}")
-
-# 最终检查
-if not import_success or TagEngine is None:
-    print("❌ 所有导入策略都失败，系统无法继续")
-    sys.exit(1)
-else:
-    print("🎉 TagEngine导入成功")
 
 
-def create_spark_session(app_name: str = "TagComputeEngine") -> SparkSession:
+def create_spark_session(config: Dict[str, any]) -> SparkSession:
     """创建Spark会话
     
     Args:
-        app_name: 应用程序名称
+        config: 包含spark配置的字典
         
     Returns:
-        SparkSession: Spark会话
+        SparkSession: Spark会话实例
     """
+    spark_config = config.get("spark", {})
+    app_name = spark_config.get("app_name", "TagComputeEngine")
+    spark_configs = spark_config.get("configs", {})
+    
     print(f"🚀 创建Spark会话: {app_name}")
     
-    spark = SparkSession.builder \
-        .appName(app_name) \
-        .enableHiveSupport() \
-        .config("spark.sql.adaptive.enabled", "true") \
-        .config("spark.sql.adaptive.coalescePartitions.enabled", "true") \
-        .config("spark.sql.adaptive.skewJoin.enabled", "true") \
-        .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer") \
-        .getOrCreate()
+    builder = SparkSession.builder.appName(app_name).enableHiveSupport()
+    
+    # 应用所有Spark配置
+    for key, value in spark_configs.items():
+        builder = builder.config(key, value)
+    
+    spark = builder.getOrCreate()
     
     # 设置日志级别
     spark.sparkContext.setLogLevel("WARN")
     
     print(f"✅ Spark会话创建完成，版本: {spark.version}")
+    print(f"📋 应用配置数: {len(spark_configs)}")
     return spark
 
 
-def load_mysql_config() -> Dict[str, str]:
-    """加载MySQL配置
+def load_config(environment: str = "test") -> Dict[str, any]:
+    """从YAML配置文件加载环境配置
     
+    Args:
+        environment: 环境标识 (dev/test/pre/prod)
+        
     Returns:
-        Dict: MySQL配置字典
+        Dict: 完整的环境配置
     """
-    # 从环境变量或配置文件加载
-    # 海豚调度器环境使用统一配置
-    import os
-
-    return {
-        "host": os.getenv("MYSQL_HOST",
-                          "rm-3ns765y13i6wf0hp3.mysql.rds.aliyuncs.com"),
-        "port": int(os.getenv("MYSQL_PORT", "3358")),
-        "database": os.getenv("MYSQL_DATABASE", "biz_user"),
-        "user": os.getenv("MYSQL_USER", "dev_rw"),
-        "password": os.getenv("MYSQL_PASSWORD", "nLjE49a20!h6vhHF"),
-        "charset": "utf8mb4"
-    }
-
-    # return {
-    #     "host": os.getenv("MYSQL_HOST",
-    #                       "cex-mysql-ex-test-cluster.cluster-c5mgk4qm8m2z.ap-southeast-1.rds.amazonaws.com"),
-    #     "port": int(os.getenv("MYSQL_PORT", "3358")),
-    #     "database": os.getenv("MYSQL_DATABASE", "biz_statistics"),
-    #     "user": os.getenv("MYSQL_USER", "ex_test_rw"),
-    #     "password": os.getenv("MYSQL_PASSWORD", "NqaBacRMzCKRRqfEWb"),
-    #     "charset": "utf8mb4"
-    # }
+    # 查找配置文件路径
+    config_file = None
+    possible_paths = [
+        os.path.join(os.path.dirname(__file__), "..", "config", "config.yaml"),  # 相对路径
+        os.path.join(os.getcwd(), "src", "config", "config.yaml"),  # 工作目录
+        os.path.join("/", "opt", "bigdata_tag_system", "src", "config", "config.yaml"),  # 部署路径
+        # DolphinScheduler部署路径
+        os.path.join(os.getcwd(), "dolphinscheduler", "default", "resources", "bigdata_tag_system", "src", "config", "config.yaml"),
+        os.path.join(os.getcwd(), "dolphinscheduler", "default", "resources", "src", "config", "config.yaml"),
+        # 从__file__路径推导 - 最关键的路径
+        os.path.join(os.path.dirname(os.path.dirname(__file__)), "config", "config.yaml")
+    ]
+    
+    for path in possible_paths:
+        if os.path.exists(path):
+            config_file = path
+            break
+    
+    if not config_file:
+        raise FileNotFoundError("❌ 配置文件未找到，请确保 config.yaml 文件存在于正确路径")
+    
+    try:
+        with open(config_file, 'r', encoding='utf-8') as file:
+            all_configs = yaml.safe_load(file)
+        
+        if environment not in all_configs:
+            available_envs = list(all_configs.keys())
+            raise ValueError(f"不支持的环境: {environment}，支持的环境：{available_envs}")
+        
+        config = all_configs[environment]
+        
+        # 环境变量覆盖MySQL配置
+        if "mysql" in config:
+            mysql_config = config["mysql"]
+            mysql_config["host"] = os.getenv("MYSQL_HOST", mysql_config.get("host"))
+            mysql_config["port"] = int(os.getenv("MYSQL_PORT", str(mysql_config.get("port", 3306))))
+            mysql_config["database"] = os.getenv("MYSQL_DATABASE", mysql_config.get("database"))
+            mysql_config["user"] = os.getenv("MYSQL_USER", mysql_config.get("user"))
+            mysql_config["password"] = os.getenv("MYSQL_PASSWORD", mysql_config.get("password"))
+        
+        print(f"✅ 成功加载 {environment.upper()} 环境配置: {config_file}")
+        return config
+        
+    except Exception as e:
+        raise RuntimeError(f"❌ 配置文件加载失败: {e}")
 
 
 def parse_tag_ids(tag_ids_str: Optional[str]) -> Optional[List[int]]:
@@ -176,361 +128,6 @@ def parse_tag_ids(tag_ids_str: Optional[str]) -> Optional[List[int]]:
         return None
 
 
-def generate_comprehensive_test_data(spark) -> bool:
-    """生成完整的测试数据，匹配新的DWS层表结构
-    
-    Args:
-        spark: SparkSession
-        
-    Returns:
-        bool: 生成是否成功
-    """
-    try:
-        # 创建DWS数据库
-        spark.sql("CREATE DATABASE IF NOT EXISTS dws_user")
-        print("✅ 数据库 dws_user 创建成功")
-        
-        print("🏗️ 创建DWS层表结构...")
-        
-        # 1. 用户基础画像表
-        spark.sql("""
-            CREATE TABLE IF NOT EXISTS dws_user.dws_user_profile_df (
-                user_id STRING,
-                register_time STRING,
-                register_source_channel STRING,
-                register_method STRING,
-                register_country STRING,
-                is_kyc_completed STRING,
-                kyc_country STRING,
-                is_2fa_enabled STRING,
-                user_level STRING,
-                is_agent STRING
-            ) USING HIVE
-            STORED AS PARQUET
-        """)
-        
-        # 2. 用户资产财务表
-        spark.sql("""
-            CREATE TABLE IF NOT EXISTS dws_user.dws_user_asset_df (
-                user_id STRING,
-                total_deposit_amount STRING,
-                total_withdraw_amount STRING,
-                net_deposit_amount STRING,
-                last_deposit_time STRING,
-                last_withdraw_time STRING,
-                withdraw_count_30d STRING,
-                deposit_fail_count STRING,
-                spot_position_value STRING,
-                contract_position_value STRING,
-                finance_position_value STRING,
-                onchain_position_value STRING,
-                current_total_position_value STRING,
-                spot_available_balance STRING,
-                contract_available_balance STRING,
-                onchain_available_balance STRING,
-                available_balance STRING,
-                spot_locked_amount STRING,
-                contract_locked_amount STRING,
-                finance_locked_amount STRING,
-                onchain_locked_amount STRING,
-                locked_amount STRING
-            ) USING HIVE
-            STORED AS PARQUET
-        """)
-        
-        # 3. 用户交易行为表
-        spark.sql("""
-            CREATE TABLE IF NOT EXISTS dws_user.dws_user_trading_df (
-                user_id STRING,
-                spot_trading_volume STRING,
-                contract_trading_volume STRING,
-                spot_recent_30d_volume STRING,
-                contract_recent_30d_volume STRING,
-                spot_trade_count STRING,
-                contract_trade_count STRING,
-                finance_trade_count STRING,
-                onchain_trade_count STRING,
-                first_trade_time STRING,
-                last_trade_time STRING,
-                has_contract_trading STRING,
-                contract_trading_style STRING,
-                has_finance_management STRING,
-                has_pending_orders STRING
-            ) USING HIVE
-            STORED AS PARQUET
-        """)
-        
-        # 4. 用户活跃行为表
-        spark.sql("""
-            CREATE TABLE IF NOT EXISTS dws_user.dws_user_activity_df (
-                user_id STRING,
-                days_since_register STRING,
-                days_since_last_login STRING,
-                last_login_time STRING,
-                last_activity_time STRING,
-                login_count_7d STRING,
-                login_ip_address STRING,
-                country_region_code STRING,
-                email_suffix STRING,
-                operating_system STRING
-            ) USING HIVE
-            STORED AS PARQUET
-        """)
-        
-        # 5. 用户风险风控表
-        spark.sql("""
-            CREATE TABLE IF NOT EXISTS dws_user.dws_user_risk_df (
-                user_id STRING,
-                is_blacklist_user STRING,
-                is_high_risk_ip STRING,
-                channel_source STRING
-            ) USING HIVE
-            STORED AS PARQUET
-        """)
-        
-        # 6. 用户营销激励表
-        spark.sql("""
-            CREATE TABLE IF NOT EXISTS dws_user.dws_user_marketing_df (
-                user_id STRING,
-                red_packet_count STRING,
-                successful_invites_count STRING,
-                commission_rate STRING,
-                total_commission_amount STRING
-            ) USING HIVE
-            STORED AS PARQUET
-        """)
-        
-        # 7. 用户行为偏好表
-        spark.sql("""
-            CREATE TABLE IF NOT EXISTS dws_user.dws_user_behavior_df (
-                user_id STRING,
-                current_holding_coins ARRAY<STRING>,
-                traded_coins_list ARRAY<STRING>,
-                device_fingerprint_list ARRAY<STRING>,
-                participated_activity_ids ARRAY<STRING>,
-                reward_claim_history ARRAY<STRING>,
-                used_coupon_types ARRAY<STRING>
-            ) USING HIVE
-            STORED AS PARQUET
-        """)
-        
-        print("✅ DWS层表结构创建完成")
-        
-        # 生成DWS层测试数据
-        print("📊 生成DWS层测试数据...")
-        
-        import random
-        from datetime import datetime, timedelta
-        
-        # 生成1000个用户的数据
-        user_count = 1000
-        
-        # 1. 用户基础画像数据
-        profile_data = []
-        for i in range(user_count):
-            user_id = f"user_{i+1:05d}"
-            register_time = (datetime(2020, 1, 1) + timedelta(days=random.randint(0, 1500))).strftime("%Y-%m-%d %H:%M:%S")
-            
-            profile_data.append((
-                user_id,
-                register_time,
-                random.choice(["官网", "APP", "推荐", "广告"]),
-                random.choice(["邮箱", "手机"]),
-                random.choice(["CN", "US", "SG", "JP"]),
-                random.choice(["true", "false"]),
-                random.choice(["CN", "US", "SG", "JP"]),
-                random.choice(["true", "false"]),
-                random.choice(["VIP1", "VIP2", "VIP3", "VIP4", "NORMAL"]),
-                random.choice(["true", "false"])
-            ))
-        
-        profile_df = spark.createDataFrame(profile_data, [
-            "user_id", "register_time", "register_source_channel", "register_method", "register_country",
-            "is_kyc_completed", "kyc_country", "is_2fa_enabled", "user_level", "is_agent"
-        ])
-        
-        # 2. 用户资产数据
-        asset_data = []
-        for i in range(user_count):
-            user_id = f"user_{i+1:05d}"
-            
-            # 生成资产数据，使用字符串类型
-            spot_position = str(random.choice([0, 5000, 25000, 50000, 100000]))
-            contract_position = str(random.choice([0, 10000, 50000, 100000, 200000]))
-            finance_position = str(random.choice([0, 20000, 50000, 100000, 300000]))
-            onchain_position = str(random.choice([0, 5000, 10000, 25000, 50000]))
-            
-            total_position = str(int(spot_position) + int(contract_position) + int(finance_position) + int(onchain_position))
-            
-            asset_data.append((
-                user_id,
-                str(random.randint(0, 1000000)),  # total_deposit_amount
-                str(random.randint(0, 500000)),   # total_withdraw_amount
-                str(random.randint(-100000, 500000)),  # net_deposit_amount
-                (datetime.now() - timedelta(days=random.randint(1, 365))).strftime("%Y-%m-%d %H:%M:%S"),
-                (datetime.now() - timedelta(days=random.randint(1, 180))).strftime("%Y-%m-%d %H:%M:%S"),
-                str(random.randint(0, 10)),       # withdraw_count_30d
-                str(random.randint(0, 5)),        # deposit_fail_count
-                spot_position,
-                contract_position,
-                finance_position,
-                onchain_position,
-                total_position,
-                str(random.randint(0, 50000)),    # spot_available_balance
-                str(random.randint(0, 100000)),   # contract_available_balance
-                str(random.randint(0, 25000)),    # onchain_available_balance
-                str(random.randint(0, 175000)),   # available_balance
-                str(random.randint(0, 10000)),    # spot_locked_amount
-                str(random.randint(0, 50000)),    # contract_locked_amount
-                str(random.randint(0, 100000)),   # finance_locked_amount
-                str(random.randint(0, 25000)),    # onchain_locked_amount
-                str(random.randint(0, 185000))    # locked_amount
-            ))
-        
-        asset_df = spark.createDataFrame(asset_data, [
-            "user_id", "total_deposit_amount", "total_withdraw_amount", "net_deposit_amount",
-            "last_deposit_time", "last_withdraw_time", "withdraw_count_30d", "deposit_fail_count",
-            "spot_position_value", "contract_position_value", "finance_position_value", "onchain_position_value", "current_total_position_value",
-            "spot_available_balance", "contract_available_balance", "onchain_available_balance", "available_balance",
-            "spot_locked_amount", "contract_locked_amount", "finance_locked_amount", "onchain_locked_amount", "locked_amount"
-        ])
-        
-        # 3. 用户交易行为数据
-        trading_data = []
-        for i in range(user_count):
-            user_id = f"user_{i+1:05d}"
-            
-            trading_data.append((
-                user_id,
-                str(random.randint(0, 500000)),   # spot_trading_volume
-                str(random.randint(0, 1000000)),  # contract_trading_volume
-                str(random.randint(0, 50000)),    # spot_recent_30d_volume
-                str(random.randint(0, 100000)),   # contract_recent_30d_volume
-                str(random.randint(0, 100)),      # spot_trade_count
-                str(random.randint(0, 200)),      # contract_trade_count
-                str(random.randint(0, 50)),       # finance_trade_count
-                str(random.randint(0, 20)),       # onchain_trade_count
-                (datetime.now() - timedelta(days=random.randint(30, 1000))).strftime("%Y-%m-%d %H:%M:%S"),
-                (datetime.now() - timedelta(days=random.randint(1, 30))).strftime("%Y-%m-%d %H:%M:%S"),
-                random.choice(["true", "false"]),
-                random.choice(["激进", "稳健", "保守"]),
-                random.choice(["true", "false"]),
-                random.choice(["true", "false"])
-            ))
-        
-        trading_df = spark.createDataFrame(trading_data, [
-            "user_id", "spot_trading_volume", "contract_trading_volume", "spot_recent_30d_volume", "contract_recent_30d_volume",
-            "spot_trade_count", "contract_trade_count", "finance_trade_count", "onchain_trade_count",
-            "first_trade_time", "last_trade_time", "has_contract_trading", "contract_trading_style", "has_finance_management", "has_pending_orders"
-        ])
-        
-        # 4. 用户活跃行为数据
-        activity_data = []
-        for i in range(user_count):
-            user_id = f"user_{i+1:05d}"
-            
-            activity_data.append((
-                user_id,
-                str(random.randint(1, 1500)),     # days_since_register
-                str(random.randint(0, 30)),       # days_since_last_login
-                (datetime.now() - timedelta(days=random.randint(0, 30))).strftime("%Y-%m-%d %H:%M:%S"),
-                (datetime.now() - timedelta(hours=random.randint(1, 72))).strftime("%Y-%m-%d %H:%M:%S"),
-                str(random.randint(0, 10)),       # login_count_7d
-                f"192.168.{random.randint(1, 255)}.{random.randint(1, 255)}",
-                random.choice(["CN", "US", "SG", "JP", "UK"]),
-                random.choice(["gmail.com", "yahoo.com", "qq.com", "163.com"]),
-                random.choice(["Windows", "macOS", "iOS", "Android", "Linux"])
-            ))
-        
-        activity_df = spark.createDataFrame(activity_data, [
-            "user_id", "days_since_register", "days_since_last_login", "last_login_time", "last_activity_time",
-            "login_count_7d", "login_ip_address", "country_region_code", "email_suffix", "operating_system"
-        ])
-        
-        # 5. 用户风险数据
-        risk_data = []
-        for i in range(user_count):
-            user_id = f"user_{i+1:05d}"
-            
-            risk_data.append((
-                user_id,
-                random.choice(["true", "false", "false", "false"]),  # 大部分不是黑名单
-                random.choice(["true", "false", "false"]),           # 少数高风险IP
-                random.choice(["官网", "推荐", "广告", "合作伙伴"])
-            ))
-        
-        risk_df = spark.createDataFrame(risk_data, [
-            "user_id", "is_blacklist_user", "is_high_risk_ip", "channel_source"
-        ])
-        
-        # 6. 用户营销数据
-        marketing_data = []
-        for i in range(user_count):
-            user_id = f"user_{i+1:05d}"
-            
-            marketing_data.append((
-                user_id,
-                str(random.randint(0, 20)),       # red_packet_count
-                str(random.randint(0, 10)),       # successful_invites_count
-                str(random.choice(["0.01", "0.02", "0.05", "0.1"])),  # commission_rate
-                str(random.randint(0, 10000))     # total_commission_amount
-            ))
-        
-        marketing_df = spark.createDataFrame(marketing_data, [
-            "user_id", "red_packet_count", "successful_invites_count", "commission_rate", "total_commission_amount"
-        ])
-        
-        # 7. 用户行为偏好数据
-        behavior_data = []
-        coins = ["BTC", "ETH", "BNB", "USDT", "ADA", "DOT", "LINK", "UNI"]
-        activities = ["新人活动", "交易赛", "理财活动", "推荐活动"]
-        rewards = ["现金", "代币", "手续费减免", "VIP权益"]
-        coupons = ["交易券", "理财券", "手续费券"]
-        
-        for i in range(user_count):
-            user_id = f"user_{i+1:05d}"
-            
-            behavior_data.append((
-                user_id,
-                random.sample(coins, random.randint(1, 4)),
-                random.sample(coins, random.randint(2, 6)),
-                [f"device_{random.randint(1000, 9999)}" for _ in range(random.randint(1, 3))],
-                random.sample(activities, random.randint(0, 2)),
-                random.sample(rewards, random.randint(0, 3)),
-                random.sample(coupons, random.randint(0, 2))
-            ))
-        
-        behavior_df = spark.createDataFrame(behavior_data, [
-            "user_id", "current_holding_coins", "traded_coins_list", "device_fingerprint_list",
-            "participated_activity_ids", "reward_claim_history", "used_coupon_types"
-        ])
-        
-        # 插入数据
-        print("💾 插入DWS层测试数据...")
-        profile_df.write.mode("overwrite").insertInto("dws_user.dws_user_profile_df")
-        asset_df.write.mode("overwrite").insertInto("dws_user.dws_user_asset_df")
-        trading_df.write.mode("overwrite").insertInto("dws_user.dws_user_trading_df")
-        activity_df.write.mode("overwrite").insertInto("dws_user.dws_user_activity_df")
-        risk_df.write.mode("overwrite").insertInto("dws_user.dws_user_risk_df")
-        marketing_df.write.mode("overwrite").insertInto("dws_user.dws_user_marketing_df")
-        behavior_df.write.mode("overwrite").insertInto("dws_user.dws_user_behavior_df")
-        
-        # 验证数据
-        print("🔍 验证生成的DWS层测试数据...")
-        dws_tables = ["dws_user_profile_df", "dws_user_asset_df", "dws_user_trading_df", 
-                      "dws_user_activity_df", "dws_user_risk_df", "dws_user_marketing_df", "dws_user_behavior_df"]
-        for table in dws_tables:
-            count = spark.sql(f"SELECT COUNT(*) as cnt FROM dws_user.{table}").collect()[0]['cnt']
-            print(f"   📊 dws_user.{table}: {count} 条记录")
-        
-        print("🎯 DWS层测试数据生成完成，已确保多样性匹配所有标签条件")
-        return True
-        
-    except Exception as e:
-        print(f"❌ 测试数据生成失败: {e}")
-        import traceback
-        traceback.print_exc()
-        return False
 
 
 def main():
@@ -559,6 +156,13 @@ def main():
         action="store_true",
         help="详细输出模式"
     )
+    parser.add_argument(
+        "--env", "--environment",
+        type=str,
+        default="test",
+        choices=["dev", "test", "pre", "prod"],
+        help="环境配置 (dev/test/pre/prod)"
+    )
     
     args = parser.parse_args()
     
@@ -581,12 +185,14 @@ def main():
     tag_engine = None
     
     try:
-        # 1. 创建Spark会话
-        spark = create_spark_session(args.app_name)
+        # 1. 加载环境配置
+        print(f"🔧 加载环境配置: {args.env.upper()}")
+        config = load_config(args.env)
+        mysql_config = config.get("mysql", {})
+        print(f"MySQL配置: {mysql_config.get('host', 'N/A')}:{mysql_config.get('port', 'N/A')}/{mysql_config.get('database', 'N/A')}")
         
-        # 2. 加载配置
-        mysql_config = load_mysql_config()
-        print(f"MySQL配置: {mysql_config['host']}:{mysql_config['port']}/{mysql_config['database']}")
+        # 2. 创建Spark会话
+        spark = create_spark_session(config)
         
         # 3. 创建标签引擎（HiveMeta内部自动处理当天分区）
         tag_engine = TagEngine(spark, mysqlConfig=mysql_config)
@@ -620,87 +226,27 @@ def main():
                 print("✅ 所有指定标签计算成功")
             
         elif args.mode == "generate-test-data":
-            print("\n🧪 生成测试数据...")
-            # 先创建数据库
-            spark.sql("CREATE DATABASE IF NOT EXISTS tag_system")
-            spark.sql("CREATE DATABASE IF NOT EXISTS dws_user")
-            print("✅ 数据库 tag_system 和 dws_user 创建成功")
-            
-            # 使用部署包中的测试数据生成器
-            try:
-                # 尝试导入部署包中的测试数据生成器（海豚调度器环境）
-                from generate_test_data import generate_test_data
-                generate_test_data(spark)
-                success = True
-                print("✅ 测试数据生成完成")
-            except ImportError:
-                # 如果找不到部署包的生成器，使用内置生成器
-                print("🔄 使用内置测试数据生成器...")
-                success = generate_comprehensive_test_data(spark)
-                if success:
-                    print("✅ 内置测试数据生成完成")
-                else:
-                    print("❌ 内置测试数据生成失败")
+            print("\n⚠️  测试数据生成功能已移除")
+            print("请使用独立的测试数据生成脚本")
+            success = False
             
         elif args.mode == "list-tasks":
             print("\n📋 列出可用标签任务...")
             
-            # 智能导入MysqlMeta
-            MysqlMeta = None
-            mysql_import_success = False
-            
-            # 策略1: 绝对路径导入
             try:
-                from src.tag_engine.meta.MysqlMeta import MysqlMeta
-                mysql_import_success = True
-                print("✅ MysqlMeta绝对路径导入成功")
-            except ImportError:
-                print("❌ MysqlMeta绝对路径导入失败")
-            
-            # 策略2: 包级导入
-            if not mysql_import_success:
                 try:
                     from tag_engine.meta.MysqlMeta import MysqlMeta
-                    mysql_import_success = True
-                    print("✅ MysqlMeta包级导入成功")
                 except ImportError:
-                    print("❌ MysqlMeta包级导入失败")
-            
-            # 策略3: ZIP文件导入
-            if not mysql_import_success:
-                try:
-                    # 确保ZIP路径已添加
-                    for path in sys.path:
-                        if 'bigdata_tag_system.zip' in path:
-                            zip_src_path = path + "/src"
-                            if zip_src_path not in sys.path:
-                                sys.path.insert(0, zip_src_path)
-                                print(f"🔍 添加ZIP src路径到MysqlMeta导入: {zip_src_path}")
+                    from src.tag_engine.meta.MysqlMeta import MysqlMeta
                     
-                    from tag_engine.meta.MysqlMeta import MysqlMeta
-                    mysql_import_success = True
-                    print("✅ MysqlMeta ZIP文件导入成功")
-                except Exception as e:
-                    print(f"❌ MysqlMeta ZIP文件导入失败: {e}")
-            
-            # 最终检查
-            if not mysql_import_success:
-                print("❌ 所有MysqlMeta导入策略都失败")
-                MysqlMeta = None
-            
-            if mysql_import_success and MysqlMeta:
-                try:
-                    mysql_meta = MysqlMeta(spark, mysql_config)
-                    tags = mysql_meta.loadTagRules()
-                    print("可用标签任务:")
-                    for tag in tags.collect():
-                        print(f"  {tag.tag_id}: {tag.tag_name if hasattr(tag, 'tag_name') else '未知标签'}")
-                    success = True
-                except Exception as e:
-                    print(f"❌ 获取标签列表失败: {e}")
-                    success = False
-            else:
-                print("❌ 无法导入MysqlMeta，跳过任务列表显示")
+                mysql_meta = MysqlMeta(spark, mysql_config)
+                tags = mysql_meta.loadTagRules()
+                print("可用标签任务:")
+                for tag in tags.collect():
+                    print(f"  {tag.tag_id}: {tag.tag_name if hasattr(tag, 'tag_name') else '未知标签'}")
+                success = True
+            except Exception as e:
+                print(f"❌ 获取标签列表失败: {e}")
                 success = False
         
         # 5. 输出结果
