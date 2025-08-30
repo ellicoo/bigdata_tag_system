@@ -21,19 +21,26 @@
 ## 项目结构
 
 ```
-src/tag_engine/
-├── main.py                 # 命令行入口，支持多种执行模式
-├── engine/                 # 核心计算引擎
-│   ├── TagEngine.py       # 主编排引擎，工作流协调
-│   └── TagGroup.py        # 智能分组，基于表依赖的并行处理
-├── meta/                  # 数据源管理
-│   ├── HiveMeta.py        # Hive表操作，智能缓存与优化
-│   └── MysqlMeta.py       # MySQL规则和结果管理
-├── parser/                # 规则解析与SQL生成
-│   └── TagRuleParser.py   # JSON规则转SQL条件
-└── utils/                 # 工具函数和Spark内置函数封装
-    ├── SparkUdfs.py       # 智能标签合并函数集合
-    └── tagExpressionUtils.py  # 并行标签表达式构建工具
+src/
+├── config/                 # 多环境配置管理
+│   └── config.yaml        # 统一配置文件（dev/test/pre/prod）
+└── tag_engine/
+    ├── main.py            # 命令行入口，支持多种执行模式和环境切换
+    ├── engine/            # 核心计算引擎
+    │   ├── TagEngine.py   # 主编排引擎，工作流协调，FULL JOIN智能合并
+    │   └── TagGroup.py    # 智能分组，基于表依赖的并行处理
+    ├── meta/              # 数据源管理
+    │   ├── HiveMeta.py    # Hive表操作，智能缓存与优化
+    │   └── MysqlMeta.py   # MySQL规则和结果管理，跨库临时表支持
+    ├── parser/            # 规则解析与SQL生成
+    │   └── TagRuleParser.py # JSON规则转SQL条件
+    └── utils/             # 工具函数和Spark内置函数封装
+        ├── SparkUdfs.py   # 智能标签替换函数集合
+        └── tagExpressionUtils.py # 并行标签表达式构建工具
+
+dolphin_gui_deploy/        # DolphinScheduler部署包
+├── 部署说明.md            # 详细部署指南
+└── bigdata_tag_system.zip # 生成的部署包（通过dolphin_deploy_package.py生成）
 ```
 
 ## 🚀 智能标签更新机制 - 核心创新
@@ -177,6 +184,28 @@ filteredDF = joinedDF.filter(
 
 ## 快速开始
 
+### 多环境配置
+
+系统支持多环境配置，通过 `src/config/config.yaml` 统一管理：
+
+```yaml
+# 支持的环境
+dev:    # 开发环境
+test:   # 测试环境  
+pre:    # 预发环境
+prod:   # 生产环境
+```
+
+#### 环境切换命令
+```bash
+# 指定环境运行（推荐）
+python src/tag_engine/main.py --environment prod --mode health
+python src/tag_engine/main.py --environment test --mode task-all
+
+# 默认为dev环境
+python src/tag_engine/main.py --mode health  # 等同于 --environment dev
+```
+
 ### 本地开发环境
 
 ```bash
@@ -189,13 +218,13 @@ cd environments/local
 
 # 3. 运行健康检查
 cd ../../
-python src/tag_engine/main.py --mode health
+python src/tag_engine/main.py --environment dev --mode health
 
 # 4. 执行全量标签计算
-python src/tag_engine/main.py --mode task-all
+python src/tag_engine/main.py --environment dev --mode task-all
 
 # 5. 计算指定标签
-python src/tag_engine/main.py --mode task-tags --tag-ids 1,2,3
+python src/tag_engine/main.py --environment dev --mode task-tags --tag-ids 1,2,3
 ```
 
 ### 海豚调度器部署
@@ -266,7 +295,7 @@ user002: [when(25>=30,1)→null, when(5000>=10000,2)→null, when(2>5,3)→null]
 user003: [when(40>=30,1)→1, when(8000>=10000,2)→null, when(12>5,3)→3]
          → array_remove([1,null,3], null) → [1,3]
 
-第5步：最终聚合结果 (保留所有用户)
+第5步：初步计算结果 (保留所有用户)
 ┌─────────┬───────────────┐
 │ user_id │ tag_ids_array │
 ├─────────┼───────────────┤
@@ -274,6 +303,45 @@ user003: [when(40>=30,1)→1, when(8000>=10000,2)→null, when(12>5,3)→3]
 │ user002 │ []            │  ← 无匹配但保留用于标签移除
 │ user003 │ [1, 3]        │  ← 匹配2个标签  
 └─────────┴───────────────┘
+
+第6步：加载MySQL现有标签数据
+┌─────────┬──────────────────┐
+│ user_id │ existing_tag_ids │
+├─────────┼──────────────────┤
+│ user001 │ [1, 4, 5]        │  ← 现有标签
+│ user002 │ [1, 2, 6]        │  ← 现有标签  
+│ user004 │ [7, 8, 9]        │  ← 未参与本次计算
+└─────────┴──────────────────┘
+
+第7步：FULL JOIN智能合并 (确保覆盖所有相关用户)
+joinedDF = groupResult.join(existingTagsDF, "full")
+┌─────────┬─────────────┬──────────────────┬─────────────────┐
+│ user_id │ new.tags    │ existing.tags    │ 处理策略         │
+├─────────┼─────────────┼──────────────────┼─────────────────┤
+│ user001 │ [1,2,3]     │ [1,4,5]         │ 智能替换        │
+│ user002 │ []          │ [1,2,6]         │ 移除计算范围标签  │
+│ user003 │ [1,3]       │ null            │ 新用户，直接添加  │
+│ user004 │ null        │ [7,8,9]         │ 未计算，保持原样  │
+└─────────┴─────────────┴──────────────────┴─────────────────┘
+
+第8步：智能标签替换算法应用
+# 本次计算范围：[1,2,3]
+replace_computed_tags(new.tags, existing.tags, [1,2,3])
+
+user001: 现有[1,4,5] → 移除范围内[1] → 保留[4,5] → 合并新计算[1,2,3] → 最终[1,2,3,4,5]
+user002: 现有[1,2,6] → 移除范围内[1,2] → 保留[6] → 合并新计算[] → 最终[6]
+user003: 现有null → 保留[] → 合并新计算[1,3] → 最终[1,3]
+user004: 未参与计算 → 保持现有[7,8,9] → 最终[7,8,9]
+
+第9步：最终标签结果 (支持完整生命周期)
+┌─────────┬─────────────────┬─────────────────────────┐
+│ user_id │ final_tag_ids   │ 变化说明                 │
+├─────────┼─────────────────┼─────────────────────────┤
+│ user001 │ [1,2,3,4,5]     │ 新增标签2,3，保持1,4,5   │
+│ user002 │ [6]             │ 移除标签1,2，保持6       │
+│ user003 │ [1,3]           │ 新用户，添加标签1,3      │
+│ user004 │ [7,8,9]         │ 未参与计算，保持不变      │
+└─────────┴─────────────────┴─────────────────────────┘
 ```
 
 #### **性能优势**
@@ -385,51 +453,95 @@ userTagsDF = joinedDF.select("user_id") \
 - **批量计算**：同组标签并行计算，共享表读取和JOIN结果
 - **完整用户处理**：FULL JOIN策略确保所有相关用户都被正确处理
 
-### 4. 高性能分布式写入架构
+### 4. 高性能跨库分布式写入架构
 
-系统采用**临时表+MySQL内部UPSERT**的创新架构，实现最小化网络传输的高性能分布式写入。
+系统采用**跨库临时表+MySQL内部UPSERT**的创新架构，解决权限限制的同时保持高性能分布式写入。
 
-#### **两阶段写入模式**
+#### **跨库两阶段写入模式**
 
-**阶段1：分布式写入MySQL临时表**
+**阶段1：分布式写入跨库临时表**
 ```
-┌─────────────┐    JDBC写入    ┌──────────────────────┐
-│ Executor-1  │──────────────→│                      │
-├─────────────┤               │   MySQL临时表         │
-│ Executor-2  │──────────────→│ user_tags_temp_xxx   │
-├─────────────┤               │                      │
-│ Executor-3  │──────────────→│ (自动创建+数据写入)    │
-└─────────────┘               └──────────────────────┘
+┌─────────────┐    JDBC写入    ┌─────────────────────────┐
+│ Executor-1  │──────────────→│                         │
+├─────────────┤               │ bigdata.user_tags_temp  │
+│ Executor-2  │──────────────→│     (临时存储库)         │
+├─────────────┤               │                         │
+│ Executor-3  │──────────────→│ (CREATE权限已申请)       │
+└─────────────┘               └─────────────────────────┘
 
-数据流：Spark Executors → MySQL临时表 (分布式并行写入)
+数据流：Spark Executors → bigdata库临时表 (分布式并行写入)
 ```
 
 **核心实现**：
 ```python
-# 每次生成唯一临时表名，避免冲突
-temp_table = f"user_tags_temp_{int(time.time())}"
+# 跨库配置：主库(biz_user) + 临时库(bigdata)
+self.jdbcUrl = "jdbc:mysql://.../biz_user?..."       # 业务表所在库
+self.jdbcUrlTemp = "jdbc:mysql://.../bigdata?..."    # 临时表专用库
 
-# Spark分布式JDBC写入，各Executor直接连MySQL
+# 在bigdata库中创建临时表
+temp_table = f"user_tags_temp_{int(time.time())}"
+full_temp_table_name = f"bigdata.{temp_table}"
+
+# Spark分布式写入临时库
 resultsDF.select("user_id", col("final_tag_ids_json").alias("tag_id_list")) \
     .write \
     .format("jdbc") \
-    .option("url", self.jdbcUrl) \
+    .option("url", self.jdbcUrlTemp) \  # 使用临时库JDBC URL
     .option("dbtable", temp_table) \
-    .mode("overwrite") \  # 删除+创建+插入，确保干净环境
+    .mode("overwrite") \
     .save()
 ```
 
-**阶段2：MySQL内部数据转移**
+**阶段2：跨库UPSERT数据转移**
 ```
-MySQL内部操作：
-┌──────────────────────┐    SELECT + UPSERT    ┌──────────────────────┐
-│   临时表              │─────────────────────→│   业务表              │
-│ user_tags_temp_xxx   │                      │ user_tag_relation    │
-│                      │    (数据不离开MySQL)   │                      │
-└──────────────────────┘                      └──────────────────────┘
+MySQL跨库内部操作：
+┌─────────────────────────┐    SELECT + UPSERT    ┌─────────────────────────┐
+│ bigdata.user_tags_temp  │─────────────────────→│ biz_user.user_tag_rel.. │
+│    (临时存储库)          │                      │    (业务数据库)          │
+│                         │  (跨库但内部操作)     │                         │
+└─────────────────────────┘                      └─────────────────────────┘
 
-数据流：MySQL临时表 → MySQL业务表 (数据库内部操作，无网络开销)
+数据流：bigdata临时表 → biz_user业务表 (MySQL内部跨库操作，无网络开销)
 ```
+
+**跨库UPSERT实现**：
+```python
+def _executeCrossDbUpsert(self, full_temp_table_name: str, record_count: int) -> bool:
+    # 使用主库连接（biz_user）执行跨库UPSERT
+    connection = pymysql.connect(**self.mysqlConfig)  # 连接到biz_user
+    
+    upsert_sql = f"""
+    INSERT INTO user_tag_relation (user_id, tag_id_list)
+    SELECT user_id, tag_id_list
+    FROM {full_temp_table_name}  -- 引用bigdata.user_tags_temp_xxx
+    ON DUPLICATE KEY UPDATE
+        updated_time = CASE 
+            WHEN JSON_EXTRACT(user_tag_relation.tag_id_list, '$') <> 
+                 JSON_EXTRACT(VALUES(tag_id_list), '$')
+            THEN CURRENT_TIMESTAMP 
+            ELSE user_tag_relation.updated_time 
+        END,
+        tag_id_list = VALUES(tag_id_list)
+    """
+```
+
+#### **架构优势**
+
+**权限隔离**：
+- **临时表权限**：在 `bigdata` 库申请 CREATE/DROP 权限
+- **业务表权限**：在 `biz_user` 库保持原有的读写权限
+- **跨库访问**：利用MySQL跨库查询能力，无需额外权限
+
+**性能保障**：
+- ✅ **保持分布式并行**：Spark各Executor并行写入临时表
+- ✅ **最小网络传输**：数据只传输一次（Executor→临时表）
+- ✅ **MySQL内部操作**：UPSERT在MySQL内部完成，无额外网络开销
+- ✅ **自动清理**：临时表使用后立即清理，不影响存储空间
+
+**业务连续性**：
+- 🔄 **向后兼容**：对业务表结构无任何影响
+- 🔄 **故障隔离**：临时表问题不影响业务表
+- 🔄 **权限最小化**：只申请必要的临时存储权限
 
 ## 执行模式
 

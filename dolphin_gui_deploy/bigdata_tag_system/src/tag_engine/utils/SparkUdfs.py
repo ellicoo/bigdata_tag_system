@@ -34,7 +34,7 @@ from pyspark.sql.types import *
 
 
 def merge_with_existing_tags(new_tags_col, existing_tags_col):
-    """新标签与MySQL现有标签合并
+    """新标签与MySQL现有标签合并 - 传统合并模式（只增不减）
     
     使用Spark原生函数：array_union + array_distinct + array_sort
     
@@ -55,6 +55,44 @@ def merge_with_existing_tags(new_tags_col, existing_tags_col):
             array_union(new_tags, existing_tags)
         )
     )
+
+
+def replace_computed_tags(computed_tags_col, existing_tags_col, computed_tag_scope_col):
+    """基于本次计算范围智能替换用户标签 - 支持标签移除
+    
+    核心逻辑：
+    1. 保留现有标签中不在本次计算范围内的标签（不受影响的标签）
+    2. 用本次计算结果替换范围内的标签（支持新增、移除、保持）
+    
+    业务场景：
+    - 现有标签: [1,2,3,4,5]
+    - 本次计算范围: [2,3,6] 
+    - 本次计算结果: [3,6] (用户匹配了3,6标签，不匹配2标签)
+    - 最终结果: [1,4,5] + [3,6] = [1,3,4,5,6]
+    
+    Args:
+        computed_tags_col: Column - 本次计算得到的标签数组
+        existing_tags_col: Column - 用户现有的标签数组
+        computed_tag_scope_col: Column - 本次计算涉及的所有标签范围数组
+        
+    Returns:
+        Column - 智能替换后的最终标签数组
+    """
+    # 处理空值
+    computed_tags = coalesce(computed_tags_col, array())
+    existing_tags = coalesce(existing_tags_col, array())
+    computed_scope = coalesce(computed_tag_scope_col, array())
+    
+    # 从现有标签中排除本次计算范围内的标签
+    unaffected_tags = array_except(existing_tags, computed_scope)
+    
+    # 合并不受影响的标签 + 本次计算结果
+    return array_distinct(
+        array_sort(
+            array_union(unaffected_tags, computed_tags)
+        )
+    )
+
 
 
 def array_to_json(array_col):
