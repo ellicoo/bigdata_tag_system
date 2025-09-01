@@ -214,7 +214,7 @@ class TagEngine:
             print(f"   🔗 FULL JOIN完成，处理用户数: {joinedDF.count()}")
             
             # 导入智能标签处理函数
-            from ..utils.SparkUdfs import array_to_json, replace_computed_tags, merge_with_existing_tags
+            from ..utils.SparkUdfs import array_to_json, replace_computed_tags, merge_with_existing_tags, determine_timestamp
             
             # 🎯 智能标签替换：根据是否提供计算范围选择策略
             if computed_tag_ids:
@@ -229,9 +229,6 @@ class TagEngine:
                         col("existing.existing_tag_ids"), # 现有标签  
                         computed_scope_lit                # 本次计算范围
                     )
-                ).withColumn(
-                    "final_tag_ids_json",
-                    array_to_json(col("final_tag_ids"))
                 )
             else:
                 print(f"   📝 使用传统合并模式（向后兼容）")
@@ -241,10 +238,27 @@ class TagEngine:
                         col("new.tag_ids_array"),
                         col("existing.existing_tag_ids")
                     )
-                ).withColumn(
-                    "final_tag_ids_json",
-                    array_to_json(col("final_tag_ids"))
                 )
+            
+            # 🕐 智能时间戳处理：检测标签变化并智能更新时间戳
+            finalDF = finalDF.withColumn(
+                "timestamps",
+                determine_timestamp(
+                    col("final_tag_ids"),                  # 最终标签
+                    col("existing.existing_tag_ids"),      # 现有标签
+                    col("existing.created_time"),          # 现有创建时间
+                    col("existing.updated_time")           # 现有更新时间
+                )
+            ).withColumn(
+                "final_tag_ids_json",
+                array_to_json(col("final_tag_ids"))
+            ).withColumn(
+                "created_time",
+                col("timestamps.created_time")
+            ).withColumn(
+                "updated_time", 
+                col("timestamps.updated_time")
+            ).drop("timestamps")
             
             # 🚀 智能过滤：只更新需要更新的用户
             # 条件：有最终标签 或 有历史标签（需要移除标签的用户）
@@ -253,11 +267,13 @@ class TagEngine:
                 (col("existing.existing_tag_ids").isNotNull())  # 或有历史标签需要处理
             ).select(
                 coalesce(col("new.user_id"), col("existing.user_id")).alias("user_id"),
-                col("final_tag_ids_json")
+                col("final_tag_ids_json"),
+                col("created_time"),
+                col("updated_time")
             )
             
-            # 写入MySQL
-            success = self.mysqlMeta.writeTagResults(filteredDF)
+            # 🚀 使用高性能overwrite写入MySQL
+            success = self.mysqlMeta.writeTagResultsOverwrite(filteredDF)
             
             if success:
                 userCount = filteredDF.count()

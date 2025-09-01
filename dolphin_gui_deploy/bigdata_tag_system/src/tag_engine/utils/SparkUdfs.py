@@ -120,3 +120,47 @@ def json_to_array(json_col):
     return coalesce(from_json(json_col, array_schema), array())
 
 
+def determine_timestamp(new_tags_col, existing_tags_col, existing_created_time_col, existing_updated_time_col):
+    """智能确定时间戳 - 标签有变化时更新updated_time，否则保持原值
+    
+    核心业务逻辑：
+    1. 如果新标签与现有标签不同，更新updated_time为当前时间
+    2. 如果相同，保持原有的updated_time不变
+    3. created_time始终保持最初创建时间，新用户使用当前时间
+    
+    Args:
+        new_tags_col: Column - 新计算的标签数组
+        existing_tags_col: Column - 现有标签数组  
+        existing_created_time_col: Column - 现有创建时间
+        existing_updated_time_col: Column - 现有更新时间
+        
+    Returns:
+        Struct[created_time: Timestamp, updated_time: Timestamp] - 时间戳结构
+    """
+    # 处理null值
+    new_tags = coalesce(new_tags_col, array())
+    existing_tags = coalesce(existing_tags_col, array())
+    
+    # 标签是否发生变化：比较排序后的数组转换为字符串进行比较
+    new_tags_sorted_str = to_json(array_sort(new_tags))
+    existing_tags_sorted_str = to_json(array_sort(existing_tags))
+    tags_changed = new_tags_sorted_str != existing_tags_sorted_str
+    
+    # 确定创建时间：新用户使用当前时间，老用户保持原值
+    final_created_time = coalesce(existing_created_time_col, current_timestamp())
+    
+    # 确定更新时间：标签变化则更新，否则保持原值
+    final_updated_time = when(
+        tags_changed, 
+        current_timestamp()
+    ).otherwise(
+        coalesce(existing_updated_time_col, current_timestamp())
+    )
+    
+    # 返回时间戳结构
+    return struct(
+        final_created_time.alias("created_time"),
+        final_updated_time.alias("updated_time")
+    )
+
+
