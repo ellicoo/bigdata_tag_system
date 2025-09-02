@@ -5,6 +5,7 @@ MySQL数据源管理类
 负责标签规则、现有标签数据的读取和标签结果的写入
 """
 import pymysql
+import time
 from typing import List, Dict, Optional
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import *
@@ -33,15 +34,7 @@ class MysqlMeta:
         self.mysqlConfig = mysqlConfig
         self.jdbcUrl = self._buildJdbcUrl()
 
-        # 创建临时库配置
-        self.mysqlConfigTemp = mysqlConfig.copy()
-        self.mysqlConfigTemp['database'] = 'bigdata'  # 修改数据库名为bigdata
-        self.jdbcUrlTemp = self._buildJdbcUrlTemp()  # 构建指向bigdata的JDBC URL
-
-        print(f"🔗 主库JDBC URL: {self.jdbcUrl}")
-        print(f"🔗 临时库JDBC URL: {self.jdbcUrlTemp}")
-
-        # print(f"🔗 JDBC URL: {self.jdbcUrl}")
+        print(f"🔗 JDBC URL: {self.jdbcUrl}")
         print("🔧 开始MySQL连接测试...")
         
         # 强制执行连接测试并显示结果
@@ -72,13 +65,6 @@ class MysqlMeta:
         # 完全匹配业务方配置，解决连接问题
         # return f"jdbc:mysql://{host}:{port}/{database}?useUnicode=true&characterEncoding=utf8&useSSL=false&autoReconnect=true&useCursorFetch=true"
 
-    def _buildJdbcUrlTemp(self) -> str:
-        """构建指向临时库的JDBC连接URL"""
-        host = self.mysqlConfig['host']
-        port = self.mysqlConfig['port']
-        database = 'bigdata'  # 固定使用bigdata库
-
-        return f"jdbc:mysql://{host}:{port}/{database}?useSSL=false&useUnicode=true&connectionCollation=utf8mb4_unicode_ci&autoReconnect=true&useCursorFetch=true&serverTimezone=UTC"
 
     def loadTagRules(self, tagIds: Optional[List[int]] = None) -> DataFrame:
         """加载标签规则DataFrame
@@ -156,10 +142,10 @@ class MysqlMeta:
             return self._createEmptyExistingTagsDataFrame()
     
     def writeTagResults(self, resultsDF: DataFrame) -> bool:
-        """写入标签计算结果到MySQL - 临时表+原生SQL方案
+        """写入标签计算结果到MySQL - Driver收集+分批UPSERT方案
         
-        使用Spark原生JDBC写入临时表，然后用纯SQL执行UPSERT
-        完全避免Python版本冲突问题
+        将结果收集到Driver内存，然后使用PyMySQL分批UPSERT到结果表
+        完全避免临时表，精确控制IPS，降低数据库压力
         
         Args:
             resultsDF: 结果DataFrame，包含字段：user_id, final_tag_ids_json
@@ -167,7 +153,7 @@ class MysqlMeta:
         Returns:
             bool: 写入是否成功
         """
-        print("💾 开始写入标签结果到MySQL（临时表+原生SQL方案）...")
+        print("💾 开始写入标签结果到MySQL（Driver收集+分批UPSERT方案）...")
         
         try:
             # 先检查是否有数据需要写入
@@ -178,58 +164,18 @@ class MysqlMeta:
             
             print(f"📤 准备写入 {totalCount} 条标签记录...")
             
-            # 🚀 步骤1：写入临时表（只要user_id, final_tag_ids_json）
-            # import time
-            # temp_table = f"user_tags_temp_{int(time.time())}"
-            # print(f"📋 创建临时表: {temp_table}")
-
-            # 🚀 步骤1：在bigdata库中创建临时表
-            import time
-            temp_table = f"user_tags_temp_{int(time.time())}"
-            full_temp_table_name = f"bigdata.{temp_table}"  # 使用完整表名
-            print(f"📋 创建临时表: {full_temp_table_name}")
+            # 🚀 步骤1：将结果收集到Driver内存
+            print("   📥 收集结果到Driver内存...")
+            collect_start_time = time.time()
             
-            # 使用Spark原生JDBC写入，完全避免Python代码分发
-            # resultsDF.select("user_id", col("final_tag_ids_json").alias("tag_id_list")) \
-            #     .write \
-            #     .format("jdbc") \
-            #     .option("url", self.jdbcUrl) \
-            #     .option("dbtable", temp_table) \
-            #     .option("user", self.mysqlConfig['user']) \
-            #     .option("password", self.mysqlConfig['password']) \
-            #     .option("driver", "com.mysql.cj.jdbc.Driver") \
-            #     .option("createTableOptions", "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4") \
-            #     .mode("overwrite") \
-            #     .save()
-            #
-            # print(f"✅ 临时表 {temp_table} 写入完成")
-
-            # 使用指向bigdata库的JDBC URL创建临时表
-            resultsDF.select("user_id", col("final_tag_ids_json").alias("tag_id_list")) \
-                .write \
-                .format("jdbc") \
-                .option("url", self.jdbcUrlTemp)  \
-                .option("dbtable", temp_table)  \
-                .option("user", self.mysqlConfig['user']) \
-                .option("password", self.mysqlConfig['password']) \
-                .option("driver", "com.mysql.cj.jdbc.Driver") \
-                .option("createTableOptions", "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4") \
-                .mode("overwrite") \
-                .save()
-
-            print(f"✅ 临时表 {full_temp_table_name} 写入完成")
+            # 选择需要的字段并收集到Driver
+            results_list = resultsDF.select("user_id", col("final_tag_ids_json").alias("tag_id_list")).collect()
             
-            # # 🚀 步骤2：执行UPSERT
-            # upsert_success = self._executeSimpleUpsert(temp_table, totalCount)
-            #
-            # # 🚀 步骤3：清理临时表
-            # self._dropTempTable(temp_table)
-
-            # 🚀 步骤2：执行UPSERT（使用完整表名bigdata.temp_table）
-            upsert_success = self._executeCrossDbUpsert(full_temp_table_name, totalCount)
-
-            # 🚀 步骤3：清理临时表（使用临时库配置）
-            self._dropCrossDbTempTable(temp_table)
+            collect_time = time.time() - collect_start_time
+            print(f"   ✅ 数据收集完成: {len(results_list)} 条记录，耗时 {collect_time:.2f} 秒")
+            
+            # 🚀 步骤2：分批UPSERT到结果表
+            upsert_success = self._executeBatchUpsert(results_list, totalCount)
             
             if upsert_success:
                 print(f"✅ 标签结果写入完成: {totalCount} 条记录")
@@ -301,115 +247,81 @@ class MysqlMeta:
         ])
         
         return self.spark.createDataFrame([], schema)
-
-    def _executeCrossDbUpsert(self, full_temp_table_name: str, record_count: int) -> bool:
-        """执行跨库UPSERT操作"""
-        print(f"🔄 执行跨库UPSERT操作，从 {full_temp_table_name} 到 user_tag_relation...")
-
+    
+    def _executeBatchUpsert(self, results_list: List, total_count: int, batch_size: int = 2000, delay_seconds: float = 0.05) -> bool:
+        """分批执行UPSERT操作 - 精确控制IPS，降低数据库压力
+        
+        Args:
+            results_list: Spark collect()返回的Row对象列表
+            total_count: 总记录数
+            batch_size: 每批处理的记录数，默认2000
+            delay_seconds: 批次间延迟时间（秒），默认0.05秒，可控制IPS
+            
+        Returns:
+            bool: 是否成功
+        """
+        print(f"🔄 开始分批UPSERT，总记录: {total_count}，批大小: {batch_size}，批间延迟: {delay_seconds}s")
+        
+        # 计算批次数
+        import math
+        import builtins  # 导入Python内置函数模块
+        total_batches = math.ceil(len(results_list) / batch_size)
+        successful_batches = 0
+        
         try:
-            # 使用主库连接（biz_user）
             connection = pymysql.connect(**self.mysqlConfig)
-
-            with connection.cursor() as cursor:
-                # 使用完整表名引用临时表
-                upsert_sql = f"""
-                INSERT INTO user_tag_relation (user_id, tag_id_list)
-                SELECT user_id, tag_id_list
-                FROM {full_temp_table_name}
-                ON DUPLICATE KEY UPDATE
-                    updated_time = CASE 
-                        WHEN JSON_EXTRACT(user_tag_relation.tag_id_list, '$') <> JSON_EXTRACT(VALUES(tag_id_list), '$')
-                        THEN CURRENT_TIMESTAMP 
-                        ELSE user_tag_relation.updated_time 
-                    END,
-                    tag_id_list = VALUES(tag_id_list)
-                """
-
-                print(f"   📝 执行SQL: INSERT INTO user_tag_relation ... FROM {full_temp_table_name}")
-                cursor.execute(upsert_sql)
-                affected_rows = cursor.rowcount
-                connection.commit()
-
-                print(f"   ✅ UPSERT完成，影响行数: {affected_rows}")
-                return True
-
+            
+            for batch_idx in range(total_batches):
+                start_idx = batch_idx * batch_size
+                end_idx = builtins.min(start_idx + batch_size, len(results_list))  # 使用内置min函数
+                batch_records = results_list[start_idx:end_idx]
+                
+                batch_start_time = time.time()
+                
+                with connection.cursor() as cursor:
+                    # 构建批量UPSERT SQL
+                    values_list = []
+                    for row in batch_records:
+                        user_id = row['user_id']
+                        tag_id_list = row['tag_id_list']
+                        # 安全处理：转义单引号，防止SQL注入
+                        safe_tag_id_list = tag_id_list.replace("'", "''") if tag_id_list else ''
+                        values_list.append(f"('{user_id}', '{safe_tag_id_list}')")
+                    
+                    batch_sql = f"""
+                    INSERT INTO user_tag_relation (user_id, tag_id_list) VALUES 
+                    {', '.join(values_list)}
+                    ON DUPLICATE KEY UPDATE
+                        updated_time = CASE 
+                            WHEN JSON_EXTRACT(user_tag_relation.tag_id_list, '$') <> JSON_EXTRACT(VALUES(tag_id_list), '$')
+                            THEN CURRENT_TIMESTAMP 
+                            ELSE user_tag_relation.updated_time 
+                        END,
+                        tag_id_list = VALUES(tag_id_list)
+                    """
+                    
+                    cursor.execute(batch_sql)
+                    affected_rows = cursor.rowcount
+                    connection.commit()
+                    
+                    batch_time = time.time() - batch_start_time
+                    successful_batches += 1
+                    
+                    # 进度显示
+                    progress_percent = (batch_idx + 1) / total_batches * 100
+                    print(f"   ✅ 批次 {batch_idx + 1}/{total_batches} ({progress_percent:.1f}%): "
+                          f"{len(batch_records)} 条记录，影响 {affected_rows} 行，耗时 {batch_time:.2f}s")
+                
+                # 批次间延迟，控制IPS
+                if batch_idx < total_batches - 1 and delay_seconds > 0:
+                    time.sleep(delay_seconds)
+            
+            connection.close()
+            print(f"   🎉 分批UPSERT完成: {successful_batches}/{total_batches} 批次成功")
+            return successful_batches == total_batches
+            
         except Exception as e:
-            print(f"   ❌ UPSERT失败: {e}")
+            print(f"   ❌ 分批UPSERT失败: {e}")
             import traceback
             traceback.print_exc()
             return False
-        finally:
-            connection.close()
-    
-    # def _executeSimpleUpsert(self, temp_table: str, record_count: int) -> bool:
-    #     """执行简单的UPSERT，利用现有的user_tag_relation表结构"""
-    #     print(f"🔄 执行UPSERT操作，从 {temp_table} 到 user_tag_relation...")
-    #
-    #     try:
-    #         connection = pymysql.connect(**self.mysqlConfig)
-    #
-    #         with connection.cursor() as cursor:
-    #             # 简单UPSERT，保持原有表结构和业务逻辑
-    #             upsert_sql = f"""
-    #             INSERT INTO user_tag_relation (user_id, tag_id_list)
-    #             SELECT user_id, tag_id_list
-    #             FROM {temp_table}
-    #             ON DUPLICATE KEY UPDATE
-    #                 updated_time = CASE
-    #                     WHEN JSON_EXTRACT(user_tag_relation.tag_id_list, '$') <> JSON_EXTRACT(VALUES(tag_id_list), '$')
-    #                     THEN CURRENT_TIMESTAMP
-    #                     ELSE user_tag_relation.updated_time
-    #                 END,
-    #                 tag_id_list = VALUES(tag_id_list)
-    #             """
-    #
-    #             print(f"   📝 执行SQL: INSERT INTO user_tag_relation ... FROM {temp_table}")
-    #             cursor.execute(upsert_sql)
-    #             affected_rows = cursor.rowcount
-    #             connection.commit()
-    #
-    #             print(f"   ✅ UPSERT完成，影响行数: {affected_rows}")
-    #             return True
-    #
-    #     except Exception as e:
-    #         print(f"   ❌ UPSERT失败: {e}")
-    #         import traceback
-    #         traceback.print_exc()
-    #         return False
-    #     finally:
-    #         connection.close()
-    
-    # def _dropTempTable(self, temp_table: str):
-    #     """清理临时表"""
-    #     print(f"🧹 清理临时表: {temp_table}")
-    #
-    #     try:
-    #         connection = pymysql.connect(**self.mysqlConfig)
-    #
-    #         with connection.cursor() as cursor:
-    #             cursor.execute(f"DROP TABLE IF EXISTS {temp_table}")
-    #             connection.commit()
-    #             print(f"   ✅ 临时表 {temp_table} 已清理")
-    #
-    #     except Exception as e:
-    #         print(f"   ⚠️  清理临时表失败: {e}")
-    #     finally:
-    #         connection.close()
-
-    def _dropCrossDbTempTable(self, temp_table: str):
-        """清理跨库临时表"""
-        print(f"🧹 清理临时表: bigdata.{temp_table}")
-
-        try:
-            # 使用临时库配置（bigdata）连接
-            connection = pymysql.connect(**self.mysqlConfigTemp)
-
-            with connection.cursor() as cursor:
-                cursor.execute(f"DROP TABLE IF EXISTS {temp_table}")
-                connection.commit()
-                print(f"   ✅ 临时表 bigdata.{temp_table} 已清理")
-
-        except Exception as e:
-            print(f"   ⚠️  清理临时表失败: {e}")
-        finally:
-            connection.close()
