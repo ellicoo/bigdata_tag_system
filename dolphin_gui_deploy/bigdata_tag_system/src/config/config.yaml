@@ -8,9 +8,18 @@ dev:
     port: 3358
     database: biz_user
     user: dev_rw
-    password: nLjE49a20!h6vhHF
+    password: ""  # Set via MYSQL_PASSWORD environment variable
     charset: utf8mb4
-  
+
+  elasticsearch:
+    hosts:
+      - http://log-es.log-test.ops-k8s-prod.jcworkint.com
+    index: user_tag_relation
+    user: bigdata-service
+    password: ""  # Set via ES_PASSWORD environment variable
+    timeout: 60
+    max_retries: 3
+
   spark:
     app_name: TagComputeEngine-Dev
     configs:
@@ -18,9 +27,12 @@ dev:
       spark.sql.adaptive.coalescePartitions.enabled: "true"
       spark.sql.adaptive.skewJoin.enabled: "true"
       spark.serializer: org.apache.spark.serializer.KryoSerializer
-  
-  hive:
-    database: dws_user
+
+  maxcompute:
+    project: test_ju_exchange
+    access_id: ""  # Set via MAXCOMPUTE_ACCESS_ID environment variable
+    access_key: ""  # Set via MAXCOMPUTE_ACCESS_KEY environment variable
+    endpoint: https://service.ap-southeast-1.maxcompute.aliyun.com/api
 
 # 测试环境配置
 test:
@@ -29,9 +41,18 @@ test:
     port: 3358
     database: biz_user
     user: ex_test_rw
-    password: NqaBacRMzCKRRqfEWb
+    password: ""  # Set via MYSQL_PASSWORD environment variable
     charset: utf8mb4
-  
+
+  elasticsearch:
+    hosts:
+      - http://es-test-endpoint:9200
+    index: user_tag_relation
+    user: elastic
+    password: ""  # Set via ES_PASSWORD environment variable
+    timeout: 60
+    max_retries: 3
+
   spark:
     app_name: TagComputeEngine-Test
     configs:
@@ -39,9 +60,12 @@ test:
       spark.sql.adaptive.coalescePartitions.enabled: "true"
       spark.sql.adaptive.skewJoin.enabled: "true"
       spark.serializer: org.apache.spark.serializer.KryoSerializer
-  
-  hive:
-    database: dws_user
+
+  maxcompute:
+    project: test_ju_exchange
+    access_id: ""  # Set via MAXCOMPUTE_ACCESS_ID environment variable
+    access_key: ""  # Set via MAXCOMPUTE_ACCESS_KEY environment variable
+    endpoint: https://service.ap-southeast-1.maxcompute.aliyun.com/api
 
 # 预发环境配置
 pre:
@@ -50,9 +74,18 @@ pre:
     port: 3358
     database: biz_user
     user: biz_user_rw
-    password: kWPOmxpp3aLS7sKi
+    password: ""  # Set via MYSQL_PASSWORD environment variable
     charset: utf8mb4
-  
+
+  elasticsearch:
+    hosts:
+      - http://log-es.log-prod.ops-k8s-prod.jcworkint.com
+    index: user_tag_relation
+    user: bigdata-service
+    password: ""  # Set via ES_PASSWORD environment variable
+    timeout: 60
+    max_retries: 3
+
   spark:
     app_name: TagComputeEngine-Pre
     configs:
@@ -60,9 +93,12 @@ pre:
       spark.sql.adaptive.coalescePartitions.enabled: "true"
       spark.sql.adaptive.skewJoin.enabled: "true"
       spark.serializer: org.apache.spark.serializer.KryoSerializer
-  
-  hive:
-    database: dws_user
+
+  maxcompute:
+    project: test_ju_exchange
+    access_id: ""  # Set via MAXCOMPUTE_ACCESS_ID environment variable
+    access_key: ""  # Set via MAXCOMPUTE_ACCESS_KEY environment variable
+    endpoint: https://service.ap-southeast-1.maxcompute.aliyun.com/api
 
 # 生产环境配置
 prod:
@@ -71,9 +107,18 @@ prod:
     port: 3358
     database: biz_user
     user: bigdata_biz_user_rw
-    password: sqinM4bzmBjE7SL
+    password: ""  # Set via MYSQL_PASSWORD environment variable
     charset: utf8mb4
-  
+
+  elasticsearch:
+    hosts:
+      - http://log-es.log-prod.ops-k8s-prod.jcworkint.com
+    index: user_tag_relation
+    user: bigdata-service
+    password: ""  # Set via ES_PASSWORD environment variable
+    timeout: 60
+    max_retries: 3
+
   spark:
     app_name: TagComputeEngine-Prod
     configs:
@@ -84,6 +129,9 @@ prod:
       # 生产环境额外优化配置
       # spark.sql.adaptive.advisoryPartitionSizeInBytes: 128MB
       # spark.sql.adaptive.coalescePartitions.minPartitionSize: 20MB
-  
-  hive:
-    database: dws_user
+
+  maxcompute:
+    project: test_ju_exchange
+    access_id: ""  # Set via MAXCOMPUTE_ACCESS_ID environment variable
+    access_key: ""  # Set via MAXCOMPUTE_ACCESS_KEY environment variable
+    endpoint: https://service.ap-southeast-1.maxcompute.aliyun.com/api

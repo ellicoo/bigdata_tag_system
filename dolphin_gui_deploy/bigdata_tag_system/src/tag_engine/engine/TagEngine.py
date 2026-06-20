@@ -8,8 +8,9 @@ from typing import List, Optional, Dict, Tuple
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import *
 
-from ..meta.HiveMeta import HiveMeta
+from ..meta.MaxComputeMeta import MaxComputeMeta
 from ..meta.MysqlMeta import MysqlMeta
+from ..meta.EsMeta import EsMeta
 from ..parser.TagRuleParser import TagRuleParser
 from .TagGroup import TagGroup
 from ..utils.SparkUdfs import merge_with_existing_tags
@@ -17,32 +18,47 @@ from ..utils.SparkUdfs import merge_with_existing_tags
 
 class TagEngine:
     """标签计算引擎
-    
+
     职责：
     1. 编排整个标签计算流程
-    2. 管理Hive和MySQL数据源
+    2. 管理MaxCompute和MySQL数据源
     3. 协调标签分组和并行计算
     4. 执行标签合并和结果写入
     """
-    
-    def __init__(self, spark: SparkSession, hiveConfig: Dict = None, mysqlConfig: Dict = None):
+
+    def __init__(self, spark: SparkSession, maxComputeConfig: Dict = None, mysqlConfig: Dict = None, esConfig: Dict = None):
         """初始化标签引擎
-        
+
         Args:
             spark: Spark会话
-            hiveConfig: Hive配置（可选）
-            mysqlConfig: MySQL配置
+            maxComputeConfig: MaxCompute配置（包含project等信息）
+            mysqlConfig: MySQL配置（用于加载标签规则）
+            esConfig: Elasticsearch配置（用于加载/写入用户标签关系）
         """
         self.spark = spark
-        self.hiveConfig = hiveConfig or {}
+        self.maxComputeConfig = maxComputeConfig or {}
         self.mysqlConfig = mysqlConfig
-        
-        # 初始化数据源管理器（HiveMeta内部自动处理分区）
-        self.hiveMeta = HiveMeta(spark)
+        self.esConfig = esConfig
+
+        # 初始化MaxCompute数据源管理器
+        self.maxComputeMeta = MaxComputeMeta(spark, maxComputeConfig)
+
+        # MySQL仅用于加载标签规则
         self.mysqlMeta = MysqlMeta(spark, mysqlConfig)
+
+        # 根据是否配置ES来决定用户标签关系的存储方式
+        if esConfig:
+            print("🔍 使用ES存储用户标签关系")
+            self.esMeta = EsMeta(spark, esConfig)
+            self.tagStorageMeta = self.esMeta  # 用户标签关系使用ES
+        else:
+            print("💾 使用MySQL存储用户标签关系（兼容模式）")
+            self.esMeta = None
+            self.tagStorageMeta = self.mysqlMeta  # 用户标签关系使用MySQL
+
         self.ruleParser = TagRuleParser()
-        
-        print("🚀 TagEngine初始化完成")
+
+        print("🚀 TagEngine初始化完成（使用MaxCompute数据源）")
     
     def computeTags(self, mode: str = "full", tagIds: Optional[List[int]] = None) -> Tuple[bool, List[int]]:
         """执行标签计算 - 简化的主流程编排，返回失败标签ID
@@ -106,6 +122,10 @@ class TagEngine:
                 "标签规则": self._checkTagRules()
             }
             
+            # 如果配置ES，添加ES连接检查
+            # if self.esMeta:
+            #     checks["ES连接"] = self.esMeta.testConnection()
+            
             allOk = all(checks.values())
             
             print("📋 健康检查结果:")
@@ -152,7 +172,7 @@ class TagEngine:
                 groupRulesDF = rulesDF.filter(col("tag_id").isin(group.tagIds))
                 
                 # 计算该组标签，获取结果和失败的标签ID
-                groupResult, failed_tag_ids = group.computeTags(self.hiveMeta, groupRulesDF)
+                groupResult, failed_tag_ids = group.computeTags(self.maxComputeMeta, groupRulesDF)
                 
                 # 收集失败的标签ID
                 if failed_tag_ids:
@@ -185,7 +205,7 @@ class TagEngine:
                     all_failed_tag_ids.extend(remaining_tag_ids)
                 
                 # 清理缓存
-                self.hiveMeta.clearGroupCache(group.requiredTables)
+                self.maxComputeMeta.clearGroupCache(group.requiredTables)
                 
             except Exception as e:
                 print(f"   ❌ 标签组 {group.name} 处理失败: {e}")
@@ -199,10 +219,14 @@ class TagEngine:
         return success, unique_failed_tag_ids
     
     def _mergeAndSaveGroup(self, groupResult: DataFrame, groupName: str, computed_tag_ids: List[int] = None) -> bool:
-        """智能合并标签并保存到MySQL - 支持标签移除"""
+        """智能合并标签并保存 - 支持标签移除和分层，自动适配ES/MySQL存储"""
+        global json
         try:
-            # 加载现有标签（包括所有用户）
-            existingTagsDF = self.mysqlMeta.loadExistingTags()
+            # 加载标签规则获取group_attr配置
+            rulesDF = self.mysqlMeta.loadTagRules(computed_tag_ids)
+            
+            # 🔍 从存储介质（ES或MySQL）加载现有标签
+            existingTagsDF = self.tagStorageMeta.loadExistingTags()
             
             # 🚀 关键改进：使用FULL JOIN确保覆盖所有相关用户
             joinedDF = groupResult.alias("new").join(
@@ -216,22 +240,62 @@ class TagEngine:
             # 导入智能标签处理函数
             from ..utils.SparkUdfs import array_to_json, replace_computed_tags, merge_with_existing_tags
             
+            # 构建标签ID到group_attr的映射（用于分层与范围扩展）
+            tag_group_map = {}
+            rules_list = rulesDF.select("tag_id", "group_attr").collect()
+            for row in rules_list:
+                if row['group_attr']:
+                    tag_group_map[row['tag_id']] = row['group_attr']
+            
             # 🎯 智能标签替换：根据是否提供计算范围选择策略
             if computed_tag_ids:
                 print(f"   🎯 使用智能替换模式，本次计算标签范围: {computed_tag_ids}")
-                # 创建计算范围列
-                computed_scope_lit = lit(computed_tag_ids)
+                
+                # 🔑 关键改进：扩展computed_scope包含所有关联的子标签
+                # 如果父标签100分层成101,102,103，则computed_scope应包含100,101,102,103
+                # 这样在移除时才能正确移除子标签
+                expanded_scope = set(computed_tag_ids)
+                
+                # 从 tag_group_map 中提取所有子标签
+                if tag_group_map:
+                    import json
+                    for parent_tag_id in computed_tag_ids:
+                        if parent_tag_id in tag_group_map:
+                            try:
+                                group_attr = json.loads(tag_group_map[parent_tag_id])
+                                child_tag_ids = group_attr.get('tagIds', [])
+                                # 确保 child_tag_ids 是列表且元素是整数
+                                if isinstance(child_tag_ids, list):
+                                    # 转换为整数列表
+                                    child_tag_ids = [int(tid) for tid in child_tag_ids if tid is not None]
+                                    expanded_scope.update(child_tag_ids)
+                                else:
+                                    print(f"   ⚠️  标签 {parent_tag_id} 的 tagIds 不是列表类型: {type(child_tag_ids)}")
+                            except Exception as e:
+                                print(f"   ⚠️  解析标签 {parent_tag_id} 的 group_attr 失败: {e}")
+                    
+                    print(f"   📝 扩展后的计算范围: {sorted(expanded_scope)}")
+                
+                # 创建扩展范围列（处理空列表情况）
+                expanded_list = sorted(expanded_scope)
+
+                # 关键修复：明确处理空列表的情况
+                if expanded_list:
+                    # 有元素：逐个创建 lit() 然后传给 array()
+                    lit_elements = [lit(int(tag_id)) for tag_id in expanded_list]
+                    computed_scope_lit = array(*lit_elements)
+                else:
+                    # 空列表：创建明确类型的空数组
+                    from pyspark.sql.types import IntegerType, ArrayType
+                    computed_scope_lit = array().cast(ArrayType(IntegerType()))
                 
                 finalDF = joinedDF.withColumn(
                     "final_tag_ids",
                     replace_computed_tags(
                         col("new.tag_ids_array"),         # 本次计算结果
                         col("existing.existing_tag_ids"), # 现有标签  
-                        computed_scope_lit                # 本次计算范围
+                        computed_scope_lit                # 扩展后的计算范围
                     )
-                ).withColumn(
-                    "final_tag_ids_json",
-                    array_to_json(col("final_tag_ids"))
                 )
             else:
                 print(f"   📝 使用传统合并模式（向后兼容）")
@@ -241,27 +305,61 @@ class TagEngine:
                         col("new.tag_ids_array"),
                         col("existing.existing_tag_ids")
                     )
-                ).withColumn(
-                    "final_tag_ids_json",
-                    array_to_json(col("final_tag_ids"))
                 )
             
+            # 🎯 关键改进：应用标签分层逻辑并记录父子关系
+            # 需要将final_tag_ids中的每个标签根据其group_attr配置进行分层
+            print(f"   🎯 应用标签分层逻辑...")
+            
+            # 构建标签ID到group_attr的映射列
+            # 从 rulesDF 中提取 tag_id 和 group_attr的映射
+            tag_group_map = {}
+            rules_list = rulesDF.select("tag_id", "group_attr").collect()
+            for row in rules_list:
+                if row['group_attr']:
+                    tag_group_map[row['tag_id']] = row['group_attr']
+            
+            # 对final_tag_ids中的每个标签应用分层
+            # 使用transform函数处理数组中的每个元素
+            if tag_group_map:
+                print(f"   📝 发现 {len(tag_group_map)} 个需要分层的标签")
+                from ..utils.SparkUdfs import _apply_layering_to_tag_array_udf
+                
+                # 关键修复：确保序列化后是字符串
+                tag_group_map_json = json.dumps(tag_group_map)
+                print(f"   🔧 tag_group_map 类型: {type(tag_group_map)}, JSON 类型: {type(tag_group_map_json)}")
+                
+                finalDF = finalDF.withColumn(
+                    "final_tag_ids",
+                    _apply_layering_to_tag_array_udf(
+                        coalesce(col("new.user_id"), col("existing.user_id")),
+                        col("final_tag_ids"),
+                        lit(json.dumps(tag_group_map))  # 确保传入的是字符串
+                    )
+                )
+            
+            # 转换为JSON
+            finalDF = finalDF.withColumn(
+                "final_tag_ids_json",
+                array_to_json(col("final_tag_ids"))
+            )
+            
             # 🚀 智能过滤：只更新需要更新的用户
-            # 条件：有最终标签 或 有历史标签（需要移除标签的用户）
             filteredDF = finalDF.filter(
-                (size(col("final_tag_ids")) > 0) |  # 有最终标签
-                (col("existing.existing_tag_ids").isNotNull())  # 或有历史标签需要处理
+                (size(col("final_tag_ids")) > 0) |
+                (col("existing.existing_tag_ids").isNotNull())
             ).select(
                 coalesce(col("new.user_id"), col("existing.user_id")).alias("user_id"),
                 col("final_tag_ids_json")
             )
             
-            # 写入MySQL
-            success = self.mysqlMeta.writeTagResults(filteredDF)
+            # 🚀 写入到存储介质（ES或MySQL）
+            success = self.tagStorageMeta.writeTagResults(filteredDF)
             
             if success:
                 userCount = filteredDF.count()
-                print(f"   ✅ {groupName}: {userCount} 个用户标签更新成功")
+                storage_type = "ES" if self.esMeta else "MySQL"
+                print(f"   ✅ {groupName}: {userCount} 个用户标签更新成功（存储: {storage_type}）")
             
             return success
             
@@ -339,7 +437,7 @@ class TagEngine:
     def cleanup(self):
         """清理资源"""
         try:
-            self.hiveMeta.clearCache()
+            self.maxComputeMeta.clearCache()
             print("🧹 TagEngine资源清理完成")
         except Exception as e:
             print(f"⚠️  资源清理异常: {e}")

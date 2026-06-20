@@ -7,7 +7,7 @@
 
 from .engine.TagEngine import TagEngine
 from .engine.TagGroup import TagGroup
-from .meta.HiveMeta import HiveMeta
+from .meta.MaxComputeMeta import MaxComputeMeta
 from .meta.MysqlMeta import MysqlMeta
 from .parser.TagRuleParser import TagRuleParser
 from .utils import SparkUdfs
@@ -15,7 +15,7 @@ from .utils import SparkUdfs
 __all__ = [
     "TagEngine",
     "TagGroup",
-    "HiveMeta", 
+    "MaxComputeMeta",
     "MysqlMeta",
     "TagRuleParser",
     "SparkUdfs"

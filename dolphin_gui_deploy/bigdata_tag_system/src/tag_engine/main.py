@@ -101,6 +101,18 @@ def load_config(environment: str = "test") -> Dict[str, any]:
             mysql_config["user"] = os.getenv("MYSQL_USER", mysql_config.get("user"))
             mysql_config["password"] = os.getenv("MYSQL_PASSWORD", mysql_config.get("password"))
         
+        # 环境变量覆盖ES配置
+        if "elasticsearch" in config:
+            es_config = config["elasticsearch"]
+            # ES主要通过hosts配置，支持环境变量覆盖
+            es_hosts = os.getenv("ES_HOSTS", None)
+            if es_hosts:
+                es_config["hosts"] = [host.strip() for host in es_hosts.split(",")]
+            
+            es_config["user"] = os.getenv("ES_USER", es_config.get("user", ""))
+            es_config["password"] = os.getenv("ES_PASSWORD", es_config.get("password", ""))
+            es_config["index"] = os.getenv("ES_INDEX", es_config.get("index", "user_tag_relation"))
+        
         print(f"✅ 成功加载 {environment.upper()} 环境配置: {config_file}")
         return config
         
@@ -189,13 +201,28 @@ def main():
         print(f"🔧 加载环境配置: {args.env.upper()}")
         config = load_config(args.env)
         mysql_config = config.get("mysql", {})
+        es_config = config.get("elasticsearch", None)  # ES配置可选
+        maxcompute_config = config.get("maxcompute", {})  # MaxCompute配置
+
         print(f"MySQL配置: {mysql_config.get('host', 'N/A')}:{mysql_config.get('port', 'N/A')}/{mysql_config.get('database', 'N/A')}")
-        
+        if es_config:
+            print(f"ES配置: {es_config.get('hosts', 'N/A')} / 索引: {es_config.get('index', 'N/A')}")
+        else:
+            print("⚠️  未ES配置，将使用MySQL存储用户标签关系")
+
+        if maxcompute_config:
+            print(f"MaxCompute配置: 项目={maxcompute_config.get('project', 'N/A')}, Endpoint={maxcompute_config.get('endpoint', 'N/A')}")
+
         # 2. 创建Spark会话
         spark = create_spark_session(config)
-        
-        # 3. 创建标签引擎（HiveMeta内部自动处理当天分区）
-        tag_engine = TagEngine(spark, mysqlConfig=mysql_config)
+
+        # 3. 创建标签引擎（使用MaxCompute数据源）
+        tag_engine = TagEngine(
+            spark,
+            maxComputeConfig=maxcompute_config,
+            mysqlConfig=mysql_config,
+            esConfig=es_config  # 传入ES配置，如果没有则使用MySQL
+        )
         
         # 4. 根据模式执行相应操作
         success = False

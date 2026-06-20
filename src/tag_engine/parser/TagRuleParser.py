@@ -296,7 +296,7 @@ class TagRuleParser:
         
         # 构建完整字段名 - 生成与DataFrame列名匹配的格式
         if table:
-            # 🔧 关键修正：使用简化的表名格式，匹配HiveMeta的alias设置
+            # 🔧 关键修正：使用简化的表名格式，匹配MaxComputeMeta的alias设置
             # 例如：tag_system.user_asset_summary -> user_asset_summary
             # 生成格式：user_asset_summary.total_asset_value
             simplifiedTable = table.split('.')[-1]

@@ -79,10 +79,10 @@ class MysqlMeta:
         
         # 构建查询SQL - 更新为新的表结构
         query = """
-        (SELECT trc.tag_id, trc.tag_conditions as rule_conditions, td.tag_name, td.description
+        (SELECT trc.tag_id, trc.tag_conditions as rule_conditions, td.tag_name, td.description, td.group_attr
          FROM tag_rules_config trc
-         LEFT JOIN tag_definition td ON trc.tag_id = td.id
-         WHERE td.is_active = 1
+         INNER JOIN tag_definition td ON trc.tag_id = td.id
+         WHERE td.is_active = 1 and td.layer_type = 1 and trc.is_active = 1
         """
         
         if tagIds:
@@ -234,7 +234,8 @@ class MysqlMeta:
             StructField("tag_id", IntegerType(), False),
             StructField("rule_conditions", StringType(), True),
             StructField("tag_name", StringType(), True),
-            StructField("description", StringType(), True)
+            StructField("description", StringType(), True),
+            StructField("group_attr", StringType(), True)
         ])
         
         return self.spark.createDataFrame([], schema)

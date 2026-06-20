@@ -386,7 +386,24 @@ client.triggerWorkflow("tag_system_compute", Map.of(
             requirements = self.create_requirements()
             zip_file.writestr("requirements.txt", requirements)
             print("  ✅ 添加依赖: requirements.txt")
-        
+
+            # 在ZIP根目录添加__init__.py，使其成为Python包（DataWorks需要）
+            root_init_content = '''"""
+BigData Tag System - DataWorks部署包
+支持在DataWorks环境中作为Python包导入
+"""
+
+__version__ = "1.0.0"
+__package_name__ = "bigdata_tag_system"
+'''
+            zip_file.writestr("__init__.py", root_init_content)
+            print("  ✅ 添加根目录包标识: __init__.py (DataWorks支持)")
+
+            # 注意：不在 ZIP 根目录添加 main_dataworks.py
+            # DataWorks 的主程序入口是资源中心单独上传的 main_dataworks_entry.py
+            # ZIP 包只包含 src/ 目录下的代码和依赖
+            print("  ℹ️  主程序入口: 请单独上传 main_dataworks_entry.py 到资源中心")
+
         print(f"\n🎉 部署包创建完成!")
         print(f"📁 输出目录: {self.output_dir}")
         print(f"📦 ZIP包: {zip_path}")

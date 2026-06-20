@@ -16,7 +16,7 @@
 - 数据源：S3 Hive Tables (Parquet格式)  
 - 规则存储：MySQL (JSON格式规则)
 - 调度系统：DolphinScheduler
-- 部署方式：YARN Cluster模式
+- 部署方式：YARN Client模式
 
 ## 项目结构
 
@@ -268,7 +268,7 @@ python dolphin_deploy_package.py
 └─────────┴─────┴────────┴─────────────┘
 
 第2步：标签规则并行解析
-- 标签1: age >= 30      (高龄用户)
+- 标签1: age >= 30 and regist_date > 2024-10-12    (高龄用户)
 - 标签2: assets >= 10000 (高净值用户) 
 - 标签3: trade_count > 5 (活跃交易用户)
 
@@ -277,22 +277,22 @@ python dolphin_deploy_package.py
 from ..utils.tagExpressionUtils import buildParallelTagExpression
 
 tagConditions = [
-    {'tag_id': 1, 'condition': 'age >= 30'},
-    {'tag_id': 2, 'condition': 'assets >= 10000'}, 
-    {'tag_id': 3, 'condition': 'trade_count > 5'}
+    {'tag_id': 1, conditions:{'condition': ['age >= 30'],'condition':['regist_date >2024-10-12'],'logic': 'AND'}},
+    {'tag_id': 2, conditions:{'condition': ['assets >= 10000'],'logic': 'AND'}}, 
+    {'tag_id': 3, conditions:{'condition': ['trade_count > 5'],'logic': 'AND'}}
 ]
 combined_tags_expr = buildParallelTagExpression(tagConditions)
 
 # 内部使用SQL表达式和filter高阶函数确保返回空数组而非null
 
 第4步：每行并行计算结果（包含无匹配用户）
-user001: [when(35>=30,1)→1, when(15000>=10000,2)→2, when(8>5,3)→3] 
+user001: [when(age=35 >= 30 and regist_date=2025-01-01 > 2024-10-12, 标签1)→1, when(asset=15000 >= 10000,标签2)→2, when(trade_count=8 > 5,标签3)→3] 
          → array_remove([1,2,3], null) → [1,2,3]
 
-user002: [when(25>=30,1)→null, when(5000>=10000,2)→null, when(2>5,3)→null]
+user002: [when(age=35>=30 and regist_date = 2021-10-10 > 2024-10-12,标签1)→null, when(asset=5000 >= 10000,标签2)→null, when(trade_count=2 > 5,标签3)→null]
          → array_remove([null,null,null], null) → [] (保留用于后续标签移除处理)
 
-user003: [when(40>=30,1)→1, when(8000>=10000,2)→null, when(12>5,3)→3]
+user003: [when(age=32 >= 30 and regist_date=2025-01-01 > 2024-10-12 ,标签1)→1, when(asset=8000 >= 10000,标签2)→null, when(trade_count=12 > 5,标签3)→3]
          → array_remove([1,null,3], null) → [1,3]
 
 第5步：初步计算结果 (保留所有用户)
@@ -415,22 +415,53 @@ userTagsDF = joinedDF.select("user_id") \
   "logic": "AND",
   "conditions": [
     {
-      "fields": [
-        {
-          "table": "user_basic_info",
-          "field": "age",
-          "operator": ">=", 
-          "value": 30,
-          "type": "number"
-        },
-        {
-          "table": "user_asset_summary", 
-          "field": "total_assets",
-          "operator": ">=",
-          "value": 100000,
-          "type": "number"
-        }
-      ]
+      "condition": {
+        "logic": "AND",
+        "fields": [
+          {
+            "table": "tag_system.user_basic_info",
+            "field": "first_name",
+            "operator": "is_not_null",
+            "value": "",
+            "type": "string"
+          },
+          {
+            "table": "tag_system.user_basic_info",
+            "field": "last_name",
+            "operator": "is_not_null",
+            "value": "",
+            "type": "string"
+          },
+          {
+            "table": "tag_system.user_basic_info",
+            "field": "birthday",
+            "operator": "is_not_null",
+            "value": "",
+            "type": "date"
+          }
+        ]
+      }
+    },
+    {
+      "condition": {
+        "logic": "OR",
+        "fields": [
+          {
+            "table": "tag_system.user_basic_info",
+            "field": "middle_name",
+            "operator": "is_null",
+            "value": "",
+            "type": "string"
+          },
+          {
+            "table": "tag_system.user_preferences",
+            "field": "optional_services",
+            "operator": "is_null",
+            "value": "",
+            "type": "list"
+          }
+        ]
+      }
     }
   ]
 }
@@ -459,89 +490,13 @@ userTagsDF = joinedDF.select("user_id") \
 
 #### **跨库两阶段写入模式**
 
-**阶段1：分布式写入跨库临时表**
-```
-┌─────────────┐    JDBC写入    ┌─────────────────────────┐
-│ Executor-1  │──────────────→│                         │
-├─────────────┤               │ bigdata.user_tags_temp  │
-│ Executor-2  │──────────────→│     (临时存储库)         │
-├─────────────┤               │                         │
-│ Executor-3  │──────────────→│ (CREATE权限已申请)       │
-└─────────────┘               └─────────────────────────┘
 
-数据流：Spark Executors → bigdata库临时表 (分布式并行写入)
-```
-
-**核心实现**：
-```python
-# 跨库配置：主库(biz_user) + 临时库(bigdata)
-self.jdbcUrl = "jdbc:mysql://.../biz_user?..."       # 业务表所在库
-self.jdbcUrlTemp = "jdbc:mysql://.../bigdata?..."    # 临时表专用库
-
-# 在bigdata库中创建临时表
-temp_table = f"user_tags_temp_{int(time.time())}"
-full_temp_table_name = f"bigdata.{temp_table}"
-
-# Spark分布式写入临时库
-resultsDF.select("user_id", col("final_tag_ids_json").alias("tag_id_list")) \
-    .write \
-    .format("jdbc") \
-    .option("url", self.jdbcUrlTemp) \  # 使用临时库JDBC URL
-    .option("dbtable", temp_table) \
-    .mode("overwrite") \
-    .save()
-```
-
-**阶段2：跨库UPSERT数据转移**
-```
-MySQL跨库内部操作：
-┌─────────────────────────┐    SELECT + UPSERT    ┌─────────────────────────┐
-│ bigdata.user_tags_temp  │─────────────────────→│ biz_user.user_tag_rel.. │
-│    (临时存储库)          │                      │    (业务数据库)          │
-│                         │  (跨库但内部操作)     │                         │
-└─────────────────────────┘                      └─────────────────────────┘
-
-数据流：bigdata临时表 → biz_user业务表 (MySQL内部跨库操作，无网络开销)
-```
-
-**跨库UPSERT实现**：
-```python
-def _executeCrossDbUpsert(self, full_temp_table_name: str, record_count: int) -> bool:
-    # 使用主库连接（biz_user）执行跨库UPSERT
-    connection = pymysql.connect(**self.mysqlConfig)  # 连接到biz_user
-    
-    upsert_sql = f"""
-    INSERT INTO user_tag_relation (user_id, tag_id_list)
-    SELECT user_id, tag_id_list
-    FROM {full_temp_table_name}  -- 引用bigdata.user_tags_temp_xxx
-    ON DUPLICATE KEY UPDATE
-        updated_time = CASE 
-            WHEN JSON_EXTRACT(user_tag_relation.tag_id_list, '$') <> 
-                 JSON_EXTRACT(VALUES(tag_id_list), '$')
-            THEN CURRENT_TIMESTAMP 
-            ELSE user_tag_relation.updated_time 
-        END,
-        tag_id_list = VALUES(tag_id_list)
-    """
-```
 
 #### **架构优势**
 
-**权限隔离**：
-- **临时表权限**：在 `bigdata` 库申请 CREATE/DROP 权限
-- **业务表权限**：在 `biz_user` 库保持原有的读写权限
-- **跨库访问**：利用MySQL跨库查询能力，无需额外权限
-
 **性能保障**：
-- ✅ **保持分布式并行**：Spark各Executor并行写入临时表
-- ✅ **最小网络传输**：数据只传输一次（Executor→临时表）
-- ✅ **MySQL内部操作**：UPSERT在MySQL内部完成，无额外网络开销
-- ✅ **自动清理**：临时表使用后立即清理，不影响存储空间
+- ✅ **写结果顺序保证(临时方案)**：Spark的driver收集数据写入结果表
 
-**业务连续性**：
-- 🔄 **向后兼容**：对业务表结构无任何影响
-- 🔄 **故障隔离**：临时表问题不影响业务表
-- 🔄 **权限最小化**：只申请必要的临时存储权限
 
 ## 执行模式
 
@@ -552,7 +507,6 @@ def _executeCrossDbUpsert(self, full_temp_table_name: str, record_count: int) ->
 | 健康检查 | --mode health | 检查Hive和MySQL连接状态 |
 | 全量计算 | --mode task-all | 计算所有激活标签 |
 | 指定标签 | --mode task-tags --tag-ids 1,2,3 | 计算指定标签ID（支持标签移除） |
-| 测试数据生成 | --mode generate-test-data --dt 2025-01-20 | 生成测试数据 |
 | 任务列表 | --mode list-tasks | 列出可用标签任务 |
 
 ## 数据流架构
